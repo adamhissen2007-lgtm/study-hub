@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>البطاقات التعليمية الذكية - Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: rgba(255,255,255,0.05); border-radius: 30px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .header h1 { color: white; font-size: 28px; }
+        .header a { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px; color: white; text-decoration: none; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .tab-btn { background: rgba(255,255,255,0.1); border: none; padding: 12px 24px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-generator, .pdf-uploader, .my-sets, .review-area { background: rgba(255,255,255,0.05); border-radius: 30px; padding: 25px; margin-bottom: 30px; }
+        textarea { width: 100%; height: 180px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; color: white; font-size: 16px; resize: vertical; }
+        button, .file-label { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 12px 28px; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; margin-left: 10px; display: inline-block; }
+        .file-label { background: #10b981; display: inline-block; }
+        input[type="file"] { display: none; }
+        .cards-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; }
+        .flashcard { background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 24px; min-height: 260px; perspective: 1000px; cursor: pointer; }
+        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; border-radius: 24px; }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 24px; padding: 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .flashcard-front { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; }
+        .flashcard-back { background: linear-gradient(135deg, #10b981, #059669); color: white; transform: rotateY(180deg); }
+        .loading { text-align: center; padding: 40px; color: #fbbf24; display: none; }
+        .error-msg { background: rgba(239,68,68,0.2); border: 1px solid #ef4444; border-radius: 16px; padding: 15px; color: #fca5a5; margin: 20px 0; display: none; }
+        .set-item { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 15px 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .recommendation-card { background: #1e293b; border-radius: 16px; padding: 15px; margin-bottom: 10px; border-right: 3px solid #fbbf24; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-brain"></i> البطاقات التعليمية الذكية</h1>
+        <a href="/dashboard"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="generate">✨ توليد من نص</button>
+        <button class="tab-btn" data-tab="pdf">📄 رفع PDF</button>
+        <button class="tab-btn" data-tab="mysets">📚 مجموعاتي</button>
+        <button class="tab-btn" data-tab="review">🔄 مراجعة</button>
+    </div>
+    <div id="tab-generate" class="tab-content active">
+        <div class="card-generator">
+            <textarea id="textInput" placeholder="📝 اكتب أو الصق نصك التعليمي هنا... (أفضل من 50 كلمة للحصول على نتائج احترافية)"></textarea>
+            <button onclick="generateFromText()"><i class="fas fa-magic"></i> توليد البطاقات</button>
+            <button onclick="fillExample()" style="background:#334155;">📋 مثال</button>
+        </div>
+        <div id="loading" class="loading"><i class="fas fa-spinner fa-pulse"></i> جاري التوليد الذكي...</div>
+        <div id="cardsContainer" class="cards-container"></div>
+        <div id="recommendations-section" style="margin-top:30px; background:rgba(255,255,255,0.03); border-radius:20px; padding:20px; display:none;">
+            <h3 style="color:#a78bfa;"><i class="fas fa-lightbulb"></i> توصيات ذكية لك</h3>
+            <div id="recommendations-list"></div>
+        </div>
+        <div id="errorMsg" class="error-msg"></div>
+    </div>
+    <div id="tab-pdf" class="tab-content">
+        <div class="pdf-uploader">
+            <input type="file" id="pdfFile" accept="application/pdf">
+            <label for="pdfFile" class="file-label"><i class="fas fa-cloud-upload-alt"></i> اختر PDF</label>
+            <button onclick="uploadPDF()"><i class="fas fa-robot"></i> استخراج وتوليد</button>
+            <div id="pdfProgress" style="margin-top:15px;"></div>
+        </div>
+        <div id="pdfCardsContainer" class="cards-container"></div>
+    </div>
+    <div id="tab-mysets" class="tab-content">
+        <div class="my-sets"><button onclick="loadMySets()"><i class="fas fa-sync-alt"></i> تحميل مجموعاتي</button><div id="setsList"></div></div>
+    </div>
+    <div id="tab-review" class="tab-content">
+        <div class="review-area"><button onclick="loadDueCards()"><i class="fas fa-clock"></i> عرض البطاقات المستحقة</button><div id="reviewContainer"></div></div>
+    </div>
+</div>
+<script>
+    let currentCards = [];
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        if (btn.dataset.tab === 'mysets') loadMySets();
+        if (btn.dataset.tab === 'review') loadDueCards();
+    }));
+    async function generateFromText() {
+        const text = document.getElementById('textInput').value.trim();
+        if (!text) { showError('أدخل نصاً أولاً'); return; }
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('cardsContainer').innerHTML = '';
+        try {
+            const res = await fetch('/api/generate-flashcards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+            const data = await res.json();
+            if (data.cards) { displayCards(data.cards, 'cardsContainer', true); currentCards = data.cards; addSaveButton(); loadRecommendations(text); }
+            else showError('لم يتم توليد بطاقات');
+        } catch(e) { showError(e.message); }
+        finally { document.getElementById('loading').style.display = 'none'; }
+    }
+    async function uploadPDF() {
+        const file = document.getElementById('pdfFile').files[0];
+        if (!file) { showError('اختر ملف PDF'); return; }
+        const formData = new FormData(); formData.append('pdf', file);
+        document.getElementById('pdfProgress').innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري المعالجة...';
+        try {
+            const res = await fetch('/api/upload-pdf-flashcards', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.cards) { displayCards(data.cards, 'pdfCardsContainer', false); loadMySets(); showError('✅ تم الحفظ', '#10b981'); }
+            else showError(data.error);
+        } catch(e) { showError(e.message); }
+        finally { document.getElementById('pdfProgress').innerHTML = ''; }
+    }
+    function displayCards(cards, containerId, withSave) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        cards.forEach(card => {
+            const div = document.createElement('div'); div.className = 'flashcard';
+            div.innerHTML = `<div class="flashcard-inner"><div class="flashcard-front"><i class="fas fa-question-circle fa-2x"></i><p style="margin-top:15px;">${escapeHtml(card.question)}</p></div><div class="flashcard-back"><i class="fas fa-lightbulb fa-2x"></i><p style="margin-top:15px;">${escapeHtml(card.answer)}</p></div></div>`;
+            div.addEventListener('click', () => div.classList.toggle('flipped'));
+            container.appendChild(div);
+        });
+        if (withSave && cards.length) { const btn = document.createElement('button'); btn.innerHTML = '<i class="fas fa-save"></i> حفظ المجموعة'; btn.onclick = saveCurrentCards; container.appendChild(btn); }
+    }
+    async function saveCurrentCards() {
+        const title = prompt('عنوان المجموعة:', 'بطاقات جديدة');
+        if (!title) return;
+        const res = await fetch('/api/save-flashcards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, cards: currentCards }) });
+        const data = await res.json();
+        if (data.success) { showError('✅ تم الحفظ', '#10b981'); loadMySets(); }
+        else showError('فشل الحفظ');
+    }
+    async function loadMySets() {
+        const setsDiv = document.getElementById('setsList');
+        setsDiv.innerHTML = '<div class="loading">جاري التحميل...</div>';
+        const res = await fetch('/api/my-flashcard-sets');
+        const sets = await res.json();
+        if (!sets.length) { setsDiv.innerHTML = '<p style="color:#94a3b8;">ليس لديك مجموعات بعد</p>'; return; }
+        setsDiv.innerHTML = '';
+        sets.forEach(set => { const div = document.createElement('div'); div.className = 'set-item'; div.innerHTML = `<div><strong>${escapeHtml(set.title)}</strong> (${set.cards_count} بطاقة)</div><div><button onclick="viewSet(${set.id})">عرض</button><button onclick="reviewSet(${set.id})" style="background:#f59e0b;">مراجعة</button></div>`; setsDiv.appendChild(div); });
+    }
+    async function viewSet(setId) { const res = await fetch(`/api/flashcard-set/${setId}`); const data = await res.json(); if (data.cards) displayCards(data.cards, 'cardsContainer', false); document.querySelector('.tab-btn[data-tab="generate"]').click(); }
+    async function reviewSet(setId) { const res = await fetch(`/api/flashcard-set/${setId}`); const data = await res.json(); if (data.cards) startReview(data.cards); }
+    async function loadDueCards() { const res = await fetch('/api/due-flashcards'); const cards = await res.json(); if (cards.length) startReview(cards); else { document.getElementById('reviewContainer').innerHTML = '<p style="color:#4ade80;">✨ لا توجد بطاقات مستحقة</p>'; } }
+    function startReview(cards) { let index = 0; const container = document.getElementById('reviewContainer'); const showCard = () => { if (index >= cards.length) { container.innerHTML = '<p style="color:#4ade80;">🎉 انتهت المراجعة</p>'; return; } const card = cards[index]; container.innerHTML = `<div class="flashcard" style="cursor:default;"><div class="flashcard-inner"><div class="flashcard-front"><p>${escapeHtml(card.question)}</p><button class="show-answer" style="margin-top:20px;">عرض الإجابة</button></div><div class="flashcard-back"><p>${escapeHtml(card.answer)}</p><div><button class="hard" data-diff="0">صعب</button><button class="medium" data-diff="1">متوسط</button><button class="easy" data-diff="2">سهل</button></div></div></div></div>`; container.querySelector('.show-answer')?.addEventListener('click', () => container.querySelector('.flashcard').classList.add('flipped')); document.querySelectorAll('.hard, .medium, .easy').forEach(btn => btn.addEventListener('click', async (e) => { await fetch(`/api/review-flashcard/${card.id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ difficulty: parseInt(e.target.dataset.diff) }) }); index++; showCard(); })); }; showCard(); }
+    async function loadRecommendations(text) { try { const res = await fetch('/api/recommend-content', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) }); const data = await res.json(); if (data.recommendations?.length) { const section = document.getElementById('recommendations-section'); const list = document.getElementById('recommendations-list'); list.innerHTML = data.recommendations.map(rec => `<div class="recommendation-card"><strong>${escapeHtml(rec.title)}</strong><p style="font-size:12px;">${escapeHtml(rec.reason)}</p><button onclick="viewSet(${rec.id})" style="margin-top:10px;">عرض</button></div>`).join(''); section.style.display = 'block'; } } catch(e) {} }
+    function fillExample() { document.getElementById('textInput').value = 'الذكاء الاصطناعي هو مجال يهدف إلى محاكاة القدرات البشرية مثل التعلم والاستدلال. يتضمن تقنيات مثل التعلم العميق والشبكات العصبية.'; generateFromText(); }
+    function addSaveButton() { const container = document.getElementById('cardsContainer'); if (container && !container.querySelector('.save-btn')) { const btn = document.createElement('button'); btn.innerHTML = '<i class="fas fa-save"></i> حفظ المجموعة'; btn.className = 'save-btn'; btn.onclick = saveCurrentCards; btn.style.marginTop = '20px'; container.appendChild(btn); } }
+    function showError(msg, bg='#ef4444') { const el = document.getElementById('errorMsg'); el.innerHTML = msg; el.style.display = 'block'; el.style.backgroundColor = bg+'20'; setTimeout(() => el.style.display = 'none', 5000); }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+</script>
+</body>
+</html>

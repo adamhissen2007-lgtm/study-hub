@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>إنشاء حساب - Study Hub</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; position: relative; overflow-y: auto !important; transition: background 0.3s ease; }
+        body::before { content: ''; position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%); top: -100px; left: -100px; border-radius: 50%; z-index: 0; }
+        body::after { content: ''; position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%); bottom: -150px; right: -150px; border-radius: 50%; z-index: 0; }
+        body.dark-mode { background: #0a0a0f; }
+        body.dark-mode .register-card { background: #1a1a2e; border-color: #2a2a4e; }
+        body.dark-mode h2 { color: #e2e8f0; }
+        body.dark-mode label { color: #a0aec0; }
+        body.dark-mode input, body.dark-mode select { background: #2d3748; border-color: #4a5568; color: white; }
+        .register-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 32px; padding: 30px 25px; width: 100%; max-width: 460px; max-height: 85vh; overflow-y: auto !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); z-index: 10; transition: transform 0.3s ease, background 0.3s ease; margin: 10px 0; }
+        .register-card::-webkit-scrollbar { width: 5px; }
+        .register-card::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+        h2 { color: #ffffff; text-align: center; margin-bottom: 25px; font-size: 26px; font-weight: 700; }
+        .input-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: #cbd5e1; font-weight: 500; font-size: 14px; }
+        input, select { width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: #ffffff; font-size: 15px; outline: none; transition: all 0.3s ease; cursor: pointer; }
+        select option { background: #1e293b; color: white; }
+        input:focus, select:focus { border-color: #6366f1; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); transform: scale(1.01); }
+        .note { font-size: 11px; color: #94a3b8; margin-top: -8px; margin-bottom: 10px; padding-right: 5px; }
+        .register-btn { width: 100%; padding: 14px; margin-top: 5px; margin-bottom: 10px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4); }
+        .register-btn:hover { transform: translateY(-3px) scale(1.02); }
+        .login-link { text-align: center; margin-top: 5px; color: #cbd5e1; font-size: 14px; }
+        .login-link a { color: #a78bfa; text-decoration: none; font-weight: 700; }
+        #darkModeToggle { position: fixed; bottom: 25px; left: 25px; width: 55px; height: 55px; border-radius: 30px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); color: white; font-size: 26px; cursor: pointer; z-index: 999; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        #darkModeToggle:hover { transform: scale(1.1); }
+        body.dark-mode #darkModeToggle { background: #2d3748; border-color: #4a5568; }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <h2>🚀 انضم إلى Study Hub</h2>
+        <form method="POST" action="/register">
+            <div class="input-group">
+                <label>📛 الاسم الكامل</label>
+                <input type="text" name="full_name" placeholder="مثال: آدم حسين" required>
+            </div>
+            <div class="input-group">
+                <label>📧 البريد الإلكتروني</label>
+                <input type="email" name="email" placeholder="example@domain.com" required>
+            </div>
+            <div class="input-group">
+                <label>🔒 كلمة المرور</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <div class="input-group">
+                <label>📅 السنة الدراسية</label>
+                <select name="university_year" id="year" required onchange="toggleMajorField()">
+                    <option value="" disabled selected>-- اختر السنة --</option>
+                    <option value="أولى">السنة الأولى</option>
+                    <option value="ثانية">السنة الثانية</option>
+                    <option value="ثالثة">السنة الثالثة</option>
+                    <option value="رابعة">السنة الرابعة</option>
+                </select>
+            </div>
+            <div id="major-field" class="input-group" style="display: none;">
+                <label>🎯 التخصص</label>
+                <select name="major" id="major">
+                    <option value="" disabled selected>-- اختر التخصص --</option>
+                    <option value="هندسة">⚙️ الهندسة</option>
+                    <option value="طب">🩺 الطب</option>
+                    <option value="علوم حاسب">💻 علوم الحاسب</option>
+                    <option value="تجارة">📊 التجارة</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>📅 الترم الدراسي</label>
+                <select name="semester" required>
+                    <option value="first">الترم الأول</option>
+                    <option value="second">الترم الثاني</option>
+                </select>
+            </div>
+            <button type="submit" class="register-btn">✨ إنشاء حساب ✨</button>
+        </form>
+        <p class="login-link">بالفعل لديك حساب؟ <a href="/login">تسجيل الدخول ←</a></p>
+    </div>
+    <button id="darkModeToggle" title="الوضع الليلي">🌙</button>
+    <script>
+        function toggleMajorField() {
+            var yearSelect = document.getElementById('year');
+            var majorField = document.getElementById('major-field');
+            var majorSelect = document.getElementById('major');
+            var selectedYear = yearSelect.value;
+            if (selectedYear === 'ثالثة' || selectedYear === 'رابعة') {
+                majorField.style.display = 'block';
+                majorSelect.required = true;
+            } else {
+                majorField.style.display = 'none';
+                majorSelect.required = false;
+                majorSelect.value = '';
+            }
+        }
+        window.onload = function() { toggleMajorField(); };
+        const toggle = document.getElementById('darkModeToggle');
+        if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); toggle.textContent = '☀️'; }
+        toggle.addEventListener('click', () => { document.body.classList.toggle('dark-mode'); const isDark = document.body.classList.contains('dark-mode'); localStorage.setItem('darkMode', isDark); toggle.textContent = isDark ? '☀️' : '🌙'; });
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');
+    </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توثيق واجهات برمجة التطبيقات - Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: rgba(255,255,255,0.05); border-radius: 30px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { color: white; font-size: 28px; }
+        .header a { background: rgba(255,255,255,0.1); color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; }
+        .content { background: rgba(255,255,255,0.05); border-radius: 30px; padding: 30px; }
+        .api-intro { background: #0f172a; border-radius: 20px; padding: 20px; margin-bottom: 30px; border-right: 4px solid #6366f1; }
+        .api-intro h3 { color: #a78bfa; margin-bottom: 10px; }
+        .api-intro p { color: #cbd5e1; }
+        .swagger-container { background: #1e293b; border-radius: 20px; overflow: hidden; margin-top: 20px; }
+        iframe { width: 100%; height: 800px; border: none; background: white; border-radius: 20px; }
+        .endpoint-card { background: #0f172a; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
+        .endpoint-method { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-left: 10px; }
+        .method-get { background: #10b981; color: white; }
+        .method-post { background: #f59e0b; color: white; }
+        .endpoint-url { color: #60a5fa; font-family: monospace; }
+        .endpoint-desc { color: #94a3b8; margin-top: 8px; font-size: 14px; }
+        .feature-badge { background: rgba(99,102,241,0.2); color: #a78bfa; padding: 8px 16px; border-radius: 50px; font-size: 13px; font-weight: 500; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-code"></i> Study Hub API Console</h1>
+        <a href="/dashboard">العودة للوحة</a>
+    </div>
+    <div class="content">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+            <h2 style="color: white;"><i class="fas fa-plug"></i> واجهات برمجة التطبيقات المتاحة</h2>
+            <div class="feature-badge"><i class="fas fa-robot"></i> AI-Powered APIs</div>
+        </div>
+        <div class="api-intro">
+            <h3><i class="fas fa-info-circle"></i> ما هي واجهات API هذه؟</h3>
+            <p>هذه هي الواجهات الخلفية التي تجعل Study Hub منصة ذكية. يمكن لأي مطور استخدام هذه الواجهات لبناء تطبيقات إضافية (مثل تطبيق موبايل) تتكامل مع Study Hub. جميع الواجهات مؤمنة وتتطلب توكن المصادقة.</p>
+        </div>
+        <div class="api-intro">
+            <h3><i class="fas fa-video"></i> مميزات WebRTC و WebSockets</h3>
+            <p>إلى جانب واجهات REST API المعروضة، تدعم المنصة اتصالات لحظية باستخدام WebSockets (للدردشة والإشعارات) و WebRTC (لمكالمات الفيديو المباشرة). هذه التقنيات تتيح تجربة تعاونية فورية دون الحاجة لتحديث الصفحة.</p>
+        </div>
+        <div class="swagger-container">
+            <iframe srcdoc='
+                <!DOCTYPE html>
+                <html>
+                <head><meta charset="UTF-8"><title>API Spec</title></head>
+                <body style="margin:0;padding:20px;font-family:system-ui;background:#f8fafc;">
+                <h2 style="color:#0f172a;margin-bottom:20px;">📋 Study Hub API Specification</h2>
+                <div style="background:white;border-radius:16px;padding:20px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+                <h3 style="color:#4f46e5;">🤖 AI & Flashcards</h3>
+                <ul style="list-style:none;padding:0;">
+                <li style="padding:12px 0;border-bottom:1px solid #e2e8f0;"><strong>POST /api/generate-flashcards</strong><br><span style="color:#475569;">توليد بطاقات تعليمية من نص</span></li>
+                <li style="padding:12px 0;border-bottom:1px solid #e2e8f0;"><strong>POST /api/upload-pdf-flashcards</strong><br><span style="color:#475569;">رفع PDF وتوليد بطاقات ذكية</span></li>
+                <li style="padding:12px 0;border-bottom:1px solid #e2e8f0;"><strong>GET /api/my-flashcard-sets</strong><br><span style="color:#475569;">جلب مجموعات البطاقات الخاصة بالمستخدم</span></li>
+                <li style="padding:12px 0;"><strong>POST /api/review-flashcard/&lt;id&gt;</strong><br><span style="color:#475569;">تسجيل مراجعة بطاقة (نظام SM-2)</span></li>
+                </ul>
+                <h3 style="color:#4f46e5;margin-top:25px;">📚 Study System</h3>
+                <ul style="list-style:none;padding:0;">
+                <li style="padding:12px 0;border-bottom:1px solid #e2e8f0;"><strong>GET /api/knowledge-stats</strong><br><span style="color:#475569;">إحصائيات قاعدة المعرفة</span></li>
+                <li style="padding:12px 0;"><strong>POST /api/teach-fahim</strong><br><span style="color:#475569;">تعليم Agent فهيم معلومة جديدة (للمشرف فقط)</span></li>
+                </ul>
+                <h3 style="color:#4f46e5;margin-top:25px;">🔐 Authentication</h3>
+                <ul style="list-style:none;padding:0;">
+                <li style="padding:12px 0;"><strong>POST /login, POST /register</strong><br><span style="color:#475569;">تسجيل الدخول وإنشاء حساب</span></li>
+                </ul>
+                <p style="margin-top:25px;padding-top:15px;border-top:2px solid #e2e8f0;color:#64748b;font-size:14px;">💡 ملاحظة: جميع واجهات API تتطلب أن يكون المستخدم مسجل الدخول (ما عدا /login و /register). يمكن توثيق الطلبات عبر Session Cookie.</p>
+                </div>
+                </body>
+                </html>
+            '></iframe>
+        </div>
+    </div>
+</div>
+</body>
+</html>

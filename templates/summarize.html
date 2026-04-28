@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>التلخيص الصوتي - Study Hub</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a, #1e293b); min-height: 100vh; padding: 40px; color: #fff; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        textarea { width: 100%; height: 200px; padding: 15px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; resize: vertical; }
+        .btn { display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; border-radius: 50px; font-size: 18px; cursor: pointer; margin-top: 15px; }
+        .result { margin-top: 30px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 25px; }
+        audio { width: 100%; margin-top: 15px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔊 التلخيص الصوتي</h1>
+    <textarea id="textInput" placeholder="الصق النص هنا..."></textarea>
+    <button class="btn" onclick="summarize()">🎙️ لخّص واستمع</button>
+    <div class="result" id="result" style="display:none;">
+        <h3>📝 الملخص:</h3>
+        <p id="summaryText"></p>
+        <audio id="audioPlayer" controls></audio>
+    </div>
+</div>
+<script>
+async function summarize() {
+    const text = document.getElementById('textInput').value;
+    const res = await fetch('/api/summarize-and-speak', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text})
+    });
+    const data = await res.json();
+    document.getElementById('summaryText').textContent = data.summary;
+    document.getElementById('audioPlayer').src = data.audio_url;
+    document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

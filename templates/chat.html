@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دردشة Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; }
+        .chat-container { max-width: 1200px; margin: 0 auto; background: rgba(255,255,255,0.05); border-radius: 30px; backdrop-filter: blur(10px); overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .chat-header { background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header h1 { color: white; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+        .chat-header a { background: rgba(255,255,255,0.2); color: white; padding: 8px 18px; border-radius: 30px; text-decoration: none; font-size: 14px; transition: 0.3s; }
+        .chat-header a:hover { background: rgba(255,255,255,0.3); }
+        .chat-main { display: flex; height: 70vh; }
+        .rooms-sidebar { width: 260px; background: rgba(0,0,0,0.3); border-left: 1px solid rgba(255,255,255,0.1); padding: 20px; overflow-y: auto; }
+        .rooms-sidebar h3 { color: #a78bfa; font-size: 16px; margin-bottom: 15px; }
+        .room-item { background: rgba(255,255,255,0.05); padding: 12px 15px; border-radius: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; color: #e2e8f0; }
+        .room-item:hover { background: rgba(99,102,241,0.3); }
+        .room-item.active { background: #4f46e5; color: white; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; }
+        .messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message { display: flex; flex-direction: column; max-width: 70%; }
+        .message.sent { align-self: flex-end; }
+        .message.received { align-self: flex-start; }
+        .message-bubble { padding: 12px 16px; border-radius: 20px; word-wrap: break-word; }
+        .message.sent .message-bubble { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border-bottom-left-radius: 5px; }
+        .message.received .message-bubble { background: rgba(255,255,255,0.1); color: #e2e8f0; border-bottom-right-radius: 5px; }
+        .message-meta { font-size: 11px; margin-top: 4px; color: #94a3b8; display: flex; gap: 8px; }
+        .message-input-area { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 12px; background: rgba(0,0,0,0.2); }
+        .message-input-area input { flex: 1; background: rgba(255,255,255,0.1); border: none; padding: 14px 18px; border-radius: 50px; color: white; font-size: 14px; outline: none; }
+        .message-input-area button { background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; padding: 12px 28px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .message-input-area button:hover { transform: scale(1.02); opacity: 0.9; }
+        .join-notice { background: rgba(16,185,129,0.2); color: #34d399; padding: 8px 15px; border-radius: 20px; text-align: center; font-size: 12px; width: fit-content; margin: 0 auto; }
+        @media (max-width: 700px) { .rooms-sidebar { display: none; } .message { max-width: 85%; } }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        <h1><i class="fas fa-comments"></i> غرف الدردشة التعاونية</h1>
+        <a href="/dashboard"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+    <div class="chat-main">
+        <div class="rooms-sidebar">
+            <h3><i class="fas fa-hashtag"></i> غرف عامة</h3>
+            <div class="room-item active" data-room="general"># عام General</div>
+            <div class="room-item" data-room="programming"># برمجة Programming</div>
+            <div class="room-item" data-room="math"># رياضيات Mathematics</div>
+            <div class="room-item" data-room="science"># علوم Science</div>
+            <div style="margin-top: 30px;">
+                <h3><i class="fas fa-video"></i> غرف الفيديو</h3>
+                <div class="room-item" data-room="video_main" onclick="window.location.href='/video-chat'"><i class="fas fa-video"></i> انضم لغرفة الفيديو الرئيسية</div>
+            </div>
+        </div>
+        <div class="chat-area">
+            <div class="messages-area" id="messages-area"></div>
+            <div class="message-input-area">
+                <input type="text" id="message-input" placeholder="اكتب رسالتك هنا...">
+                <button id="send-btn"><i class="fas fa-paper-plane"></i> إرسال</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const socket = io();
+    let currentRoom = 'general';
+    const username = '{{ session.get("user_name", "طالب") }}';
+    
+    socket.on('connect', () => {
+        socket.emit('join', { room: currentRoom, username: username });
+    });
+    
+    socket.on('previous_messages', (data) => {
+        const messagesArea = document.getElementById('messages-area');
+        messagesArea.innerHTML = '';
+        data.messages.forEach(msg => {
+            addMessageToUI(msg.username, msg.message, msg.timestamp, msg.username === username);
+        });
+    });
+    
+    socket.on('chat_message', (data) => {
+        addMessageToUI(data.username, data.message, data.timestamp, data.username === username);
+    });
+    
+    socket.on('user_joined', (data) => {
+        const messagesArea = document.getElementById('messages-area');
+        const notice = document.createElement('div');
+        notice.className = 'join-notice';
+        notice.innerHTML = `<i class="fas fa-user-plus"></i> ${data.username} انضم إلى الغرفة`;
+        messagesArea.appendChild(notice);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    });
+    
+    function addMessageToUI(username, message, timestamp, isSent) {
+        const messagesArea = document.getElementById('messages-area');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+        messageDiv.innerHTML = `
+            <div class="message-bubble">${escapeHtml(message)}</div>
+            <div class="message-meta"><span>${escapeHtml(username)}</span><span>${new Date(timestamp).toLocaleTimeString('ar-EG')}</span></div>
+        `;
+        messagesArea.appendChild(messageDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+    
+    document.getElementById('send-btn').onclick = () => {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        if (!message) return;
+        socket.emit('chat_message', { room: currentRoom, message: message, username: username });
+        input.value = '';
+    };
+    document.getElementById('message-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('send-btn').click(); });
+    
+    document.querySelectorAll('.room-item').forEach(item => {
+        if (item.onclick) return;
+        item.onclick = () => {
+            if (item.dataset.room === 'video_main') return;
+            document.querySelectorAll('.room-item').forEach(r => r.classList.remove('active'));
+            item.classList.add('active');
+            const newRoom = item.dataset.room;
+            socket.emit('leave', { room: currentRoom });
+            currentRoom = newRoom;
+            socket.emit('join', { room: currentRoom, username: username });
+        };
+    });
+    
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+</script>
+</body>
+</html>

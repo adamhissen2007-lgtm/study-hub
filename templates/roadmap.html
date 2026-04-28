@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>خريطة الطريق - Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --surface: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.05);
+            --text: white;
+            --text-secondary: #94a3b8;
+            --gold: #fbbf24;
+            --accent: #6366f1;
+            --green: #10b981;
+            --blue: #3b82f6;
+            --red: #ef4444;
+            --purple: #8b5cf6;
+        }
+        body { background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%); padding: 20px; min-height: 100vh; color: var(--text); font-family: 'Tajawal'; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 48px; background: linear-gradient(135deg, var(--gold), #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 40px; font-size: 18px; }
+        .year-section { margin-bottom: 50px; background: var(--surface); border-radius: 24px; padding: 30px; border: 1px solid var(--border); }
+        .year-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .year-badge { background: linear-gradient(135deg, var(--accent), var(--purple)); color: white; padding: 10px 25px; border-radius: 50px; font-size: 24px; font-weight: 900; }
+        .year-progress { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .year-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--purple)); border-radius: 10px; transition: width 0.5s ease; }
+        .semester-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .semester-col { background: rgba(255,255,255,0.02); border-radius: 20px; padding: 25px; border: 1px solid var(--border); }
+        .semester-col h3 { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--gold); font-size: 20px; }
+        .course-card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; margin-bottom: 12px; border: 1px solid var(--border); transition: all 0.3s; cursor: pointer; }
+        .course-card:hover { transform: translateX(-5px); border-color: var(--accent); background: rgba(99,102,241,0.1); }
+        .course-card h4 { margin-bottom: 8px; font-size: 18px; }
+        .course-card p { color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; }
+        .course-progress { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .course-progress-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+        .course-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 8px; }
+        .status-completed { background: rgba(16,185,129,0.2); color: var(--green); }
+        .status-in-progress { background: rgba(59,130,246,0.2); color: var(--blue); }
+        .status-pending { background: rgba(148,163,184,0.2); color: var(--text-secondary); }
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 30px; font-size: 16px; }
+        .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="back-link">← العودة للوحة التحكم</a>
+        <h1>🗺️ خريطة الطريق الذكية</h1>
+        <p class="subtitle">خطتك الدراسية الكاملة عبر 4 سنوات</p>
+        
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background: var(--green);"></div> مكتمل</div>
+            <div class="legend-item"><div class="legend-dot" style="background: var(--blue);"></div> قيد الدراسة</div>
+            <div class="legend-item"><div class="legend-dot" style="background: var(--text-secondary);"></div> لم يبدأ بعد</div>
+        </div>
+        
+        {% set years = {
+            'أولى': {
+                'first': [
+                    {'name': 'رياضيات 1', 'desc': 'تفاضل وتكامل', 'color': '#3b82f6', 'status': 'in-progress'},
+                    {'name': 'فيزياء 1', 'desc': 'ميكانيكا كلاسيكية', 'color': '#10b981', 'status': 'completed'},
+                    {'name': 'كمبيوتر ساينس', 'desc': 'مقدمة في علوم الحاسب', 'color': '#8b5cf6', 'status': 'in-progress'},
+                    {'name': 'Linear Algebra', 'desc': 'جبر خطي', 'color': '#f59e0b', 'status': 'pending'},
+                    {'name': 'إنجليزي 1', 'desc': 'لغة إنجليزية - مستوى أول', 'color': '#ef4444', 'status': 'pending'},
+                ],
+                'second': [
+                    {'name': 'رياضيات 2', 'desc': 'معادلات تفاضلية', 'color': '#3b82f6', 'status': 'pending'},
+                    {'name': 'فيزياء 2', 'desc': 'كهربية ومغناطيسية', 'color': '#10b981', 'status': 'pending'},
+                    {'name': 'برمجة 1', 'desc': 'Python Basics', 'color': '#8b5cf6', 'status': 'pending'},
+                    {'name': 'إنجليزي 2', 'desc': 'لغة إنجليزية - مستوى ثاني', 'color': '#ef4444', 'status': 'pending'},
+                    {'name': 'إحصاء', 'desc': 'احتمالات وإحصاء', 'color': '#f59e0b', 'status': 'pending'},
+                ]
+            },
+            'ثانية': {
+                'first': [
+                    {'name': 'تحليل عددي', 'desc': 'Numerical Analysis', 'color': '#3b82f6', 'status': 'pending'},
+                    {'name': 'دوائر كهربية', 'desc': 'Electric Circuits', 'color': '#10b981', 'status': 'pending'},
+                    {'name': 'برمجة 2', 'desc': 'Object-Oriented Programming', 'color': '#8b5cf6', 'status': 'pending'},
+                    {'name': 'قواعد بيانات', 'desc': 'Database Systems', 'color': '#f59e0b', 'status': 'pending'},
+                ],
+                'second': [
+                    {'name': 'هياكل بيانات', 'desc': 'Data Structures', 'color': '#3b82f6', 'status': 'pending'},
+                    {'name': 'شبكات', 'desc': 'Computer Networks', 'color': '#10b981', 'status': 'pending'},
+                    {'name': 'ذكاء اصطناعي', 'desc': 'AI Fundamentals', 'color': '#8b5cf6', 'status': 'pending'},
+                    {'name': 'مشروع تخرج 1', 'desc': 'Graduation Project I', 'color': '#ef4444', 'status': 'pending'},
+                ]
+            }
+        } %}
+        
+        {% for year_name, semesters in years.items() %}
+        <div class="year-section">
+            <div class="year-header">
+                <span class="year-badge">📚 السنة {{ year_name }}</span>
+                <div class="year-progress">
+                    <div class="year-progress-fill" style="width: {{ (loop.index0 * 15) + 10 }}%;"></div>
+                </div>
+                <span style="color: var(--text-secondary); font-size: 14px;">{{ (loop.index0 * 15) + 10 }}% مكتمل</span>
+            </div>
+            <div class="semester-row">
+                <div class="semester-col">
+                    <h3>📖 الترم الأول</h3>
+                    {% for course in semesters['first'] %}
+                    <div class="course-card">
+                        <h4 style="color: {{ course.color }};">{{ course.name }}</h4>
+                        <p>{{ course.desc }}</p>
+                        <div class="course-progress">
+                            <div class="course-progress-fill" style="width: {{ {'completed': '100', 'in-progress': (loop.index * 20)|string, 'pending': '0'}[course.status] }}%; background: {{ course.color }};"></div>
+                        </div>
+                        <span class="course-status status-{{ course.status }}">
+                            {% if course.status == 'completed' %}✅ مكتمل
+                            {% elif course.status == 'in-progress' %}🔄 قيد الدراسة
+                            {% else %}⏳ لم يبدأ
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="semester-col">
+                    <h3>📗 الترم الثاني</h3>
+                    {% for course in semesters['second'] %}
+                    <div class="course-card">
+                        <h4 style="color: {{ course.color }};">{{ course.name }}</h4>
+                        <p>{{ course.desc }}</p>
+                        <div class="course-progress">
+                            <div class="course-progress-fill" style="width: {{ {'completed': '100', 'in-progress': (loop.index * 15)|string, 'pending': '0'}[course.status] }}%; background: {{ course.color }};"></div>
+                        </div>
+                        <span class="course-status status-{{ course.status }}">
+                            {% if course.status == 'completed' %}✅ مكتمل
+                            {% elif course.status == 'in-progress' %}🔄 قيد الدراسة
+                            {% else %}⏳ لم يبدأ
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="year-section" style="text-align: center; opacity: 0.5;">
+            <div class="year-header"><span class="year-badge">📚 السنة الثالثة والرابعة</span></div>
+            <p style="color: var(--text-secondary);">قيد الإعداد - سيتم إضافة المواد قريباً</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>مفكرة الطالب - Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0f172a; --bg2: #1e293b; --surface: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.08); --text: white; --text-secondary: #94a3b8; --gold: #fbbf24; --accent: #6366f1; --green: #10b981; }
+        body { background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%); padding: 20px; min-height: 100vh; color: var(--text); font-family: 'Tajawal'; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 42px; background: linear-gradient(135deg, var(--gold), #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .notebook-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 40px; }
+        .note-section { background: var(--surface); border-radius: 24px; padding: 25px; border: 1px solid var(--border); }
+        .note-section h3 { color: var(--gold); margin-bottom: 20px; }
+        .note-input { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 16px; color: var(--text); font-family: 'Tajawal'; resize: vertical; min-height: 150px; margin-bottom: 10px; }
+        .note-btn { background: var(--accent); color: white; border: none; padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+        .note-list { margin-top: 20px; }
+        .note-item { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .note-item .note-content { flex: 1; }
+        .note-item .note-date { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+        .note-item .note-actions { display: flex; gap: 5px; }
+        .note-item button { background: rgba(239,68,68,0.2); color: #f87171; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 11px; }
+        .share-btn { background: var(--green); color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 11px; }
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="back-link">← العودة للوحة التحكم</a>
+        <h1>📓 مفكرة الطالب</h1>
+        
+        <div class="notebook-grid">
+            {% set courses = ['رياضيات 1', 'فيزياء 1', 'كمبيوتر ساينس', 'Linear Algebra', 'إنجليزي 1'] %}
+            {% for course in courses %}
+            <div class="note-section">
+                <h3>📚 {{ course }}</h3>
+                <textarea class="note-input" id="note-{{ loop.index }}" placeholder="اكتب ملاحظاتك هنا..."></textarea>
+                <button class="note-btn" onclick="saveNote('{{ course }}', 'note-{{ loop.index }}')">💾 حفظ الملاحظة</button>
+                <div class="note-list" id="noteList-{{ loop.index }}">
+                    <p style="color: var(--text-secondary); font-size: 13px;">لا توجد ملاحظات محفوظة بعد.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function saveNote(courseName, inputId) {
+            const noteText = document.getElementById(inputId).value.trim();
+            if (!noteText) return;
+            
+            let notes = JSON.parse(localStorage.getItem('studyhub_notes') || '{}');
+            if (!notes[courseName]) notes[courseName] = [];
+            notes[courseName].push({
+                text: noteText,
+                date: new Date().toLocaleString('ar-EG'),
+                id: Date.now()
+            });
+            localStorage.setItem('studyhub_notes', JSON.stringify(notes));
+            
+            document.getElementById(inputId).value = '';
+            loadNotes();
+        }
+        
+        function shareNote(courseName, noteId) {
+            const notes = JSON.parse(localStorage.getItem('studyhub_notes') || '{}');
+            const note = notes[courseName]?.find(n => n.id === noteId);
+            if (!note) return;
+            
+            const shareText = `📚 ملاحظة من Study Hub - ${courseName}:\n\n${note.text}`;
+            navigator.clipboard.writeText(shareText).then(() => alert('✅ تم نسخ الملاحظة للمشاركة!'));
+        }
+        
+        function deleteNote(courseName, noteId) {
+            let notes = JSON.parse(localStorage.getItem('studyhub_notes') || '{}');
+            if (notes[courseName]) {
+                notes[courseName] = notes[courseName].filter(n => n.id !== noteId);
+                localStorage.setItem('studyhub_notes', JSON.stringify(notes));
+                loadNotes();
+            }
+        }
+        
+        function loadNotes() {
+            const notes = JSON.parse(localStorage.getItem('studyhub_notes') || '{}');
+            const courses = ['رياضيات 1', 'فيزياء 1', 'كمبيوتر ساينس', 'Linear Algebra', 'إنجليزي 1'];
+            
+            courses.forEach((course, index) => {
+                const listEl = document.getElementById(`noteList-${index + 1}`);
+                const courseNotes = notes[course] || [];
+                
+                if (courseNotes.length === 0) {
+                    listEl.innerHTML = '<p style="color: var(--text-secondary); font-size: 13px;">لا توجد ملاحظات محفوظة بعد.</p>';
+                    return;
+                }
+                
+                listEl.innerHTML = courseNotes.map(note => `
+                    <div class="note-item">
+                        <div class="note-content">
+                            <p>${note.text.substring(0, 100)}${note.text.length > 100 ? '...' : ''}</p>
+                            <div class="note-date">📅 ${note.date}</div>
+                        </div>
+                        <div class="note-actions">
+                            <button class="share-btn" onclick="shareNote('${course}', ${note.id})">📤</button>
+                            <button onclick="deleteNote('${course}', ${note.id})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            });
+        }
+        
+        loadNotes();
+    </script>
+</body>
+</html>

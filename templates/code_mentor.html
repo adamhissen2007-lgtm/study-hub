@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مساعد البرمجة - Study Hub</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg2: #1a0a2e;
+            --surface: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.05);
+            --text: white;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --gold: #fbbf24;
+            --red: #ef4444;
+            --green: #10b981;
+            --teach-bg: rgba(34,197,94,0.08);
+            --teach-border: rgba(34,197,94,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%); padding: 20px; min-height: 100vh; color: var(--text); display: flex; }
+        .sidebar { width: 280px; background: var(--surface); backdrop-filter: blur(10px); border-radius: 30px; padding: 20px; margin-left: 20px; border: 1px solid var(--border); overflow-y: auto; max-height: 90vh; }
+        .sidebar h3 { color: var(--gold); margin-bottom: 20px; font-size: 18px; }
+        .history-item { padding: 12px 15px; border-radius: 15px; cursor: pointer; margin-bottom: 8px; transition: all 0.3s; background: var(--surface); border: 1px solid var(--border); }
+        .history-item:hover { background: rgba(99,102,241,0.2); }
+        .history-item .title { font-weight: 600; font-size: 14px; }
+        .history-item .date { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+        .main-content { flex: 1; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .page-header { text-align: center; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .page-header h1 { font-size: 36px; background: linear-gradient(135deg, var(--gold), #f59e0b, var(--red)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-actions { display: flex; gap: 10px; }
+        .export-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 8px 15px; border-radius: 50px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+        .export-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .mode-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .mode-tab { padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: var(--text); cursor: pointer; transition: all 0.3s; font-weight: 600; font-size: 13px; }
+        .mode-tab.active { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); border-color: transparent; }
+        .mode-tab.special { border-color: var(--gold); color: var(--gold); }
+        .mode-tab.special.active { background: linear-gradient(135deg, var(--gold), #f59e0b); color: black; }
+        .teach-panel { background: var(--teach-bg); border: 1px solid var(--teach-border); border-radius: 20px; padding: 15px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .teach-panel input { flex: 1; padding: 10px 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 50px; color: var(--text); outline: none; font-size: 13px; }
+        .teach-btn { background: var(--green); color: var(--text); border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; }
+        .preview-panel { background: white; border-radius: 25px; overflow: hidden; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.1); }
+        .preview-header { background: rgba(255,255,255,0.05); padding: 10px 15px; color: var(--text); display: flex; justify-content: space-between; }
+        .chat-area { background: var(--surface); backdrop-filter: blur(10px); border-radius: 25px; padding: 20px; border: 1px solid var(--border); min-height: 300px; max-height: 450px; overflow-y: auto; margin-bottom: 15px; }
+        .message { margin-bottom: 15px; display: flex; gap: 10px; }
+        .message.user { flex-direction: row-reverse; }
+        .message-avatar { width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .message.bot .message-avatar { background: linear-gradient(135deg, var(--gold), #f59e0b); }
+        .message.user .message-avatar { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); }
+        .message-content { background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 15px; max-width: 80%; line-height: 1.6; font-size: 13px; }
+        .message.user .message-content { background: rgba(99,102,241,0.2); }
+        .code-block { position: relative; background: #0f172a; border-radius: 12px; margin: 8px 0; overflow: hidden; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.05); }
+        .code-lang { color: var(--text-secondary); font-size: 11px; }
+        .copy-btn, .run-btn, .teach-code-btn { background: rgba(99,102,241,0.2); color: var(--text); border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; margin-left: 5px; transition: all 0.3s; }
+        .run-btn { background: rgba(34,197,94,0.3); }
+        .teach-code-btn { background: rgba(251, 191, 36, 0.4); }
+        .copy-btn:hover, .run-btn:hover, .teach-code-btn:hover { background: var(--accent); }
+        .copy-btn.copied { background: var(--green); }
+        pre { margin: 0; padding: 12px; overflow-x: auto; }
+        code { color: var(--green); font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+        .input-area { display: flex; gap: 8px; align-items: center; }
+        .input-area textarea { flex: 1; padding: 12px 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 25px; color: var(--text); outline: none; font-size: 13px; resize: vertical; font-family: 'Tajawal', sans-serif; }
+        .send-btn { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: var(--text); border: none; padding: 12px 25px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-size: 13px; }
+        .send-btn:hover { transform: scale(1.05); }
+        .voice-btn { background: rgba(251,191,36,0.2); border: none; color: var(--gold); padding: 12px 15px; border-radius: 50px; cursor: pointer; font-size: 18px; transition: all 0.3s; }
+        .voice-btn.listening { background: var(--red); color: var(--text); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .back-link { display: inline-block; margin-bottom: 10px; color: #a78bfa; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .new-chat-btn { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: var(--text); border: none; padding: 10px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 15px; font-size: 14px; }
+        .upload-btn { background: rgba(255,255,255,0.1); border: none; color: var(--text); padding: 8px 12px; border-radius: 50px; cursor: pointer; font-size: 14px; }
+        .snippets-panel { background: var(--surface); border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .snippets-title { font-size: 16px; margin-bottom: 10px; color: var(--gold); }
+        .snippet-item { display: inline-block; padding: 8px 15px; margin: 5px; background: rgba(255,255,255,0.05); border-radius: 50px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+        .snippet-item:hover { background: var(--accent); }
+        iframe { width: 100%; height: 400px; border: none; background: white; }
+        .response-time { font-size: 10px; color: var(--text-secondary); text-align: left; margin-top: 2px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <button class="new-chat-btn" onclick="newChat()">➕ محادثة جديدة</button>
+        <h3>📜 المحادثات السابقة</h3>
+        <div id="historyList"><p style="color: var(--text-secondary); font-size: 12px;">لا توجد محادثات بعد</p></div>
+    </div>
+    <div class="main-content">
+        <div class="container">
+            <a href="/dashboard" class="back-link"><i class="fas fa-arrow-right"></i> العودة</a>
+            <div class="page-header">
+                <h1>🚀 Code Mentor Ultimate</h1>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span id="knowledgeCounter" style="background: var(--teach-bg); padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold;">🧠 0 حقيقة</span>
+                    <button class="export-btn" onclick="exportChat()"><i class="fas fa-download"></i></button>
+                    <button class="export-btn" onclick="copyFullChat()"><i class="fas fa-copy"></i></button>
+                </div>
+            </div>
+            <div class="teach-panel" id="teachPanel">
+                <input type="text" id="teachCategory" placeholder="📂 الفئة (مثال: خطط)">
+                <input type="text" id="teachFact" placeholder="🧠 المعلومة الجديدة اللي عايز تعلمها لفهيم...">
+                <button class="teach-btn" onclick="teachFahim()"><i class="fas fa-brain"></i> علّم فهيم</button>
+            </div>
+            <div class="mode-tabs" id="modeTabs">
+                <button class="mode-tab active" data-mode="chat">💬 محادثة</button>
+                <button class="mode-tab" data-mode="roadmap">🗺️ خطة تعلم</button>
+                <button class="mode-tab" data-mode="review">🔍 مراجعة كود</button>
+                <button class="mode-tab" data-mode="generate">⚡ توليد كود</button>
+                <button class="mode-tab" data-mode="translate">🔄 ترجمة كود</button>
+                <button class="mode-tab" data-mode="explain">🐛 شرح خطأ</button>
+                <button class="mode-tab special" data-mode="code_explain">🧠 فهم الكود</button>
+                <button class="mode-tab special" data-mode="design">🎨 مساعد تصميم</button>
+            </div>
+            <div class="preview-panel" id="designPreview" style="display: none;">
+                <div class="preview-header">
+                    <span><i class="fas fa-eye"></i> معاينة التصميم</span>
+                    <button onclick="document.getElementById('designPreview').style.display='none'" style="background: none; border: none; color: var(--text); cursor: pointer;">✕</button>
+                </div>
+                <iframe id="previewFrame" style="width: 100%; height: 450px; border: none;"></iframe>
+            </div>
+            <div class="snippets-panel" id="snippetsPanel">
+                <div class="snippets-title"><i class="fas fa-book-open"></i> مكتبة الأكواد التجريبية</div>
+                <span class="snippet-item" onclick="loadSnippet('game')">🎮 لعبة تخمين الرقم</span>
+                <span class="snippet-item" onclick="loadSnippet('calc')">🧮 آلة حاسبة</span>
+                <span class="snippet-item" onclick="loadSnippet('todo')">📝 قائمة مهام</span>
+                <span class="snippet-item" onclick="loadSnippet('timer')">⏱️ مؤقت زمني</span>
+                <span class="snippet-item" onclick="loadSnippet('hello')">👋 Hello World</span>
+            </div>
+            <div class="chat-area" id="chatArea">
+                <div class="message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        🚀 أهلًا بك! أنا **Code Mentor Ultimate**، جاهز لمساعدتك.<br>
+                        • اسألني أي سؤال تقني، وهجاوبك من المعرفة اللي علمتهالي.<br>
+                        • جرب تطلب "خطة تعلم بايثون".<br>
+                        • أو استخدم وضع <strong>🧠 فهم الكود</strong> والصق أي كود！
+                    </div>
+                </div>
+            </div>
+            <div class="input-area">
+                <button class="upload-btn" title="رفع ملف كود" onclick="document.getElementById('fileInput').click()"><i class="fas fa-paperclip"></i></button>
+                <input type="file" id="fileInput" style="display: none;" accept=".py,.js,.html,.css,.java,.cpp" onchange="handleFileUpload(event)">
+                <textarea id="userInput" placeholder="اسأل فهيم..." onkeypress="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendMessage();}"></textarea>
+                <button class="voice-btn" id="voiceButton" title="تحدث بدل الكتابة" onclick="toggleVoice()"><i class="fas fa-microphone"></i></button>
+                <button class="send-btn" id="sendButton" onclick="sendMessage()"><i class="fas fa-paper-plane"></i> إرسال</button>
+            </div>
+        </div>
+    </div>
+    <div style="position: fixed; bottom: 80px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000;">
+        <button onclick="alert(switchPersona('friendly'))" style="background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-size: 12px;">😊 صديق</button>
+        <button onclick="alert(switchPersona('strict'))" style="background: #6366f1; color: white; border: none; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-size: 12px;">👨‍🏫 معلم</button>
+        <button onclick="alert(switchPersona('motivator'))" style="background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-size: 12px;">🔥 محفز</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <script src="{{ url_for('static', filename='fahim_controller.js') }}"></script>
+    <script src="{{ url_for('static', filename='fahim_live.js') }}"></script>
+    <script>
+        let currentMode = 'chat';
+        let currentMessages = [];
+        let recognition;
+        const snippets = {
+            game: { html: `<h2>لعبة التخمين</h2><input id='g' placeholder='رقم'><button onclick='runGame()'>تخمين</button><p id='r'></p><script>let n=Math.floor(Math.random()*100)+1;function runGame(){let g=+document.getElementById('g').value;document.getElementById('r').textContent=g===n?'🎉 صح':g<n?'📈 أكبر':'📉 أصغر';}<\/script>`, lang: 'html' },
+            calc: { html: `<h2>آلة حاسبة</h2><input id='n1' placeholder='رقم 1'><input id='n2' placeholder='رقم 2'><button onclick='calc()'>جمع</button><p id='rc'></p><script>function calc(){let a=+document.getElementById('n1').value,b=+document.getElementById('n2').value;document.getElementById('rc').textContent=a+b;}<\/script>`, lang: 'html' },
+            todo: { html: `<h2>قائمة مهام</h2><input id='t' placeholder='مهمة جديدة'><button onclick='add()'>إضافة</button><ul id='list'></ul><script>function add(){let li=document.createElement('li');li.textContent=document.getElementById('t').value;document.getElementById('list').appendChild(li);}<\/script>`, lang: 'html' },
+            timer: { html: `<h2>مؤقت</h2><p id='time'>0</p><button onclick='startTimer()'>ابدأ</button><script>let s=0,i;function startTimer(){i=setInterval(()=>{s++;document.getElementById('time').textContent=s;},1000);}<\/script>`, lang: 'html' },
+            hello: { html: `<h1>Hello World!</h1><p>أهلاً بك في بيئة التشغيل.</p>`, lang: 'html' }
+        };
+
+        function loadSnippet(name) { const s = snippets[name]; if (s) { document.getElementById('userInput').value = `شغّل الكود التالي:\n\`\`\`${s.lang}\n${s.html}\n\`\`\``; sendMessage(); } }
+        function toggleVoice() { /* ... */ }
+        function teachCode(btn, code) { document.getElementById('userInput').value = `اشرح لي الكود التالي بالتفصيل سطر سطر:\n\n${code}`; sendMessage(); }
+        function updateDesignPreview(code) { document.getElementById('designPreview').style.display = 'block'; const frame = document.getElementById('previewFrame'); frame.contentDocument.open(); frame.contentDocument.write(code); frame.contentDocument.close(); }
+        function runCode(btn, code) { const msgDiv = btn.closest('.message-content'); const oldIframe = msgDiv.querySelector('iframe'); if (oldIframe) oldIframe.remove(); const iframe = document.createElement('iframe'); iframe.style.cssText = 'width:100%; height:300px; border:none; border-radius:12px; background:white;'; msgDiv.appendChild(iframe); iframe.contentDocument.open(); iframe.contentDocument.write(code); iframe.contentDocument.close(); }
+        function formatMessage(text) { return text.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => { const cleanCode = code.trim(); if (currentMode === 'design' && lang === 'html') setTimeout(() => updateDesignPreview(cleanCode), 500); return `<div class="code-block"><div class="code-header"><span class="code-lang">${lang || 'code'}</span><div><button class="run-btn" onclick="runCode(this, \`${cleanCode.replace(/`/g,'\\`').replace(/\$/g,'\\$')}\`)">▶️ تشغيل</button><button class="teach-code-btn" onclick="teachCode(this, \`${cleanCode.replace(/`/g,'\\`').replace(/\$/g,'\\$')}\`)">🧑‍🏫 شرح</button><button class="copy-btn" onclick="copyCode(this, \`${cleanCode.replace(/`/g,'\\`').replace(/\$/g,'\\$')}\`)">📋 نسخ</button></div></div><pre><code>${cleanCode}</code></pre></div>`; }).replace(/\n/g, '<br>'); }
+        function copyCode(btn, code) { navigator.clipboard.writeText(code).then(() => { btn.textContent = '✓ تم'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '📋 نسخ'; btn.classList.remove('copied'); }, 2000); }); }
+        async function teachFahim() { const category = document.getElementById('teachCategory').value.trim(); const fact = document.getElementById('teachFact').value.trim(); if (!fact) return; const res = await fetch('/api/teach-fahim', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({category: category || 'عام', fact}) }); const data = await res.json(); const chatArea = document.getElementById('chatArea'); chatArea.innerHTML += `<div class="message bot"><div class="message-avatar">🧑‍🏫</div><div class="message-content">${data.message}</div></div>`; chatArea.scrollTop = chatArea.scrollHeight; document.getElementById('teachFact').value = ''; updateKnowledgeCounter(); }
+        function askSuggestion(q) { document.getElementById('userInput').value = q; sendMessage(); }
+        function newChat() { if (currentMessages.length > 0) { let chats = JSON.parse(localStorage.getItem('codeMentorHistory') || '[]'); chats.push({ id: Date.now(), title: currentMessages[0]?.content?.substring(0,30) || 'محادثة', messages: currentMessages }); localStorage.setItem('codeMentorHistory', JSON.stringify(chats)); } currentMessages = []; document.getElementById('chatArea').innerHTML = `<div class="message bot"><div class="message-avatar">🤖</div><div class="message-content">🧠 محادثة جديدة! علمني حقائق جديدة أو اسألني أي سؤال.</div></div>`; }
+        function handleFileUpload(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { document.getElementById('userInput').value = e.target.result; sendMessage(); }; reader.readAsText(file); }
+        function exportChat() { const text = currentMessages.map(m => `${m.role === 'user' ? '🧑‍💻' : '🤖'}: ${m.content}`).join('\n\n---\n\n'); const blob = new Blob([text], {type: 'text/plain'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'chat.txt'; a.click(); }
+        function copyFullChat() { const text = currentMessages.map(m => `${m.role === 'user' ? '🧑‍💻' : '🤖'}: ${m.content}`).join('\n\n---\n\n'); navigator.clipboard.writeText(text).then(() => alert('تم نسخ المحادثة!')); }
+        
+        async function updateKnowledgeCounter() {
+            try {
+                const res = await fetch('/api/knowledge-stats');
+                const data = await res.json();
+                const counter = document.getElementById('knowledgeCounter');
+                if (counter) counter.textContent = `🧠 ${data.total_facts} حقيقة في ${data.total_categories} فئة`;
+            } catch(e) {}
+        }
+        updateKnowledgeCounter();
+        setInterval(updateKnowledgeCounter, 30000);
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const question = input.value.trim();
+            if (!question) return;
+            const sendBtn = document.getElementById('sendButton');
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML += `<div class="message user"><div class="message-avatar">🧑‍💻</div><div class="message-content">${question}</div></div>`;
+            currentMessages.push({ role: 'user', content: question });
+            input.value = '';
+            sendBtn.disabled = true;
+            chatArea.scrollTop = chatArea.scrollHeight;
+            const loadingId = 'load' + Date.now();
+            chatArea.innerHTML += `<div class="message bot" id="${loadingId}"><div class="message-avatar">🤖</div><div class="message-content">⏳ جاري التفكير...</div></div>`;
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            const startTime = performance.now();
+            try {
+                const res = await fetch('/api/code-mentor', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({question, mode: currentMode}) });
+                const data = await res.json();
+                const endTime = performance.now();
+                const responseTime = ((endTime - startTime) / 1000).toFixed(2);
+                document.getElementById(loadingId)?.remove();
+                
+                if (data.answer) {
+                    chatArea.innerHTML += `<div class="message bot"><div class="message-avatar">🤖</div><div class="message-content">${formatMessage(data.answer)}<div class="response-time">⚡ ${responseTime} ثانية</div></div></div>`;
+                    currentMessages.push({ role: 'bot', content: data.answer });
+                } else {
+                    chatArea.innerHTML += `<div class="message bot"><div class="message-avatar">🤖</div><div class="message-content">❌ لم أستطع الإجابة.</div></div>`;
+                }
+            } catch (e) {
+                document.getElementById(loadingId)?.remove();
+                chatArea.innerHTML += `<div class="message bot"><div class="message-avatar">🤖</div><div class="message-content">❌ فشل الاتصال</div></div>`;
+            }
+            finally { sendBtn.disabled = false; chatArea.scrollTop = chatArea.scrollHeight; }
+        }
+
+        // ========== تفعيل وضع الليدر ==========
+        const LEADER_EMAIL = "{{ LEADER_EMAIL }}";
+
+        function checkIfLeader() {
+            const userEmail = "{{ session.get('user_email', '') }}";
+            return userEmail === LEADER_EMAIL;
+        }
+
+        window.addEventListener('load', function() {
+            if (!checkIfLeader()) {
+                const teachPanel = document.getElementById('teachPanel');
+                if (teachPanel) teachPanel.style.display = 'none';
+            }
+        });
+
+        document.getElementById('modeTabs').addEventListener('click', function(e) {
+            if (e.target.classList.contains('mode-tab')) {
+                currentMode = e.target.dataset.mode;
+                document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                if (currentMode !== 'design') document.getElementById('designPreview').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

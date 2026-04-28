@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الكتابة الذكية - Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --surface: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.08);
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --gold: #fbbf24;
+            --green: #10b981;
+            --red: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%); min-height: 100vh; color: var(--text); display: flex; }
+        
+        /* شريط الأدوات الجانبي */
+        #sidebar { width: 60px; background: var(--bg2); border-left: 1px solid var(--border); padding: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; position: fixed; right: 0; top: 0; bottom: 0; z-index: 10; }
+        #sidebar button { width: 42px; height: 42px; border-radius: 12px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        #sidebar button:hover { background: rgba(99,102,241,0.2); color: white; }
+        #sidebar button.active { background: var(--accent); color: white; }
+        #sidebar .separator { width: 30px; height: 1px; background: var(--border); margin: 5px 0; }
+        
+        /* المحتوى الرئيسي */
+        #main { flex: 1; display: flex; flex-direction: column; margin-right: 60px; }
+        
+        /* شريط الأدوات العلوي */
+        #toolbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 15px; }
+        #toolbar button { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+        #toolbar button:hover { border-color: var(--accent); color: white; }
+        #toolbar button.active { background: var(--accent); color: white; border-color: var(--accent); }
+        #toolbar input[type="color"] { width: 32px; height: 32px; border-radius: 8px; border: 2px solid var(--border); cursor: pointer; }
+        #toolbar select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; outline: none; }
+        #toolbar label { color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+        
+        /* مساحة الرسم */
+        #canvasContainer { flex: 1; position: relative; overflow: hidden; }
+        #drawingCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; cursor: crosshair; }
+        
+        /* منطقة النتيجة */
+        #resultPanel { background: var(--bg2); border-top: 1px solid var(--border); padding: 15px 20px; min-height: 100px; }
+        #resultText { width: 100%; min-height: 60px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; padding: 15px; color: var(--text); font-size: 16px; resize: vertical; }
+        #recognizeBtn { background: linear-gradient(135deg, var(--accent), #8b5cf6); color: white; border: none; padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: 700; margin-top: 10px; }
+        #recognizeBtn:hover { transform: scale(1.05); }
+        
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+        .recognized-text { margin-top: 10px; padding: 10px; background: rgba(16,185,129,0.1); border-radius: 10px; border: 1px solid rgba(16,185,129,0.3); color: var(--green); }
+    </style>
+</head>
+<body>
+    <!-- شريط الأدوات الجانبي -->
+    <div id="sidebar">
+        <button onclick="setTool('pen')" id="penTool" class="active" title="قلم">✏️</button>
+        <button onclick="setTool('marker')" id="markerTool" title="ماركر">🖍️</button>
+        <button onclick="setTool('eraser')" id="eraserTool" title="مساحة">🧹</button>
+        <div class="separator"></div>
+        <button onclick="undoStroke()" title="تراجع">↩️</button>
+        <button onclick="clearCanvas()" title="مسح الكل">🗑️</button>
+        <div class="separator"></div>
+        <button onclick="recognizeText()" title="تعرف على النص">🔍</button>
+    </div>
+    
+    <!-- المحتوى الرئيسي -->
+    <div id="main">
+        <!-- شريط الأدوات العلوي -->
+        <div id="toolbar">
+            <a href="/dashboard" class="back-link">← العودة</a>
+            <span style="flex:1;"></span>
+            <label>اللون:</label>
+            <input type="color" id="colorPicker" value="#000000" onchange="setColor(this.value)">
+            <label>الحجم:</label>
+            <input type="range" id="sizeSlider" min="1" max="10" value="3" onchange="setSize(this.value)">
+            <span id="sizeValue" style="color: var(--text-secondary); min-width: 20px;">3</span>
+            <button onclick="saveAsImage()">💾 حفظ كصورة</button>
+        </div>
+        
+        <!-- مساحة الرسم -->
+        <div id="canvasContainer">
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+        
+        <!-- منطقة النتيجة -->
+        <div id="resultPanel">
+            <h3 style="margin-bottom: 10px; color: var(--gold);">📝 النص المكتوب:</h3>
+            <textarea id="resultText" placeholder="النص اللي هيتعرف عليه هيظهر هنا..."></textarea>
+            <button id="recognizeBtn" onclick="recognizeText()">🔍 تعرف على النص</button>
+            <div id="recognizedOutput" class="recognized-text" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let tool = 'pen', color = '#000000', size = 3, isDrawing = false;
+        let strokes = [], currentStroke = [];
+        let undoneStrokes = [];
+        
+        // تهيئة
+        function initCanvas() {
+            const container = document.getElementById('canvasContainer');
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        initCanvas();
+        window.addEventListener('resize', initCanvas);
+        
+        // تغيير الأداة
+        function setTool(t) {
+            tool = t;
+            document.querySelectorAll('#sidebar button').forEach(b => b.classList.remove('active'));
+            document.getElementById(t + 'Tool').classList.add('active');
+        }
+        
+        // إعدادات
+        function setColor(c) { color = c; }
+        function setSize(s) { size = s; document.getElementById('sizeValue').textContent = s; }
+        
+        // مسح
+        function clearCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            strokes = [];
+            undoneStrokes = [];
+        }
+        
+        function undoStroke() {
+            if (strokes.length === 0) return;
+            undoneStrokes.push(strokes.pop());
+            redrawCanvas();
+        }
+        
+        function redrawCanvas() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            strokes.forEach(stroke => drawStroke(stroke));
+        }
+        
+        function drawStroke(points) {
+            if (points.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            ctx.lineWidth = points[0].size;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = points[0].tool === 'eraser' ? 'white' : points[0].color;
+            ctx.globalAlpha = points[0].tool === 'marker' ? 0.4 : 1;
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+        
+        // أحداث الرسم
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const point = { x: e.offsetX, y: e.offsetY, tool, color, size };
+            currentStroke = [point];
+            strokes.push(currentStroke);
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const point = { x: e.offsetX, y: e.offsetY, tool, color, size };
+            currentStroke.push(point);
+            drawStroke(currentStroke);
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+            undoneStrokes = [];
+        });
+        
+        // دعم الـ Touch
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const point = { x: touch.clientX - rect.left, y: touch.clientY - rect.top, tool, color, size };
+            isDrawing = true;
+            currentStroke = [point];
+            strokes.push(currentStroke);
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const point = { x: touch.clientX - rect.left, y: touch.clientY - rect.top, tool, color, size };
+            currentStroke.push(point);
+            drawStroke(currentStroke);
+        });
+        
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+            undoneStrokes = [];
+        });
+        
+        // حفظ كصورة
+        function saveAsImage() {
+            const link = document.createElement('a');
+            link.download = 'handwriting_' + new Date().toISOString().slice(0,10) + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // التعرف على النص (OCR)
+        async function recognizeText() {
+            const btn = document.getElementById('recognizeBtn');
+            const output = document.getElementById('recognizedOutput');
+            btn.textContent = '⏳ جاري التعرف...';
+            btn.disabled = true;
+            
+            // تحويل الـ Canvas لـ Image Data
+            const imageData = canvas.toDataURL('image/png');
+            
+            // هنا ممكن تستخدم Google Vision API أو أي خدمة OCR
+            // حالياً هنستخدم محاكاة بسيطة
+            setTimeout(() => {
+                const fakeText = `[نص تجريبي] - للتعرف الحقيقي، اربط Google Vision API أو Tesseract.js`;
+                output.textContent = fakeText;
+                output.style.display = 'block';
+                document.getElementById('resultText').value = fakeText;
+                btn.textContent = '🔍 تعرف على النص';
+                btn.disabled = false;
+            }, 2000);
+            
+            /* ========== للاستخدام الحقيقي مع Google Vision API ==========
+            try {
+                const res = await fetch('https://vision.googleapis.com/v1/images:annotate?key=YOUR_API_KEY', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        requests: [{
+                            image: { content: imageData.split(',')[1] },
+                            features: [{ type: 'TEXT_DETECTION' }]
+                        }]
+                    })
+                });
+                const data = await res.json();
+                const text = data.responses[0]?.fullTextAnnotation?.text || 'لم يتم التعرف على نص';
+                output.textContent = text;
+                output.style.display = 'block';
+                document.getElementById('resultText').value = text;
+            } catch (e) {
+                output.textContent = 'فشل الاتصال بخدمة التعرف';
+            }
+            btn.textContent = '🔍 تعرف على النص';
+            btn.disabled = false;
+            ============================================================= */
+        }
+    </script>
+</body>
+</html>
