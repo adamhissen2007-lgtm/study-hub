@@ -2,108 +2,737 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>إنشاء حساب - Study Hub</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <link rel="manifest" href="/manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب - Study Hub AI</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; position: relative; overflow-y: auto !important; transition: background 0.3s ease; }
-        body::before { content: ''; position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%); top: -100px; left: -100px; border-radius: 50%; z-index: 0; }
-        body::after { content: ''; position: fixed; width: 500px; height: 500px; background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%); bottom: -150px; right: -150px; border-radius: 50%; z-index: 0; }
-        body.dark-mode { background: #0a0a0f; }
-        body.dark-mode .register-card { background: #1a1a2e; border-color: #2a2a4e; }
-        body.dark-mode h2 { color: #e2e8f0; }
-        body.dark-mode label { color: #a0aec0; }
-        body.dark-mode input, body.dark-mode select { background: #2d3748; border-color: #4a5568; color: white; }
-        .register-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 32px; padding: 30px 25px; width: 100%; max-width: 460px; max-height: 85vh; overflow-y: auto !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); z-index: 10; transition: transform 0.3s ease, background 0.3s ease; margin: 10px 0; }
-        .register-card::-webkit-scrollbar { width: 5px; }
-        .register-card::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
-        h2 { color: #ffffff; text-align: center; margin-bottom: 25px; font-size: 26px; font-weight: 700; }
-        .input-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 6px; color: #cbd5e1; font-weight: 500; font-size: 14px; }
-        input, select { width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: #ffffff; font-size: 15px; outline: none; transition: all 0.3s ease; cursor: pointer; }
-        select option { background: #1e293b; color: white; }
-        input:focus, select:focus { border-color: #6366f1; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); transform: scale(1.01); }
-        .note { font-size: 11px; color: #94a3b8; margin-top: -8px; margin-bottom: 10px; padding-right: 5px; }
-        .register-btn { width: 100%; padding: 14px; margin-top: 5px; margin-bottom: 10px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4); }
-        .register-btn:hover { transform: translateY(-3px) scale(1.02); }
-        .login-link { text-align: center; margin-top: 5px; color: #cbd5e1; font-size: 14px; }
-        .login-link a { color: #a78bfa; text-decoration: none; font-weight: 700; }
-        #darkModeToggle { position: fixed; bottom: 25px; left: 25px; width: 55px; height: 55px; border-radius: 30px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); color: white; font-size: 26px; cursor: pointer; z-index: 999; transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        #darkModeToggle:hover { transform: scale(1.1); }
-        body.dark-mode #darkModeToggle { background: #2d3748; border-color: #4a5568; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* animated background particles */
+        .particle {
+            position: absolute;
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .register-container {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 48px;
+            padding: 40px;
+            width: 100%;
+            max-width: 520px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.6s ease-out;
+            position: relative;
+            z-index: 10;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .logo i {
+            font-size: 55px;
+            background: linear-gradient(135deg, #8b5cf6, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .logo h1 {
+            color: white;
+            font-size: 26px;
+            margin-top: 8px;
+        }
+        
+        .logo p {
+            color: #9ca3af;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        
+        .input-group {
+            margin-bottom: 18px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #e5e7eb;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .input-group .input-wrapper {
+            position: relative;
+        }
+        
+        .input-group i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8b5cf6;
+            font-size: 16px;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 30px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group select {
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        .input-group select option {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+        
+        .input-group input.error, .input-group select.error {
+            border-color: #ef4444;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 11px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .strength-text {
+            font-size: 11px;
+            margin-top: 5px;
+            color: #9ca3af;
+        }
+        
+        .strength-weak { background: #ef4444; width: 25%; }
+        .strength-medium { background: #f59e0b; width: 50%; }
+        .strength-strong { background: #10b981; width: 75%; }
+        .strength-very-strong { background: #06b6d4; width: 100%; }
+        
+        .password-hint {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        
+        .row-2cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .terms {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        
+        .terms input {
+            width: 16px;
+            height: 16px;
+            accent-color: #8b5cf6;
+        }
+        
+        .terms a {
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+        
+        .terms a:hover {
+            color: #fbbf24;
+        }
+        
+        .register-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+        }
+        
+        .register-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-link {
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        .login-link a {
+            color: #8b5cf6;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .login-link a:hover {
+            color: #fbbf24;
+        }
+        
+        .alert {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            border-radius: 30px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            color: #fca5a5;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert i {
+            font-size: 16px;
+        }
+        
+        .success-message {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            border-radius: 30px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            color: #6ee7b7;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .security-badge {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @media (max-width: 550px) {
+            .register-container {
+                padding: 30px 25px;
+            }
+            .row-2cols {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .btn-loading .btn-text {
+            display: none;
+        }
+        
+        .btn-loading .spinner {
+            display: inline-block;
+        }
+        
+        /* Tooltip for password requirements */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: #1e293b;
+            color: #fbbf24;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
-    <div class="register-card">
-        <h2>🚀 انضم إلى Study Hub</h2>
-        <form method="POST" action="/register">
+    <div id="particles-container"></div>
+    
+    <div class="register-container">
+        <div class="logo">
+            <i class="fas fa-user-graduate"></i>
+            <h1>إنشاء حساب جديد</h1>
+            <p>انضم إلى منصة Study Hub AI</p>
+        </div>
+        
+        {% if error %}
+        <div class="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+        
+        {% if message %}
+        <div class="success-message">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="/register" id="registerForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="fingerprint" id="fingerprintInput">
+            
             <div class="input-group">
-                <label>📛 الاسم الكامل</label>
-                <input type="text" name="full_name" placeholder="مثال: آدم حسين" required>
+                <label><i class="fas fa-user"></i> الاسم الكامل</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="full_name" id="full_name" placeholder="محمد أحمد" required autocomplete="name">
+                </div>
+                <div class="error-message" id="full_nameError"></div>
             </div>
+            
             <div class="input-group">
-                <label>📧 البريد الإلكتروني</label>
-                <input type="email" name="email" placeholder="example@domain.com" required>
+                <label><i class="fas fa-envelope"></i> البريد الإلكتروني الجامعي</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" id="email" placeholder="example@eru.edu.eg" required autocomplete="email">
+                </div>
+                <div class="error-message" id="emailError"></div>
+                <div class="password-hint">* يجب أن يكون البريد الإلكتروني من النطاق الجامعي (eru.edu.eg أو student.eru.edu.eg)</div>
             </div>
+            
+            <div class="row-2cols">
+                <div class="input-group">
+                    <label><i class="fas fa-graduation-cap"></i> السنة الدراسية</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-graduation-cap"></i>
+                        <select name="university_year" id="university_year">
+                            <option value="أولى">السنة الأولى</option>
+                            <option value="ثانية">السنة الثانية</option>
+                            <option value="ثالثة">السنة الثالثة</option>
+                            <option value="رابعة">السنة الرابعة</option>
+                            <option value="خامسة">السنة الخامسة</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label><i class="fas fa-chalkboard-user"></i> التخصص</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-chalkboard-user"></i>
+                        <select name="major" id="major">
+                            <option value="حاسبات">علوم الحاسب</option>
+                            <option value="هندسة">الهندسة</option>
+                            <option value="طب">الطب</option>
+                            <option value="صيدلة">الصيدلة</option>
+                            <option value="إدارة أعمال">إدارة الأعمال</option>
+                            <option value="اقتصاد">الاقتصاد</option>
+                            <option value="إعلام">الإعلام</option>
+                            <option value="لغات">اللغات والترجمة</option>
+                            <option value="قانون">القانون</option>
+                            <option value="عام">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
             <div class="input-group">
-                <label>🔒 كلمة المرور</label>
-                <input type="password" name="password" placeholder="••••••••" required>
+                <label><i class="fas fa-lock"></i> كلمة المرور <i class="fas fa-question-circle tooltip" data-tip="8 أحرف على الأقل + حرف كبير + رقم"></i></label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" id="password" placeholder="••••••••" required autocomplete="new-password">
+                </div>
+                <div class="password-strength">
+                    <div class="strength-bar" id="strengthBar"></div>
+                </div>
+                <div class="strength-text" id="strengthText"></div>
+                <div class="error-message" id="passwordError"></div>
             </div>
+            
             <div class="input-group">
-                <label>📅 السنة الدراسية</label>
-                <select name="university_year" id="year" required onchange="toggleMajorField()">
-                    <option value="" disabled selected>-- اختر السنة --</option>
-                    <option value="أولى">السنة الأولى</option>
-                    <option value="ثانية">السنة الثانية</option>
-                    <option value="ثالثة">السنة الثالثة</option>
-                    <option value="رابعة">السنة الرابعة</option>
-                </select>
+                <label><i class="fas fa-check-circle"></i> تأكيد كلمة المرور</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-check-circle"></i>
+                    <input type="password" name="confirm_password" id="confirm_password" placeholder="••••••••" required>
+                </div>
+                <div class="error-message" id="confirm_passwordError"></div>
             </div>
-            <div id="major-field" class="input-group" style="display: none;">
-                <label>🎯 التخصص</label>
-                <select name="major" id="major">
-                    <option value="" disabled selected>-- اختر التخصص --</option>
-                    <option value="هندسة">⚙️ الهندسة</option>
-                    <option value="طب">🩺 الطب</option>
-                    <option value="علوم حاسب">💻 علوم الحاسب</option>
-                    <option value="تجارة">📊 التجارة</option>
-                </select>
+            
+            <div class="terms">
+                <input type="checkbox" name="terms" id="terms" required>
+                <label for="terms">أوافق على <a href="/terms" target="_blank">شروط الاستخدام</a> و <a href="/privacy" target="_blank">سياسة الخصوصية</a></label>
             </div>
-            <div class="input-group">
-                <label>📅 الترم الدراسي</label>
-                <select name="semester" required>
-                    <option value="first">الترم الأول</option>
-                    <option value="second">الترم الثاني</option>
-                </select>
-            </div>
-            <button type="submit" class="register-btn">✨ إنشاء حساب ✨</button>
+            
+            <button type="submit" class="register-btn" id="registerBtn">
+                <span class="btn-text">إنشاء حساب</span>
+                <span class="spinner hidden"></span>
+            </button>
         </form>
-        <p class="login-link">بالفعل لديك حساب؟ <a href="/login">تسجيل الدخول ←</a></p>
+        
+        <div class="login-link">
+            لديك حساب بالفعل؟ <a href="/login">تسجيل الدخول</a>
+        </div>
     </div>
-    <button id="darkModeToggle" title="الوضع الليلي">🌙</button>
+    
+    <div class="security-badge">
+        <i class="fas fa-shield-alt"></i>
+        <span>🔐 اتصال آمن | حماية CSRF + بصمة المتصفح + تشفير البيانات</span>
+    </div>
+    
     <script>
-        function toggleMajorField() {
-            var yearSelect = document.getElementById('year');
-            var majorField = document.getElementById('major-field');
-            var majorSelect = document.getElementById('major');
-            var selectedYear = yearSelect.value;
-            if (selectedYear === 'ثالثة' || selectedYear === 'رابعة') {
-                majorField.style.display = 'block';
-                majorSelect.required = true;
-            } else {
-                majorField.style.display = 'none';
-                majorSelect.required = false;
-                majorSelect.value = '';
+        // توليد البصمة وحماية CSRF
+        let visitorId = null;
+        
+        // إنشاء جزيئات خلفية متحركة
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            if (!container) return;
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 6 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = Math.random() * 15 + 10 + 's';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(particle);
             }
         }
-        window.onload = function() { toggleMajorField(); };
-        const toggle = document.getElementById('darkModeToggle');
-        if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); toggle.textContent = '☀️'; }
-        toggle.addEventListener('click', () => { document.body.classList.toggle('dark-mode'); const isDark = document.body.classList.contains('dark-mode'); localStorage.setItem('darkMode', isDark); toggle.textContent = isDark ? '☀️' : '🌙'; });
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');
+        
+        // الحصول على بصمة المتصفح
+        FingerprintJS.load().then(fp => {
+            fp.get().then(result => {
+                visitorId = result.visitorId;
+                document.getElementById('fingerprintInput').value = visitorId;
+            });
+        });
+        
+        // قياس قوة كلمة المرور
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^A-Za-z0-9]/)) strength++;
+            
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            
+            strengthBar.className = 'strength-bar';
+            
+            if (password.length === 0) {
+                strengthBar.style.width = '0%';
+                strengthText.textContent = '';
+                return 0;
+            }
+            
+            if (strength === 1) {
+                strengthBar.classList.add('strength-weak');
+                strengthText.textContent = '⚠️ ضعيفة';
+                strengthText.style.color = '#ef4444';
+            } else if (strength === 2) {
+                strengthBar.classList.add('strength-medium');
+                strengthText.textContent = '⚠️ متوسطة';
+                strengthText.style.color = '#f59e0b';
+            } else if (strength === 3) {
+                strengthBar.classList.add('strength-strong');
+                strengthText.textContent = '✅ قوية';
+                strengthText.style.color = '#10b981';
+            } else if (strength >= 4) {
+                strengthBar.classList.add('strength-very-strong');
+                strengthText.textContent = '✅ قوية جداً';
+                strengthText.style.color = '#06b6d4';
+            }
+            
+            return strength;
+        }
+        
+        function validateEmail(email) {
+            const re = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function showFieldError(fieldId, message) {
+            const errorDiv = document.getElementById(fieldId + 'Error');
+            const input = document.getElementById(fieldId);
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+            if (input) input.classList.add('error');
+        }
+        
+        function hideFieldError(fieldId) {
+            const errorDiv = document.getElementById(fieldId + 'Error');
+            const input = document.getElementById(fieldId);
+            if (errorDiv) errorDiv.style.display = 'none';
+            if (input) input.classList.remove('error');
+        }
+        
+        // حدث كتابة كلمة المرور
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            checkPasswordStrength(password);
+            
+            if (password.length > 0 && password.length < 8) {
+                showFieldError('password', 'كلمة المرور يجب أن تكون 8 أحرف على الأقل');
+            } else if (password.length >= 8 && !/[A-Z]/.test(password)) {
+                showFieldError('password', 'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل');
+            } else if (password.length >= 8 && !/[0-9]/.test(password)) {
+                showFieldError('password', 'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل');
+            } else {
+                hideFieldError('password');
+            }
+            
+            // التحقق من تطابق كلمة المرور
+            const confirmPassword = document.getElementById('confirm_password').value;
+            if (confirmPassword && password !== confirmPassword) {
+                showFieldError('confirm_password', 'كلمتا المرور غير متطابقتين');
+            } else if (confirmPassword && password === confirmPassword) {
+                hideFieldError('confirm_password');
+            }
+        });
+        
+        // حدث كتابة تأكيد كلمة المرور
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            if (this.value !== password) {
+                showFieldError('confirm_password', 'كلمتا المرور غير متطابقتين');
+            } else {
+                hideFieldError('confirm_password');
+            }
+        });
+        
+        // التحقق من البريد الإلكتروني
+        document.getElementById('email').addEventListener('input', function() {
+            const email = this.value.trim();
+            if (email && !validateEmail(email)) {
+                showFieldError('email', 'البريد الإلكتروني غير صحيح');
+            } else {
+                hideFieldError('email');
+            }
+        });
+        
+        // التحقق من الاسم الكامل
+        document.getElementById('full_name').addEventListener('input', function() {
+            if (this.value.trim().length < 3) {
+                showFieldError('full_name', 'الاسم الكامل يجب أن يكون 3 أحرف على الأقل');
+            } else {
+                hideFieldError('full_name');
+            }
+        });
+        
+        // التحقق من صحة النموذج قبل الإرسال
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            const fullName = document.getElementById('full_name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const terms = document.getElementById('terms').checked;
+            
+            // التحقق من الاسم
+            if (!fullName) {
+                showFieldError('full_name', 'الاسم الكامل مطلوب');
+                isValid = false;
+            } else if (fullName.length < 3) {
+                showFieldError('full_name', 'الاسم الكامل يجب أن يكون 3 أحرف على الأقل');
+                isValid = false;
+            } else {
+                hideFieldError('full_name');
+            }
+            
+            // التحقق من البريد الإلكتروني
+            if (!email) {
+                showFieldError('email', 'البريد الإلكتروني مطلوب');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showFieldError('email', 'البريد الإلكتروني غير صحيح');
+                isValid = false;
+            } else {
+                hideFieldError('email');
+            }
+            
+            // التحقق من كلمة المرور
+            if (!password) {
+                showFieldError('password', 'كلمة المرور مطلوبة');
+                isValid = false;
+            } else if (password.length < 8) {
+                showFieldError('password', 'كلمة المرور 8 أحرف على الأقل');
+                isValid = false;
+            } else if (!/[A-Z]/.test(password)) {
+                showFieldError('password', 'يجب أن تحتوي على حرف كبير');
+                isValid = false;
+            } else if (!/[0-9]/.test(password)) {
+                showFieldError('password', 'يجب أن تحتوي على رقم');
+                isValid = false;
+            } else {
+                hideFieldError('password');
+            }
+            
+            // التحقق من تطابق كلمة المرور
+            if (password !== confirmPassword) {
+                showFieldError('confirm_password', 'كلمتا المرور غير متطابقتين');
+                isValid = false;
+            } else {
+                hideFieldError('confirm_password');
+            }
+            
+            // التحقق من الموافقة على الشروط
+            if (!terms) {
+                alert('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // إظهار loading
+            const btn = document.getElementById('registerBtn');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+            btn.querySelector('.btn-text').classList.add('hidden');
+            btn.querySelector('.spinner').classList.remove('hidden');
+            
+            return true;
+        });
+        
+        createParticles();
+        
+        // إضافة حدث Enter للتنقل بين الحقول
+        const inputs = ['full_name', 'email', 'password', 'confirm_password'];
+        inputs.forEach((id, index) => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && index < inputs.length - 1) {
+                        e.preventDefault();
+                        document.getElementById(inputs[index + 1]).focus();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

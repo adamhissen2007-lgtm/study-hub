@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بصمتي التعليمية - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #F3F4F6 0%, #E0E7FF 100%); min-height: 100vh; padding: 40px; }
+        body.dark-mode { background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%); color: #F1F5F9; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .header h1 { background: linear-gradient(135deg, #4F46E5, #06B6D4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 24px; padding: 25px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        body.dark-mode .card { background: rgba(30,41,59,0.85); }
+        .card-title { color: #4F46E5; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .value { font-size: 2rem; font-weight: bold; color: #F59E0B; }
+        .risk-bar { background: #E5E7EB; border-radius: 20px; height: 10px; margin: 10px 0; }
+        .risk-fill { height: 10px; border-radius: 20px; transition: width 0.5s; }
+        .risk-high { background: #EF4444; }
+        .risk-medium { background: #F59E0B; }
+        .risk-low { background: #10B981; }
+        .btn { background: linear-gradient(135deg, #4F46E5, #06B6D4); color: white; padding: 10px 25px; border-radius: 40px; text-decoration: none; }
+        @media (max-width: 700px) { body { padding: 20px; } .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-dna"></i> بصمتي التعليمية (Learning DNA)</h1>
+            <a href="/dashboard" class="btn"><i class="fas fa-arrow-right"></i> العودة للوحة</a>
+        </div>
+        
+        <div class="grid" id="dnaGrid">
+            <div class="card"><div class="card-title"><i class="fas fa-clock"></i> ⏰ أفضل وقت للمذاكرة</div><div id="bestHours" class="value">...</div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-chart-line"></i> 🎯 نوع التحفيز</div><div id="motivationType" class="value">...</div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-exclamation-triangle"></i> ⚠️ فجوات المعرفة</div><div id="weakAreas">...</div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-tachometer-alt"></i> 📊 مخاطر الإرهاق</div><div id="burnoutRisk" class="value">...</div><div class="risk-bar"><div id="burnoutBar" class="risk-fill" style="width: 0%;"></div></div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-sign-out-alt"></i> ⚠️ مخاطر التسرب</div><div id="dropoutRisk" class="value">...</div><div class="risk-bar"><div id="dropoutBar" class="risk-fill" style="width: 0%;"></div></div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-robot"></i> 🤖 توصية الذكاء الاصطناعي</div><div id="aiRecommendation">...</div></div>
+        </div>
+    </div>
+    <script>
+        fetch('/api/personalized-dashboard')
+            .then(res => res.json())
+            .then(data => {
+                if (data.dna) {
+                    document.getElementById('bestHours').innerHTML = data.dna.best_hours?.join(' - ') || 'غير محدد';
+                    const motivationMap = { 'points': '⭐ النقاط والمكافآت', 'challenges': '🏆 التحديات', 'breaks': '🧘 الراحة', 'social': '👥 التفاعل الاجتماعي' };
+                    document.getElementById('motivationType').innerHTML = motivationMap[data.dna.motivation_type] || data.dna.motivation_type;
+                    document.getElementById('weakAreas').innerHTML = data.dna.weak_areas?.length ? data.dna.weak_areas.join('، ') : '🎉 ممتاز! لا توجد فجوات';
+                    document.getElementById('burnoutRisk').innerHTML = `${data.dna.burnout_risk}%`;
+                    document.getElementById('burnoutBar').style.width = `${data.dna.burnout_risk}%`;
+                    document.getElementById('burnoutBar').className = `risk-fill ${data.dna.burnout_risk > 60 ? 'risk-high' : data.dna.burnout_risk > 30 ? 'risk-medium' : 'risk-low'}`;
+                    document.getElementById('dropoutRisk').innerHTML = `${data.dna.dropout_risk}%`;
+                    document.getElementById('dropoutBar').style.width = `${data.dna.dropout_risk}%`;
+                    document.getElementById('dropoutBar').className = `risk-fill ${data.dna.dropout_risk > 60 ? 'risk-high' : data.dna.dropout_risk > 30 ? 'risk-medium' : 'risk-low'}`;
+                }
+                if (data.smart_recommendation) {
+                    document.getElementById('aiRecommendation').innerHTML = data.smart_recommendation.message;
+                }
+            })
+            .catch(err => console.error(err));
+    </script>
+</body>
+</html>

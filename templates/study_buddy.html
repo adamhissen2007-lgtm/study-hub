@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>الرفيق الذكي - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
+        .chat-bubble { background: #1e293b; border-radius: 20px; padding: 20px; margin: 10px 0; border-right: 4px solid #f59e0b; }
+        .buddy-avatar { width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+    </style>
+</head>
+<body class="text-white">
+    <div class="container mx-auto p-6">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-amber-400">🤝 الرفيق الذكي</h1>
+            <a href="/dashboard" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full transition">← العودة</a>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="bg-gray-800 rounded-2xl p-6 border border-amber-500">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="buddy-avatar">
+                        <i class="fas fa-robot text-3xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">مرحباً {{ user_name }}!</h2>
+                        <p class="text-gray-300 text-sm">{{ greeting }}</p>
+                    </div>
+                </div>
+                <div id="chat-area" class="h-96 overflow-y-auto space-y-3 mb-4">
+                    <div class="chat-bubble">
+                        <i class="fas fa-robot text-amber-400"></i> أنا هنا لمساعدتك! كيف تسير مذاكرتك اليوم؟
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="message-input" placeholder="اكتب رسالتك..." class="flex-1 bg-gray-700 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <button onclick="sendMessage()" class="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-full transition">إرسال</button>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-2xl p-6 border border-amber-500">
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-amber-400"></i> تحفيز اليوم</h2>
+                <div id="motivation-area" class="space-y-4">
+                    <div class="bg-gray-700 rounded-xl p-4">
+                        <p id="motivation-text" class="text-gray-200">🔥 أنت أقوى مما تعتقد! خذ نفس عميق وابدأ.</p>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-700">
+                    <h3 class="font-bold mb-2">⚡ إحصائياتك السريعة</h3>
+                    <div id="stats-area">
+                        <p><i class="fas fa-fire text-amber-400"></i> النقاط: {{ user_points }}</p>
+                        <p><i class="fas fa-chart-line"></i> المستوى: {{ user_level }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const chatArea = document.getElementById('chat-area');
+            chatArea.innerHTML += `<div class="bg-indigo-600 rounded-xl p-3 self-end text-right">👤 ${message}</div>`;
+            input.value = '';
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            try {
+                const response = await fetch('/api/study-buddy/motivation?focus_minutes=' + Math.floor(Math.random() * 60));
+                const data = await response.json();
+                chatArea.innerHTML += `<div class="chat-bubble"><i class="fas fa-robot text-amber-400"></i> ${data.message}</div>`;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            } catch(e) {
+                chatArea.innerHTML += `<div class="chat-bubble"><i class="fas fa-robot text-amber-400"></i> عذراً، حدث خطأ. حاول مرة أخرى.</div>`;
+            }
+        }
+        
+        async function loadMotivation() {
+            try {
+                const response = await fetch('/api/study-buddy/motivation');
+                const data = await response.json();
+                document.getElementById('motivation-text').innerHTML = data.message;
+            } catch(e) {}
+        }
+        
+        loadMotivation();
+        setInterval(loadMotivation, 30000);
+    </script>
+</body>
+</html>

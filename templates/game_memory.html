@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الذاكرة - العقل الذكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0b1120, #030712);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; text-align: center; }
+        h1 { color: #fbbf24; margin-bottom: 20px; }
+        .timer { font-size: 24px; color: white; margin-bottom: 20px; }
+        .score { font-size: 18px; color: #10b981; margin-bottom: 20px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            transition: all 0.3s;
+        }
+        .card.flipped, .card.matched {
+            background: #10b981;
+            cursor: default;
+        }
+        .card.matched { opacity: 0.5; }
+        .btn {
+            background: #6366f1;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .message {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 20px;
+            margin-top: 20px;
+            color: #fbbf24;
+        }
+        @media (max-width: 500px) { .grid { gap: 8px; } .card { font-size: 20px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧠 لعبة الذاكرة - طابق البطاقات</h1>
+    <div class="timer">⏱️ الوقت: <span id="timer">00:00</span></div>
+    <div class="score">🎯 المحاولات: <span id="attempts">0</span> | ✅ متطابق: <span id="matched">0</span>/8</div>
+    <div class="grid" id="gameGrid"></div>
+    <button class="btn" onclick="resetGame()">🔄 لعبة جديدة</button>
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+    const emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+    let cards = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let attempts = 0;
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let canFlip = true;
+    
+    function shuffleArray(arr) {
+        for(let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    function initGame() {
+        let deck = [...emojis, ...emojis];
+        cards = shuffleArray(deck).map((emoji, index) => ({
+            id: index,
+            emoji: emoji,
+            flipped: false,
+            matched: false
+        }));
+        flippedCards = [];
+        matchedPairs = 0;
+        attempts = 0;
+        canFlip = true;
+        
+        if(timerInterval) clearInterval(timerInterval);
+        timerSeconds = 0;
+        timerInterval = setInterval(() => {
+            timerSeconds++;
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            document.getElementById('timer').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        }, 1000);
+        
+        updateUI();
+        document.getElementById('message').innerHTML = '';
+    }
+    
+    function updateUI() {
+        const grid = document.getElementById('gameGrid');
+        grid.innerHTML = cards.map(card => `
+            <div class="card ${card.flipped || card.matched ? 'flipped' : ''} ${card.matched ? 'matched' : ''}" onclick="flipCard(${card.id})">
+                ${card.flipped || card.matched ? card.emoji : '?'}
+            </div>
+        `).join('');
+        document.getElementById('attempts').innerText = attempts;
+        document.getElementById('matched').innerText = matchedPairs;
+    }
+    
+    function flipCard(id) {
+        if(!canFlip) return;
+        const card = cards[id];
+        if(card.flipped || card.matched) return;
+        if(flippedCards.length === 2) return;
+        
+        card.flipped = true;
+        flippedCards.push(card);
+        updateUI();
+        
+        if(flippedCards.length === 2) {
+            canFlip = false;
+            attempts++;
+            updateUI();
+            
+            if(flippedCards[0].emoji === flippedCards[1].emoji) {
+                flippedCards.forEach(c => { c.matched = true; c.flipped = false; });
+                matchedPairs++;
+                flippedCards = [];
+                canFlip = true;
+                updateUI();
+                
+                if(matchedPairs === 8) {
+                    clearInterval(timerInterval);
+                    const xpEarned = Math.max(30, 50 - Math.floor(timerSeconds / 10));
+                    document.getElementById('message').innerHTML = `🎉 رائع! أكملت اللعبة في ${Math.floor(timerSeconds/60)}:${(timerSeconds%60).toString().padStart(2,'0')} 🎉<br>⭐ حصلت على ${xpEarned} نقطة خبرة!`;
+                    
+                    fetch('/api/academic/complete-course', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ points: xpEarned, course_name: 'لعبة الذاكرة' })
+                    });
+                    
+                    setTimeout(() => { window.location.href = '/smart-games'; }, 3000);
+                }
+            } else {
+                setTimeout(() => {
+                    flippedCards.forEach(c => { c.flipped = false; });
+                    flippedCards = [];
+                    canFlip = true;
+                    updateUI();
+                }, 1000);
+            }
+        }
+    }
+    
+    function resetGame() {
+        if(timerInterval) clearInterval(timerInterval);
+        initGame();
+    }
+    
+    initGame();
+</script>
+</body>
+</html>

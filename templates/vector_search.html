@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البحث الدلالي - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0b1120, #030712); padding: 40px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: rgba(17,24,39,0.9); border-radius: 30px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .header h1 { color: #06b6d4; display: flex; align-items: center; gap: 10px; }
+        .back-btn { background: #4f46e5; color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .back-btn:hover { background: #7c3aed; transform: translateY(-2px); }
+        .search-box { background: #111827; border-radius: 60px; padding: 15px 25px; display: flex; gap: 15px; margin-bottom: 30px; border: 1px solid #1f2937; }
+        .search-box input { flex: 1; background: transparent; border: none; color: white; font-size: 18px; outline: none; }
+        .search-box button { background: linear-gradient(135deg, #06b6d4, #0284c7); border: none; padding: 12px 30px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .search-box button:hover { transform: scale(1.02); }
+        .results-container { background: #111827; border-radius: 25px; padding: 25px; border: 1px solid #1f2937; }
+        .result-card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 15px; transition: 0.3s; }
+        .result-card:hover { transform: translateX(-5px); border-right: 3px solid #06b6d4; }
+        .result-score { color: #06b6d4; font-size: 12px; margin-bottom: 8px; }
+        .result-content { color: #e5e7eb; line-height: 1.6; }
+        .result-meta { color: #9ca3af; font-size: 12px; margin-top: 10px; }
+        .loading { text-align: center; padding: 40px; color: #9ca3af; }
+        .stats-bar { background: #1e293b; border-radius: 20px; padding: 15px 20px; margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap; }
+        .stat { color: #9ca3af; }
+        .stat span { color: #06b6d4; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-search"></i> البحث الدلالي المتقدم</h1>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للوحة</a>
+    </div>
+
+    <div class="stats-bar" id="statsBar">
+        <div class="stat">📄 المستندات المفهرسة: <span id="docCount">0</span></div>
+        <div class="stat">🔍 آخر بحث: <span id="lastQuery">—</span></div>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="اكتب سؤالك هنا... مثال: ما هو التكامل؟ أو اشرح لي التفاضل" onkeypress="if(event.key==='Enter') semanticSearch()">
+        <button onclick="semanticSearch()"><i class="fas fa-search"></i> بحث دلالي</button>
+    </div>
+
+    <div class="results-container">
+        <h3 style="color: #fbbf24; margin-bottom: 20px;"><i class="fas fa-list-ul"></i> نتائج البحث</h3>
+        <div id="results">
+            <div class="loading">🔍 اكتب سؤالك في الأعلى لبدء البحث الدلالي...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function semanticSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) {
+            showMessage('الرجاء كتابة سؤال للبحث', 'warning');
+            return;
+        }
+
+        document.getElementById('results').innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> جاري البحث...</div>';
+        document.getElementById('lastQuery').innerText = query;
+
+        try {
+            const response = await fetch('/api/search/semantic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query, limit: 10 })
+            });
+            const data = await response.json();
+
+            if (data.stats) {
+                document.getElementById('docCount').innerText = data.stats.total_documents || 0;
+            }
+
+            if (data.results && data.results.length > 0) {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = data.results.map((r, i) => `
+                    <div class="result-card">
+                        <div class="result-score">🎯 دقة المطابقة: ${(r.score * 100).toFixed(1)}% ${r.score > 0.7 ? '🔥 ممتاز' : r.score > 0.4 ? '📖 جيد' : '📘 مقبول'}</div>
+                        <div class="result-content">${r.highlighted || r.content.substring(0, 400)}${r.content.length > 400 ? '...' : ''}</div>
+                        <div class="result-meta">
+                            <i class="fas fa-tag"></i> النوع: ${r.metadata?.type || 'محتوى تعليمي'} | 
+                            <i class="fas fa-clock"></i> تمت الإضافة: ${r.metadata?.created_at ? new Date(r.metadata.created_at).toLocaleDateString('ar-EG') : '—'}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('results').innerHTML = '<div class="loading">❌ لا توجد نتائج مطابقة. حاول استخدام كلمات مفتاحية مختلفة.</div>';
+            }
+        } catch(e) {
+            console.error(e);
+            document.getElementById('results').innerHTML = '<div class="loading">⚠️ حدث خطأ في البحث. تأكد من اتصال الإنترنت.</div>';
+        }
+    }
+
+    function showMessage(msg, type) {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = `<div class="loading" style="color: ${type === 'warning' ? '#f59e0b' : '#ef4444'}">${msg}</div>`;
+        setTimeout(() => {
+            if (document.getElementById('results').innerHTML.includes(msg)) {
+                document.getElementById('results').innerHTML = '<div class="loading">🔍 اكتب سؤالك في الأعلى لبدء البحث الدلالي...</div>';
+            }
+        }, 3000);
+    }
+
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/search/semantic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: 'إحصاءات', limit: 1 })
+            });
+            const data = await response.json();
+            if (data.stats) {
+                document.getElementById('docCount').innerText = data.stats.total_documents || 0;
+            }
+        } catch(e) {}
+    }
+
+    loadStats();
+</script>
+</body>
+</html>

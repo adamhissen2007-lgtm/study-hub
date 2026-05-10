@@ -1,0 +1,262 @@
+/* Ultimate Hub Styles - Study Hub AI Platform */
+/* المركز المتقدم - أنماط جبارة */
+
+:root {
+    --ultimate-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --ultimate-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --ultimate-gold: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    --ultimate-dark: #0f172a;
+    --ultimate-card: rgba(17, 24, 39, 0.8);
+    --ultimate-border: rgba(99, 102, 241, 0.3);
+}
+
+/* Animations */
+@keyframes ultimateGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6); }
+}
+
+@keyframes ultimateFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes ultimateSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes ultimatePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* Ultimate Card Styles */
+.ultimate-card {
+    background: var(--ultimate-card);
+    backdrop-filter: blur(12px);
+    border-radius: 28px;
+    border: 1px solid var(--ultimate-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+}
+
+.ultimate-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--ultimate-primary);
+    border-radius: 30px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+
+.ultimate-card:hover::before {
+    opacity: 0.3;
+}
+
+.ultimate-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    border-color: #8b5cf6;
+}
+
+/* Ultimate Button */
+.ultimate-btn {
+    background: var(--ultimate-primary);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 50px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ultimate-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.ultimate-btn:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.ultimate-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+}
+
+/* Ultimate Tab */
+.ultimate-tab {
+    background: rgba(17, 24, 39, 0.6);
+    border-radius: 60px;
+    padding: 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ultimate-tab-btn {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 50px;
+    color: #9ca3af;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.ultimate-tab-btn.active {
+    background: var(--ultimate-primary);
+    color: white;
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+}
+
+/* Ultimate Feature Card */
+.ultimate-feature {
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.ultimate-feature:hover {
+    background: rgba(79, 70, 229, 0.1);
+    border-color: #8b5cf6;
+    transform: translateY(-5px);
+}
+
+.ultimate-feature-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.ultimate-feature-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fbbf24;
+    margin-bottom: 8px;
+}
+
+.ultimate-feature-desc {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+/* Ultimate Modal */
+.ultimate-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.ultimate-modal-content {
+    background: linear-gradient(135deg, #111827, #0f172a);
+    border-radius: 32px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid #8b5cf6;
+    animation: ultimateFloat 0.4s ease-out;
+}
+
+/* Ultimate Loader */
+.ultimate-loader {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #334155;
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: ultimateSpin 1s linear infinite;
+    margin: 20px auto;
+}
+
+/* Ultimate Progress Bar */
+.ultimate-progress {
+    background: #1e293b;
+    border-radius: 30px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.ultimate-progress-fill {
+    background: var(--ultimate-primary);
+    height: 100%;
+    border-radius: 30px;
+    transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ultimate-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(95deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: ultimateGlow 2s infinite;
+}
+
+/* Ultimate Grid */
+.ultimate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Stars Background */
+.ultimate-stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.ultimate-star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: ultimatePulse 3s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ultimate-grid { grid-template-columns: 1fr; }
+    .ultimate-tab { flex-direction: column; }
+    .ultimate-tab-btn { text-align: center; }
+}

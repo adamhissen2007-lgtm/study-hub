@@ -1,0 +1,114 @@
+<!-- ==================== ملف: templates/superbrain_notes.html ==================== -->
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جميع الملاحظات - سوبر برين | Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0b1120, #030712); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: rgba(17,24,39,0.95); border-radius: 30px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .header h1 { color: #8b5cf6; display: flex; align-items: center; gap: 10px; }
+        .btn { background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; padding: 10px 20px; border-radius: 30px; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-outline { background: transparent; border: 1px solid #4f46e5; }
+        .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .note-card { background: #111827; border-radius: 20px; padding: 20px; border: 1px solid #1f2937; transition: 0.3s; cursor: pointer; }
+        .note-card:hover { transform: translateY(-5px); border-color: #8b5cf6; }
+        .note-title { color: #fbbf24; font-size: 18px; margin-bottom: 10px; }
+        .note-preview { color: #9ca3af; font-size: 14px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .note-meta { display: flex; justify-content: space-between; margin-top: 15px; color: #6b7280; font-size: 12px; }
+        .search-bar { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .search-bar input { flex: 1; padding: 12px 20px; border-radius: 40px; background: #1e293b; border: none; color: white; font-size: 16px; }
+        .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+        .filter-btn { background: #1e293b; padding: 8px 16px; border-radius: 30px; color: white; cursor: pointer; transition: 0.3s; }
+        .filter-btn.active { background: #4f46e5; }
+        @keyframes floatIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .note-card { animation: floatIn 0.3s ease-out backwards; }
+        .note-card:nth-child(n) { animation-delay: calc(0.05s * var(--i, 1)); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-sticky-note"></i> جميع الملاحظات</h1>
+        <div>
+            <button class="btn" onclick="createNewNote()"><i class="fas fa-plus"></i> ملاحظة جديدة</button>
+            <a href="/superbrain" class="btn btn-outline"><i class="fas fa-arrow-right"></i> العودة</a>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 بحث في الملاحظات..." onkeyup="filterNotes()">
+    </div>
+
+    <div class="filters">
+        <div class="filter-btn active" data-filter="all" onclick="setFilter('all')">📋 الكل</div>
+        <div class="filter-btn" data-filter="favorite" onclick="setFilter('favorite')">⭐ المفضلة</div>
+        <div class="filter-btn" data-filter="recent" onclick="setFilter('recent')">🕒 حديثة</div>
+    </div>
+
+    <div class="notes-grid" id="notesGrid">
+        {% for note in notes %}
+        <div class="note-card" data-id="{{ note.id }}" data-title="{{ note.title.lower() }}" data-favorite="{{ note.is_favorite }}" onclick="window.location.href='/superbrain/note/{{ note.id }}'">
+            <div class="note-title">
+                {% if note.is_favorite %}<i class="fas fa-star" style="color: #fbbf24;"></i>{% else %}<i class="fas fa-file-alt" style="color: #8b5cf6;"></i>{% endif %}
+                {{ note.title[:40] }}
+            </div>
+            <div class="note-preview">{{ note.content[:100]|replace('\n', ' ') }}{% if note.content|length > 100 %}...{% endif %}</div>
+            <div class="note-meta">
+                <span><i class="fas fa-calendar"></i> {{ note.updated_at.strftime('%Y/%m/%d') }}</span>
+                <span><i class="fas fa-eye"></i> {{ note.view_count }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px; background: #111827; border-radius: 30px;">
+            <i class="fas fa-folder-open" style="font-size: 64px; color: #4f46e5;"></i>
+            <p style="margin-top: 20px; color: #9ca3af;">لا توجد ملاحظات بعد</p>
+            <button class="btn" style="margin-top: 20px;" onclick="createNewNote()">أنشئ أول ملاحظة</button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function createNewNote() {
+        const title = prompt('أدخل عنوان الملاحظة:');
+        if (title) {
+            fetch('/api/superbrain/note/create', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: title, content: '' })
+            }).then(res => res.json()).then(data => {
+                if (data.success) window.location.href = `/superbrain/note/${data.note_id}`;
+            });
+        }
+    }
+
+    function filterNotes() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const filterType = document.querySelector('.filter-btn.active').dataset.filter;
+        const cards = document.querySelectorAll('.note-card');
+        
+        cards.forEach(card => {
+            const title = card.dataset.title;
+            const isFavorite = card.dataset.favorite === 'True';
+            let show = true;
+            
+            if (searchTerm && !title.includes(searchTerm)) show = false;
+            if (filterType === 'favorite' && !isFavorite) show = false;
+            
+            card.style.display = show ? 'block' : 'none';
+        });
+    }
+
+    function setFilter(type) {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.filter-btn[data-filter="${type}"]`).classList.add('active');
+        filterNotes();
+    }
+</script>
+</body>
+</html>

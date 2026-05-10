@@ -1,0 +1,251 @@
+<!-- ==================== ملف: templates/superbrain_dashboard.html ==================== -->
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سوبر برين - العقل الثاني | Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0b1120, #030712); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .header { background: rgba(17,24,39,0.95); backdrop-filter: blur(10px); border-radius: 30px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border: 1px solid rgba(139,92,246,0.3); }
+        .header h1 { color: #8b5cf6; display: flex; align-items: center; gap: 12px; font-size: 28px; }
+        .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn { background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; padding: 10px 20px; border-radius: 30px; color: white; text-decoration: none; font-weight: bold; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-outline { background: transparent; border: 1px solid #4f46e5; }
+        .btn-outline:hover { background: #4f46e5; transform: translateY(-2px); }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #111827; border-radius: 25px; padding: 20px; text-align: center; border: 1px solid #1f2937; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); border-color: #8b5cf6; }
+        .stat-number { font-size: 36px; font-weight: bold; background: linear-gradient(135deg, #8b5cf6, #fbbf24); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .stat-label { color: #9ca3af; margin-top: 8px; }
+        
+        /* Grid Layout */
+        .grid-2cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .card { background: #111827; border-radius: 25px; padding: 25px; border: 1px solid #1f2937; transition: 0.3s; }
+        .card:hover { border-color: #8b5cf6; transform: translateY(-3px); }
+        .card-title { color: #fbbf24; font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #1f2937; padding-bottom: 12px; }
+        
+        /* Note Item */
+        .note-item { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .note-item:hover { background: #2d3a4e; transform: translateX(-5px); }
+        .note-title { color: white; font-weight: 500; }
+        .note-date { color: #9ca3af; font-size: 11px; margin-top: 5px; }
+        .task-item { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .task-priority { width: 8px; height: 40px; border-radius: 10px; margin-left: 12px; }
+        .priority-high { background: #ef4444; }
+        .priority-medium { background: #f59e0b; }
+        .priority-low { background: #10b981; }
+        .insight-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 15px; padding: 15px; margin-bottom: 12px; border-right: 4px solid #8b5cf6; }
+        .progress-bar { background: #1e293b; border-radius: 20px; height: 10px; margin: 15px 0; overflow: hidden; }
+        .progress-fill { background: linear-gradient(95deg, #8b5cf6, #fbbf24); width: 0%; height: 100%; border-radius: 20px; transition: width 0.5s ease; }
+        
+        @keyframes floatIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .card, .stat-card, .note-item, .task-item, .insight-card { animation: floatIn 0.4s ease-out backwards; }
+        .card:nth-child(1) { animation-delay: 0.05s; }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        
+        @media (max-width: 768px) { .grid-2cols { grid-template-columns: 1fr; } .header { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-brain"></i> سوبر برين | العقل الثاني</h1>
+        <div class="header-actions">
+            <a href="/superbrain/notes" class="btn"><i class="fas fa-sticky-note"></i> جميع الملاحظات</a>
+            <button class="btn btn-success" onclick="createNewNote()"><i class="fas fa-plus"></i> ملاحظة جديدة</button>
+            <button class="btn btn-outline" onclick="generateBriefing()"><i class="fas fa-sun"></i> إيجاز يومي</button>
+            <a href="/dashboard" class="btn btn-outline"><i class="fas fa-arrow-right"></i> العودة</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="productivityScore">{{ productivity_score }}%</div><div class="stat-label">إنتاجيتك</div></div>
+        <div class="stat-card"><div class="stat-number" id="bestHour">{{ best_hour }}</div><div class="stat-label">أفضل وقت للمذاكرة</div></div>
+        <div class="stat-card"><div class="stat-number" id="totalPoints">{{ user_points }}</div><div class="stat-label">نقاط الخبرة</div></div>
+        <div class="stat-card"><div class="stat-number" id="totalNotes">{{ recent_notes|length }}</div><div class="stat-label">ملاحظاتك</div></div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid-2cols">
+        <!-- Recent Notes -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-clock"></i> 📝 آخر الملاحظات</div>
+            <div id="recentNotesList">
+                {% for note in recent_notes %}
+                <div class="note-item" onclick="window.location.href='/superbrain/note/{{ note.id }}'">
+                    <div>
+                        <div class="note-title"><i class="fas fa-file-alt" style="color: #8b5cf6;"></i> {{ note.title[:50] }}</div>
+                        <div class="note-date">{{ note.updated_at.strftime('%Y/%m/%d %H:%M') }}</div>
+                    </div>
+                    <i class="fas fa-chevron-left" style="color: #4f46e5;"></i>
+                </div>
+                {% else %}
+                <div class="note-item" style="text-align: center; color: #6b7280;">لا توجد ملاحظات، أنشئ أول ملاحظة! ✨</div>
+                {% endfor %}
+            </div>
+            <a href="/superbrain/notes" class="btn" style="width: 100%; text-align: center; margin-top: 15px; display: block;">عرض الكل →</a>
+        </div>
+
+        <!-- Today's Tasks -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-tasks"></i> ✅ مهام اليوم</div>
+            <div id="todayTasksList">
+                {% for task in today_tasks %}
+                <div class="task-item">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="task-priority {% if task.priority >= 4 %}priority-high{% elif task.priority >= 2 %}priority-medium{% else %}priority-low{% endif %}"></div>
+                        <div>
+                            <div class="note-title">{{ task.title[:60] }}</div>
+                            <div class="note-date">⏱️ {{ task.estimated_duration }} دقيقة | 🔥 مستوى طاقة {{ task.energy_level_required }}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" style="padding: 6px 12px; font-size: 12px;" onclick="completeTask({{ task.id }})"><i class="fas fa-check"></i> تم</button>
+                        <button class="btn btn-warning" style="padding: 6px 12px; font-size: 12px;" onclick="postponeTask({{ task.id }})"><i class="fas fa-clock"></i> تأجيل</button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="note-item" style="text-align: center; color: #6b7280;">🎉 مبروك! لا توجد مهام معلقة اليوم</div>
+                {% endfor %}
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 15px;" onclick="showCreateTaskModal()"><i class="fas fa-plus"></i> إضافة مهمة جديدة</button>
+        </div>
+
+        <!-- Productivity Insights -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-line"></i> 📊 تحليلات الإنتاجية</div>
+            <div class="progress-bar"><div class="progress-fill" style="width: {{ productivity_score }}%;"></div></div>
+            <div style="text-align: center; margin: 10px 0; color: #9ca3af;">نشاطك اليوم: {{ productivity_score }}%</div>
+            <div id="insightsList">
+                {% for insight in unread_insights %}
+                <div class="insight-card" id="insight-{{ insight.id }}">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div><strong>{{ insight.title }}</strong></div>
+                        <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="markInsightRead({{ insight.id }})">✓ تم</button>
+                    </div>
+                    <div style="color: #e5e7eb; font-size: 13px; margin-top: 8px;">{{ insight.message[:100] }}...</div>
+                    <div style="color: #8b5cf6; font-size: 12px; margin-top: 8px;"><i class="fas fa-lightbulb"></i> {{ insight.suggestion }}</div>
+                </div>
+                {% else %}
+                <div style="text-align: center; color: #6b7280; padding: 20px;">✨ لا توجد إشعارات جديدة</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-calendar-alt"></i> 📅 الأحداث القادمة</div>
+            <div id="upcomingEvents">
+                {% for event in upcoming_events %}
+                <div class="note-item">
+                    <div>
+                        <div class="note-title"><i class="fas fa-calendar-day"></i> {{ event.title }}</div>
+                        <div class="note-date">{{ event.start_time.strftime('%Y/%m/%d %H:%M') }} - {{ event.end_time.strftime('%H:%M') }}</div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="note-item" style="text-align: center; color: #6b7280;">📭 لا توجد أحداث قادمة</div>
+                {% endfor %}
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 15px;" onclick="showAddEventModal()"><i class="fas fa-plus"></i> إضافة حدث</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for New Note -->
+<div id="newNoteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: #111827; border-radius: 25px; padding: 30px; width: 90%; max-width: 500px; border: 1px solid #4f46e5;">
+        <h3 style="color: #fbbf24; margin-bottom: 20px;"><i class="fas fa-plus"></i> ملاحظة جديدة</h3>
+        <input type="text" id="newNoteTitle" placeholder="عنوان الملاحظة" style="width: 100%; padding: 12px; border-radius: 12px; background: #1e293b; border: none; color: white; margin-bottom: 15px;">
+        <textarea id="newNoteContent" placeholder="محتوى الملاحظة..." rows="5" style="width: 100%; padding: 12px; border-radius: 12px; background: #1e293b; border: none; color: white; margin-bottom: 15px;"></textarea>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" style="flex: 1;" onclick="saveNewNote()">حفظ</button>
+            <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('newNoteModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function createNewNote() { document.getElementById('newNoteModal').style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    
+    async function saveNewNote() {
+        const title = document.getElementById('newNoteTitle').value;
+        const content = document.getElementById('newNoteContent').value;
+        if (!title) { alert('الرجاء إدخال عنوان'); return; }
+        const response = await fetch('/api/superbrain/note/create', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: title, content: content })
+        });
+        const data = await response.json();
+        if (data.success) { window.location.href = `/superbrain/note/${data.note_id}`; }
+        else { alert('حدث خطأ'); }
+    }
+    
+    async function completeTask(taskId) {
+        const response = await fetch(`/api/superbrain/task/${taskId}/complete`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actual_duration: 30 })
+        });
+        const data = await response.json();
+        if (data.success) { alert(`✅ تم إكمال المهمة! +${data.points_earned} نقطة`); location.reload(); }
+        else { alert('حدث خطأ'); }
+    }
+    
+    async function postponeTask(taskId) {
+        const response = await fetch(`/api/superbrain/task/${taskId}/postpone`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        const data = await response.json();
+        if (data.success) { alert(`⏰ تم تأجيل المهمة (${data.postponed_count}/3)`); location.reload(); }
+        else { alert('حدث خطأ'); }
+    }
+    
+    async function generateBriefing() {
+        const response = await fetch('/api/superbrain/generate-briefing', { method: 'POST' });
+        const data = await response.json();
+        alert(data.briefing);
+    }
+    
+    async function markInsightRead(insightId) {
+        await fetch(`/api/superbrain/insights/read/${insightId}`, { method: 'POST' });
+        document.getElementById(`insight-${insightId}`).style.display = 'none';
+    }
+    
+    function showCreateTaskModal() {
+        const taskTitle = prompt('أدخل عنوان المهمة:');
+        if (taskTitle) {
+            fetch('/api/superbrain/task/create', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: taskTitle, priority: 2, estimated_duration: 30 })
+            }).then(() => location.reload());
+        }
+    }
+    
+    function showAddEventModal() {
+        const eventTitle = prompt('أدخل عنوان الحدث:');
+        const eventDate = prompt('أدخل التاريخ والوقت (مثال: 2024-12-31T15:00):');
+        if (eventTitle && eventDate) {
+            fetch('/api/superbrain/calendar/event/create', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: eventTitle, start: eventDate, end: eventDate })
+            }).then(() => location.reload());
+        }
+    }
+</script>
+</body>
+</html>

@@ -2,54 +2,133 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملفي الشخصي - Study Hub</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; min-height: 100vh; color: white; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .profile-header { display: flex; align-items: center; gap: 30px; margin-bottom: 40px; background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); padding: 30px; border-radius: 40px; }
-        .avatar { width: 100px; height: 100px; border-radius: 30px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: bold; }
-        .stats { display: flex; gap: 40px; margin-top: 20px; }
-        .badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; margin-top: 30px; }
-        .badge-card { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 25px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .header h1 { color: white; display: flex; align-items: center; gap: 10px; }
+        .header a { background: rgba(255,255,255,0.1); padding: 10px 24px; border-radius: 40px; color: white; text-decoration: none; }
+        .profile-card { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 30px; margin-bottom: 30px; }
+        .stats-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px; }
+        .stat-box { background: #1e293b; border-radius: 24px; padding: 20px; flex: 1; text-align: center; }
+        .stat-value { font-size: 36px; font-weight: 900; color: #fbbf24; }
+        .badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .badge-card { background: #1e293b; border-radius: 20px; padding: 15px; text-align: center; transition: 0.3s; }
+        .badge-card.earned { border: 2px solid #fbbf24; background: linear-gradient(135deg, #1e293b, #0f172a); }
+        .badge-card.missing { opacity: 0.5; filter: grayscale(0.3); }
         .badge-icon { font-size: 40px; margin-bottom: 10px; }
+        .badge-name { color: white; font-size: 14px; }
+        
+        /* شارة الثقة */
+        .trust-badge-section {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .progress-bar-container {
+            background: #1e293b;
+            border-radius: 30px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(95deg, #10b981, #fbbf24);
+            height: 100%;
+            border-radius: 30px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="/dashboard" style="color: #a78bfa; margin-bottom: 20px; display: inline-block;"><i class="fas fa-arrow-right"></i> العودة</a>
-        
-        <div class="profile-header">
-            <div class="avatar">{{ user.full_name[0] }}</div>
-            <div>
-                <h1 style="font-size: 36px;">{{ user.full_name }}</h1>
-                <p style="color: #94a3b8;">{{ user.email }}</p>
-                <p><span class="badge" style="background: #6366f1; padding: 5px 15px; border-radius: 50px;">{{ user.university_year }} - {{ user.major }}</span></p>
-                <div class="stats">
-                    <div><i class="fas fa-star" style="color: #fbbf24;"></i> {{ user.points }} نقطة</div>
-                    <div><i class="fas fa-layer-group"></i> مستوى {{ user.level }}</div>
-                    <div><i class="fas fa-ranking-star"></i> #{{ user_rank }}</div>
-                </div>
-            </div>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-user-circle"></i> ملفي الشخصي</h1>
+        <a href="/dashboard">← العودة</a>
+    </div>
+
+    <div class="profile-card">
+        <div class="stats-row">
+            <div class="stat-box"><div class="stat-value">{{ user.full_name }}</div><div>👤 الاسم</div></div>
+            <div class="stat-box"><div class="stat-value">{{ user.points }}</div><div>⭐ النقاط</div></div>
+            <div class="stat-box"><div class="stat-value">{{ user.level }}</div><div>📊 المستوى</div></div>
+            <div class="stat-box"><div class="stat-value">{{ user.streak }}</div><div>🔥 الأيام المتواصلة</div></div>
         </div>
 
-        <h2><i class="fas fa-medal" style="margin-left: 10px; color: #fbbf24;"></i>الشارات</h2>
+        <!-- شارة الثقة -->
+        <div class="trust-badge-section">
+            <div id="trustBadge">
+                <i class="fas fa-spinner fa-pulse"></i> جاري تحميل درجة الثقة...
+            </div>
+            <div id="trustScore" style="margin-top: 10px;"></div>
+        </div>
+
+        <h3 style="color: #fbbf24; margin-bottom: 20px;"><i class="fas fa-medal"></i> الشارات التي حصلت عليها</h3>
         <div class="badges-grid">
-            {% if badges %}
-                {% for badge in badges %}
-                <div class="badge-card">
-                    <div class="badge-icon">{{ badge.split(' ')[0] }}</div>
-                    <div>{{ badge }}</div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p style="color: #94a3b8;">لم تحصل على أي شارات بعد. استمر في رفع الملفات والتفاعل!</p>
-            {% endif %}
+            {% for badge in earned_badges %}
+            <div class="badge-card earned">
+                <div class="badge-icon">{{ badge[0] }}</div>
+                <div class="badge-name">{{ badge }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h3 style="color: #64748b; margin: 30px 0 20px;"><i class="fas fa-lock"></i> شارات لم تحصل عليها بعد</h3>
+        <div class="badges-grid">
+            {% for badge in missing_badges %}
+            <div class="badge-card missing">
+                <div class="badge-icon">{{ badge[0] }}</div>
+                <div class="badge-name">{{ badge }}</div>
+            </div>
+            {% endfor %}
         </div>
     </div>
+</div>
+
+<script>
+async function loadTrustBadge() {
+    try {
+        const res = await fetch('/api/security/trust-score');
+        const data = await res.json();
+        
+        const badge = data.badge;
+        document.getElementById('trustBadge').innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <span style="font-size: 32px;">${badge.icon}</span>
+                <div>
+                    <div style="font-weight: bold; color: ${badge.color};">${badge.name}</div>
+                    <div style="font-size: 12px; color: #9ca3af;">${badge.description}</div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('trustScore').innerHTML = `
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${data.score}%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>درجة الثقة: ${data.score}%</span>
+                <span>المستوى: ${data.level === 'trusted' ? 'موثوق' : data.level === 'high' ? 'عالي' : data.level === 'medium' ? 'متوسط' : 'منخفض'}</span>
+            </div>
+        `;
+    } catch(e) {
+        console.log('خطأ في تحميل شارة الثقة');
+        document.getElementById('trustBadge').innerHTML = '<span style="color: #9ca3af;">⚠️ غير متاحة حالياً</span>';
+    }
+}
+loadTrustBadge();
+</script>
 </body>
 </html>

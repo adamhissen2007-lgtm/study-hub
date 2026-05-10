@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأنماط البصرية - العقل الذكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0b1120, #030712);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            background: #111827;
+            border-radius: 48px;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 { color: #fbbf24; margin-bottom: 20px; }
+        .pattern { display: flex; gap: 15px; justify-content: center; margin: 30px 0; }
+        .shape { width: 80px; height: 80px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+        .question { background: #4f46e5; width: 80px; height: 80px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; }
+        .options { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+        .option { background: #1e293b; width: 80px; height: 80px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 40px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { background: #10b981; transform: scale(0.98); }
+        .score { font-size: 20px; color: #10b981; margin: 15px 0; }
+        .message { margin-top: 20px; color: #fbbf24; }
+        @media (max-width: 550px) { .shape, .question, .option { width: 60px; height: 60px; font-size: 30px; } }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>🧩 الأنماط البصرية</h1>
+    <div class="score">⭐ النقاط: <span id="score">0</span> | ✅ المستوى: <span id="level">1</span></div>
+    <div class="pattern" id="pattern"></div>
+    <div class="options" id="options"></div>
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+    let score = 0;
+    let level = 1;
+    let currentPattern = [];
+    let correctAnswer = '';
+    
+    const shapes = ['⬛', '⬜', '🔴', '🔵', '🟢', '🟡', '⭐', '❤️', '🔷', '🔶'];
+    
+    function generatePattern() {
+        let pattern = [];
+        let patternType = Math.floor(Math.random() * 3);
+        
+        if(patternType === 0) {
+            let baseShape = shapes[Math.floor(Math.random() * shapes.length)];
+            pattern = [baseShape, baseShape, baseShape];
+            correctAnswer = baseShape;
+        } else if(patternType === 1) {
+            let shape1 = shapes[Math.floor(Math.random() * shapes.length)];
+            let shape2 = shapes[Math.floor(Math.random() * shapes.length)];
+            pattern = [shape1, shape2, shape1];
+            correctAnswer = shape2;
+        } else {
+            let shape1 = shapes[Math.floor(Math.random() * shapes.length)];
+            let shape2 = shapes[Math.floor(Math.random() * shapes.length)];
+            let shape3 = shapes[Math.floor(Math.random() * shapes.length)];
+            pattern = [shape1, shape2, shape3];
+            correctAnswer = shape1;
+        }
+        
+        return pattern;
+    }
+    
+    function generateOptions(correct) {
+        let options = [correct];
+        while(options.length < 4) {
+            let randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            if(!options.includes(randomShape)) options.push(randomShape);
+        }
+        return options.sort(() => Math.random() - 0.5);
+    }
+    
+    function newRound() {
+        currentPattern = generatePattern();
+        const patternDiv = document.getElementById('pattern');
+        patternDiv.innerHTML = currentPattern.map(s => `<div class="shape">${s}</div>`).join('') + `<div class="question">?</div>`;
+        
+        const options = generateOptions(correctAnswer);
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = options.map(opt => `<div class="option" onclick="checkAnswer('${opt}')">${opt}</div>`).join('');
+    }
+    
+    function checkAnswer(selected) {
+        if(selected === correctAnswer) {
+            score += level * 5;
+            level++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('level').innerText = level;
+            document.getElementById('message').innerHTML = '✅ رائع!';
+            setTimeout(() => document.getElementById('message').innerHTML = '', 800);
+            newRound();
+        } else {
+            document.getElementById('message').innerHTML = '❌ خطأ! حاول مرة أخرى';
+            setTimeout(() => document.getElementById('message').innerHTML = '', 1000);
+        }
+        
+        if(score >= 40) {
+            const xpEarned = score;
+            document.getElementById('message').innerHTML = `🎉 ممتاز! حصلت على ${xpEarned} نقطة خبرة!`;
+            fetch('/api/academic/complete-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points: xpEarned, course_name: 'الأنماط البصرية' })
+            });
+            setTimeout(() => { window.location.href = '/smart-games'; }, 2000);
+        }
+    }
+    
+    newRound();
+</script>
+</body>
+</html>

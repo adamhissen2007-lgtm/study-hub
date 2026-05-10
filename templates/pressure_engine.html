@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرك الضغط - Pressure Engine | Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #111827;
+            --border: #1f2937;
+            --accent: #6366f1;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --gold: #fbbf24;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --pressure-low: #10b981;
+            --pressure-medium: #f59e0b;
+            --pressure-high: #ef4444;
+            --pressure-extreme: #7c3aed;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, var(--bg-dark), #030712);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
+        .badge {
+            background: linear-gradient(95deg, #4f46e5, #7c3aed);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+        }
+        .back-btn {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+        .back-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        
+        /* Stress Meter */
+        .stress-meter-card {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 40px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px solid var(--danger);
+            position: relative;
+            overflow: hidden;
+        }
+        .stress-meter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(95deg, var(--pressure-low), var(--pressure-medium), var(--pressure-high), var(--pressure-extreme));
+        }
+        .stress-value {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--danger), var(--warning));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .stress-label {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .stress-bar-container {
+            background: #1e293b;
+            border-radius: 30px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .stress-bar {
+            height: 100%;
+            border-radius: 30px;
+            transition: width 0.5s ease;
+            background: linear-gradient(95deg, var(--pressure-low), var(--pressure-medium), var(--pressure-high), var(--pressure-extreme));
+            width: 0%;
+        }
+        
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .card-title {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-right: 4px solid var(--gold);
+            padding-right: 15px;
+        }
+        
+        /* Challenge Button */
+        .challenge-btn {
+            background: linear-gradient(135deg, var(--warning), #ea580c);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .challenge-btn:hover { transform: scale(0.98); filter: brightness(1.1); }
+        
+        /* Breathing Coach */
+        .breathing-circle {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse 4s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        .breathing-text { color: white; font-size: 18px; font-weight: bold; text-align: center; }
+        
+        /* Arena */
+        .arena-card {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        /* Legend Hall */
+        .legend-item {
+            background: linear-gradient(135deg, var(--gold), #f59e0b);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: black;
+        }
+        
+        /* Adrenaline Mode */
+        .adrenaline-mode {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            animation: adrenalinePulse 1s infinite;
+        }
+        @keyframes adrenalinePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            50% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+        }
+        
+        @media (max-width: 700px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .stress-value { font-size: 48px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <h1><i class="fas fa-bolt" style="color: var(--danger);"></i> محرك الضغط - Pressure Engine</h1>
+            <span class="badge"><i class="fas fa-user-graduate"></i> {{ session.user_name }} | حول ضغطك لطاقة</span>
+        </div>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+    </div>
+
+    <!-- 1. مقياس الضغط الفوري -->
+    <div class="stress-meter-card">
+        <h2 style="color: white; margin-bottom: 15px;"><i class="fas fa-heartbeat"></i> مقياس الضغط الفوري</h2>
+        <div class="stress-value" id="stressValue">0%</div>
+        <div class="stress-bar-container">
+            <div class="stress-bar" id="stressBar" style="width: 0%;"></div>
+        </div>
+        <div class="stress-label" id="stressMessage">🟢 مستوى ضغطك منخفض. ممتاز!</div>
+        <button class="challenge-btn" onclick="measureStress()" style="margin-top: 15px; width: auto; display: inline-block; padding: 8px 20px;">
+            <i class="fas fa-sync-alt"></i> قياس الضغط الآن
+        </button>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 2. تحديات تحويل الضغط -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-trophy" style="color: var(--warning);"></i> 🎯 تحديات تحويل الضغط</div>
+            <div id="challengesList">
+                <p style="color: var(--text-dim);"><i class="fas fa-spinner fa-pulse"></i> جاري تحميل التحديات...</p>
+            </div>
+        </div>
+
+        <!-- 3. تمارين تنفس - AI Coach -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-lungs" style="color: var(--success);"></i> 🧘 مدرب التنفس الذكي</div>
+            <div style="text-align: center;">
+                <div class="breathing-circle" onclick="startBreathing()">
+                    <div class="breathing-text" id="breathingText">شهيق</div>
+                </div>
+                <div id="breathingTimer" style="color: var(--text-dim); margin-top: 10px;">اضغط على الدائرة للبدء</div>
+                <select id="breathingMode" style="background: #1e293b; border: none; padding: 8px; border-radius: 20px; color: white; margin-top: 10px;">
+                    <option value="4">هادئ (4-4-4-4)</option>
+                    <option value="6">مكثف (6-6-6-6)</option>
+                    <option value="8">متقدم (8-8-8-8)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 4. تحويل الضغط لنقاط -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-exchange-alt" style="color: var(--gold);"></i> 💰 تحويل الضغط لنقاط</div>
+            <div style="text-align: center;">
+                <div style="font-size: 48px; font-weight: 900; color: var(--gold);" id="stressPoints">0</div>
+                <div style="color: var(--text-dim);">نقاط تحويل الضغط</div>
+                <div class="progress-bar-container" style="margin-top: 15px;">
+                    <div class="progress-bar" id="pointsProgress" style="width: 0%; background: var(--gold);"></div>
+                </div>
+                <button class="challenge-btn" onclick="convertStressToPoints()">
+                    <i class="fas fa-magic"></i> حول ضغطك لنقاط الآن
+                </button>
+            </div>
+        </div>
+
+        <!-- 5. صالة التحدي -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-fist-raised" style="color: var(--danger);"></i> 🥊 صالة التحدي</div>
+            <div id="arenaContainer">
+                <p style="color: var(--text-dim);">تحدى طالب آخر بنفس مستوى الضغط</p>
+                <button class="challenge-btn" onclick="findOpponent()">
+                    <i class="fas fa-search"></i> ابحث عن خصم
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 6. علاج بالضحك -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-laugh-squint" style="color: var(--gold);"></i> 😂 علاج بالضحك - استرخِ مع فهيم</div>
+            <div id="jokeContainer" style="background: #1e293b; border-radius: 20px; padding: 20px; text-align: center; min-height: 150px;">
+                <p style="color: var(--text-dim);">اضغط للضحك وتقليل التوتر</p>
+            </div>
+            <button class="challenge-btn" onclick="getJoke()">
+                <i class="fas fa-smile-wink"></i> اضحك مع فهيم
+            </button>
+        </div>
+
+        <!-- 7. قاعة مشاهير الضغط -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-crown" style="color: var(--gold);"></i> 👑 أساطير الضغط - قاعة المشاهير</div>
+            <div id="legendsList">
+                <p style="color: var(--text-dim);"><i class="fas fa-spinner fa-pulse"></i> جاري تحميل الأساطير...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 8. وضع الأدرينالين -->
+        <div class="card" id="adrenalineCard">
+            <div class="card-title"><i class="fas fa-fire" style="color: var(--danger);"></i> ⚡ وضع الأدرينالين الصناعي</div>
+            <div style="text-align: center;">
+                <button class="challenge-btn" id="adrenalineBtn" onclick="activateAdrenalineMode()" style="background: linear-gradient(135deg, #dc2626, #991b1b);">
+                    <i class="fas fa-bolt"></i> فعّل وضع القاتل
+                </button>
+                <div id="adrenalineTimer" style="margin-top: 10px; color: var(--text-dim);"></div>
+            </div>
+        </div>
+
+        <!-- 9. تقرير الضغط الأسبوعي -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-line" style="color: var(--info);"></i> 📊 تقرير الضغط الأسبوعي</div>
+            <canvas id="stressChart" style="max-height: 200px;"></canvas>
+            <div id="weeklyAdvice" style="margin-top: 15px; background: #1e293b; border-radius: 20px; padding: 10px;"></div>
+        </div>
+    </div>
+
+    <!-- 10. فهيم الصوت الهاديء -->
+    <div class="card" style="background: linear-gradient(135deg, #1e1b4b, #0f172a); text-align: center;">
+        <div class="card-title"><i class="fas fa-robot" style="color: var(--success);"></i> 🎙️ فهيم - صوتك الهاديء</div>
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <button class="challenge-btn" onclick="playCalmMessage()" style="background: var(--success); width: auto;">
+                <i class="fas fa-head-side-vr"></i> استمع لفهيم
+            </button>
+            <button class="challenge-btn" onclick="startVoiceRelax()" style="background: var(--accent); width: auto;">
+                <i class="fas fa-microphone-alt"></i> جلسة استرخاء مسموعة
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStressLevel = 0;
+    let breathingInterval = null;
+    let adrenalineInterval = null;
+    let stressChart = null;
+    
+    // Load all data
+    async function loadAllData() {
+        await loadStressLevel();
+        await loadChallenges();
+        await loadLegends();
+        await loadStressChart();
+        await loadStressPoints();
+    }
+    
+    async function loadStressLevel() {
+        const res = await fetch('/api/pressure/stress-level');
+        const data = await res.json();
+        currentStressLevel = data.stress_level;
+        document.getElementById('stressValue').innerText = currentStressLevel + '%';
+        document.getElementById('stressBar').style.width = currentStressLevel + '%';
+        
+        let message = '';
+        let icon = '';
+        if (currentStressLevel < 30) {
+            message = '🟢 مستوى ضغط منخفض. أنت في حالة ممتازة!';
+            icon = '😎';
+        } else if (currentStressLevel < 60) {
+            message = '🟡 مستوى ضغط متوسط. تحتاج شوية تركيز إضافي!';
+            icon = '🤔';
+        } else if (currentStressLevel < 85) {
+            message = '🟠 مستوى ضغط مرتفع. حان وقت تمارين التنفس!';
+            icon = '😰';
+        } else {
+            message = '🔴 مستوى ضغط شديد! استخدم وضع الأدرينالين أو جلسة الاسترخاء فوراً!';
+            icon = '😫';
+        }
+        document.getElementById('stressMessage').innerHTML = `${icon} ${message}`;
+    }
+    
+    async function measureStress() {
+        const res = await fetch('/api/pressure/measure-stress', { method: 'POST' });
+        const data = await res.json();
+        currentStressLevel = data.stress_level;
+        document.getElementById('stressValue').innerText = currentStressLevel + '%';
+        document.getElementById('stressBar').style.width = currentStressLevel + '%';
+        loadChallenges();
+    }
+    
+    async function loadChallenges() {
+        const res = await fetch('/api/pressure/challenges');
+        const challenges = await res.json();
+        const container = document.getElementById('challengesList');
+        
+        if (challenges.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-dim);">لا توجد تحديات حالياً. قس ضغطك أولاً!</p>';
+            return;
+        }
+        
+        container.innerHTML = challenges.map(c => `
+            <div style="background: #1e293b; border-radius: 20px; padding: 15px; margin-bottom: 10px;">
+                <strong style="color: var(--gold);">${c.name}</strong>
+                <div style="font-size: 12px; color: var(--text-dim);">${c.description}</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <span>💰 المكافأة: ${c.multiplier}x نقاط</span>
+                    <span>⏱️ المدة: ${c.duration} دقيقة</span>
+                </div>
+                <button class="challenge-btn" onclick="startChallenge(${c.id}, ${c.multiplier})" style="margin-top: 10px;">
+                    <i class="fas fa-play"></i> ابدأ التحدي
+                </button>
+            </div>
+        `).join('');
+    }
+    
+    async function startChallenge(challengeId, multiplier) {
+        alert(`🔥 بدأت التحدي! مذاكرة تحت الضغط مع نقاط ×${multiplier}\n\nركز في مذاكرتك لمدة 15 دقيقة وسيتم احتساب نقاطك تلقائياً!`);
+        
+        setTimeout(async () => {
+            const points = Math.floor(Math.random() * 50 + 20) * multiplier;
+            await fetch('/api/pressure/complete-challenge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points: points, multiplier: multiplier })
+            });
+            alert(`🎉 أحسنت! أكملت التحدي وحصلت على ${points} نقطة!\nضغطك انخفض بنسبة 20%`);
+            loadStressLevel();
+            loadStressPoints();
+        }, 15000);
+    }
+    
+    // Breathing Exercises
+    let breathPhase = 0;
+    let breathCycle = ['شهيق', 'احبس', 'زفير', 'استرخ'];
+    
+    function startBreathing() {
+        if (breathingInterval) clearInterval(breathingInterval);
+        
+        const mode = parseInt(document.getElementById('breathingMode').value);
+        let step = 0;
+        
+        function doBreath() {
+            const phase = breathCycle[step % 4];
+            document.getElementById('breathingText').innerHTML = phase;
+            step++;
+            
+            if (phase === 'شهيق' || phase === 'زفير') {
+                document.getElementById('breathingTimer').innerHTML = `خذ نفس ${phase === 'شهيق' ? 'عميقاً' : 'بطيئاً'} لـ ${mode} ثواني...`;
+            } else if (phase === 'احبس') {
+                document.getElementById('breathingTimer').innerHTML = `احبس نفسك لـ ${mode} ثواني...`;
+            } else {
+                document.getElementById('breathingTimer').innerHTML = `استرخ... تنفس طبيعي لـ ${mode} ثواني`;
+            }
+        }
+        
+        doBreath();
+        breathingInterval = setInterval(doBreath, mode * 1000);
+        
+        setTimeout(() => {
+            if (breathingInterval) clearInterval(breathingInterval);
+            document.getElementById('breathingTimer').innerHTML = '✅ جلسة تنفس ممتازة! ضغطك انخفض';
+            measureStress();
+        }, mode * 4 * 1000);
+    }
+    
+    async function convertStressToPoints() {
+        const res = await fetch('/api/pressure/convert-to-points', { method: 'POST' });
+        const data = await res.json();
+        alert(`✨ تم تحويل ${data.stress_used}% من ضغطك إلى ${data.points_earned} نقطة!\nاجتهد وأكمل!`);
+        loadStressLevel();
+        loadStressPoints();
+    }
+    
+    async function loadStressPoints() {
+        const res = await fetch('/api/pressure/stress-points');
+        const data = await res.json();
+        document.getElementById('stressPoints').innerText = data.total_points;
+        const nextLevel = Math.min(100, (data.total_points % 500) / 5);
+        document.getElementById('pointsProgress').style.width = nextLevel + '%';
+    }
+    
+    async function findOpponent() {
+        const res = await fetch('/api/pressure/find-opponent');
+        const data = await res.json();
+        
+        const container = document.getElementById('arenaContainer');
+        if (data.opponent) {
+            container.innerHTML = `
+                <div class="arena-card">
+                    <div><i class="fas fa-user-circle" style="font-size: 40px;"></i></div>
+                    <div><strong>${data.opponent.name}</strong></div>
+                    <div>😰 ضغط: ${data.opponent.stress_level}%</div>
+                    <button class="challenge-btn" onclick="acceptChallenge('${data.opponent.name}')" style="margin-top: 10px;">
+                        <i class="fas fa-handshake"></i> قبل التحدي
+                    </button>
+                </div>
+            `;
+        } else {
+            container.innerHTML = '<p style="color: var(--text-dim);">لا يوجد خصوم حالياً. أنت فريد!</p><button class="challenge-btn" onclick="findOpponent()"><i class="fas fa-sync-alt"></i> حاول مرة أخرى</button>';
+        }
+    }
+    
+    function acceptChallenge(opponentName) {
+        alert(`🎯 بدأ التحدي مع ${opponentName}!\nأول من يكمل مهمة إنقاذ يحصل على 100 نقطة إضافية!`);
+    }
+    
+    async function getJoke() {
+        const res = await fetch('/api/pressure/joke');
+        const data = await res.json();
+        const container = document.getElementById('jokeContainer');
+        container.innerHTML = `
+            <div style="font-size: 18px; color: var(--gold);">😂 ${data.joke}</div>
+            <div style="margin-top: 10px; font-size: 12px; color: var(--text-dim);">الضحك يفرز الإندورفين - هرمون السعادة!</div>
+        `;
+        measureStress();
+    }
+    
+    async function loadLegends() {
+        const res = await fetch('/api/pressure/legends');
+        const legends = await res.json();
+        const container = document.getElementById('legendsList');
+        
+        if (legends.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-dim);">كن أول أسطورة! تعامل مع ضغطك ببطولة</p>';
+            return;
+        }
+        
+        container.innerHTML = legends.map(l => `
+            <div class="legend-item">
+                <i class="fas fa-crown" style="font-size: 24px;"></i>
+                <div style="flex: 1;">
+                    <strong>${l.name}</strong>
+                    <div style="font-size: 12px;">🏆 ${l.title}</div>
+                </div>
+                <div style="font-size: 12px;">${l.points} نقطة</div>
+            </div>
+        `).join('');
+    }
+    
+    async function activateAdrenalineMode() {
+        const btn = document.getElementById('adrenalineBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> تفعيل وضع القاتل...';
+        
+        const res = await fetch('/api/pressure/adrenaline-mode', { method: 'POST' });
+        const data = await res.json();
+        
+        if (data.active) {
+            document.getElementById('adrenalineCard').classList.add('adrenaline-mode');
+            btn.innerHTML = '<i class="fas fa-bolt"></i> وضع القاتل مفعل 🔥';
+            btn.style.background = 'linear-gradient(135deg, #991b1b, #7f1d1d)';
+            
+            let timeLeft = 300;
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('adrenalineTimer').innerHTML = `⏱️ الوضع مفعل: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('adrenalineCard').classList.remove('adrenaline-mode');
+                    document.getElementById('adrenalineTimer').innerHTML = '';
+                    btn.innerHTML = '<i class="fas fa-bolt"></i> فعّل وضع القاتل';
+                    btn.style.background = 'linear-gradient(135deg, #dc2626, #991b1b)';
+                }
+            }, 1000);
+            
+            alert(`🔥 وضع الأدرينالين مفعل!\nلمدة 5 دقائق، كل نقاطك مضاعفة ×3\nحول ضغطك لغضب إيجابي وركز!`);
+        }
+    }
+    
+    async function loadStressChart() {
+        const res = await fetch('/api/pressure/weekly-stress');
+        const data = await res.json();
+        
+        const ctx = document.getElementById('stressChart').getContext('2d');
+        if (stressChart) stressChart.destroy();
+        
+        stressChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                datasets: [{
+                    label: 'مستوى الضغط %',
+                    data: data.weekly_stress,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: 'white' } } }
+            }
+        });
+        
+        document.getElementById('weeklyAdvice').innerHTML = data.advice;
+    }
+    
+    function playCalmMessage() {
+        const messages = [
+            "آدم، خذ نفس عميق. أنت أقوى من أي ضغط",
+            "كل شيء سيكون على ما يرام. ركز على خطوة واحدة في كل مرة",
+            "أنت لست وحدك. Study Hub معك في كل خطوة",
+            "الضغط دليل أنك تهتم. حول هذا الاهتمام لطاقة إيجابية"
+        ];
+        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        alert(`🎙️ فهيم الهاديء يقول: "${randomMsg}"`);
+    }
+    
+    function startVoiceRelax() {
+        alert("🎧 جلسة استرخاء لمدة 3 دقائق\n\nخذ نفساً عميقاً... تخيل نفسك في مكان هادئ...\n\nركز على صوتي: أنت تفعل ما هو أفضل مما تظن. استمر!");
+        setTimeout(() => {
+            measureStress();
+            alert("✅ جلسة الاسترخاء انتهت! ضغطك انخفض، ركز الآن على دراستك");
+        }, 180000);
+    }
+    
+    // Initial load
+    loadAllData();
+    setInterval(loadStressLevel, 30000);
+</script>
+</body>
+</html>

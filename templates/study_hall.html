@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>الصالة الدراسية - Study Hub AI</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white font-tajawal">
+    <div class="container mx-auto p-6">
+        <h1 class="text-4xl font-bold text-center text-amber-400 mb-2">📚 الصالة الدراسية</h1>
+        <p class="text-center text-gray-300 mb-8">غرف مذاكرة افتراضية. ذاكر مع زملائك في صمت وارفع تركيزك!</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Rooms List -->
+            <div class="lg:col-span-1 bg-gray-800 rounded-2xl p-6 border border-indigo-500">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-door-open text-amber-400"></i> الغرف المتاحة</h2>
+                <div id="rooms-list" class="space-y-3">
+                    <div class="bg-gray-700 p-3 rounded-xl flex justify-between items-center">
+                        <div><i class="fas fa-flask"></i> <strong>فيزياء</strong> (كهرباء)</div>
+                        <button class="bg-indigo-600 px-3 py-1 rounded-full text-sm hover:bg-indigo-700 join-room-btn">انضم</button>
+                    </div>
+                </div>
+                <button id="create-room-btn" class="mt-6 w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 rounded-xl transition">+ إنشاء غرفة جديدة</button>
+            </div>
+
+            <!-- Active Room Area -->
+            <div class="lg:col-span-2 bg-gray-800 rounded-2xl p-6 border border-indigo-500">
+                <div id="active-room-header" class="border-b border-gray-600 pb-3 mb-4 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold"><span id="room-name-label">الغرفة الرئيسية</span> <span id="room-topic-label" class="text-sm text-amber-400 bg-gray-700 px-2 py-1 rounded-full">#عام</span></h2>
+                    <button id="leave-room-btn" class="text-red-400 hover:text-red-300 text-sm hidden">✖ مغادرة</button>
+                </div>
+                <div id="active-room-content" class="text-center text-gray-400 py-20">
+                    <i class="fas fa-users text-6xl mb-4 opacity-20"></i>
+                    <p>اختر غرفة من القائمة أو أنشئ واحدة لترى زملائك هنا.</p>
+                </div>
+                <div id="focus-timer" class="mt-6 text-center hidden">
+                    <span class="text-3xl font-mono bg-black px-6 py-3 rounded-full border border-amber-400" id="timer-display">00:00</span>
+                    <button id="focus-btn" class="bg-green-600 ml-3 px-6 py-3 rounded-full font-bold hover:bg-green-700 transition">ابدأ التركيز 🟢</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let currentRoomId = null;
+        let focusInterval = null;
+        let focusSeconds = 0;
+
+        function joinRoom(roomId) {
+            fetch(`/api/study-hall/join/${roomId}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    currentRoomId = roomId;
+                    document.getElementById('room-name-label').innerText = data.room;
+                    document.getElementById('room-topic-label').innerText = `#${data.topic}`;
+                    document.getElementById('active-room-content').innerHTML = `<div id="participants-list" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>`;
+                    document.getElementById('focus-timer').classList.remove('hidden');
+                    document.getElementById('leave-room-btn').classList.remove('hidden');
+                    socket.emit('join_study_room', {room_id: roomId});
+                }
+            });
+        }
+
+        document.getElementById('focus-btn')?.addEventListener('click', () => {
+            if(focusInterval) clearInterval(focusInterval);
+            focusSeconds = 0;
+            focusInterval = setInterval(() => {
+                focusSeconds++;
+                const minutes = Math.floor(focusSeconds / 60);
+                const seconds = focusSeconds % 60;
+                document.getElementById('timer-display').innerText = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+                if(focusSeconds % 60 === 0 && focusSeconds > 0) {
+                    fetch('/api/study-hall/focus', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({room_id: currentRoomId, minutes: 1})
+                    });
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز الطوارئ الأكاديمي - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #111827;
+            --border: #1f2937;
+            --accent: #6366f1;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --gold: #fbbf24;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, var(--bg-dark), #030712);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
+        .badge {
+            background: linear-gradient(95deg, #4f46e5, #7c3aed);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            display: inline-block;
+        }
+        .back-btn {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+        .back-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .card-title {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-right: 4px solid var(--gold);
+            padding-right: 15px;
+        }
+        
+        /* Course Item */
+        .course-item {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-right: 4px solid var(--danger);
+        }
+        .course-item.safe { border-right-color: var(--success); }
+        .risk-high { color: var(--danger); font-weight: bold; }
+        .risk-medium { color: var(--warning); }
+        .rescue-btn {
+            background: var(--danger);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .activate-plan-btn {
+            background: var(--success);
+            margin-left: 8px;
+        }
+        
+        /* Progress Bar */
+        .progress-bar-container {
+            background: #1e293b;
+            border-radius: 30px;
+            height: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(95deg, var(--success), var(--gold));
+            height: 100%;
+            border-radius: 30px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        /* Rescue Plan Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #111827;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--gold);
+        }
+        .task-item {
+            background: #1e293b;
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        
+        /* Timer */
+        .pressure-timer {
+            text-align: center;
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 28px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .timer-display {
+            font-size: 48px;
+            font-weight: 900;
+            font-family: monospace;
+            color: var(--gold);
+            background: #030712;
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 60px;
+        }
+        
+        /* Mini Boss */
+        .boss-card {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .boss-name { font-size: 24px; font-weight: bold; color: var(--gold); }
+        .difficulty-easy { color: var(--success); }
+        .difficulty-medium { color: var(--warning); }
+        .difficulty-hard { color: var(--danger); }
+        
+        /* Journal */
+        .journal-input {
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 15px;
+            color: white;
+            resize: vertical;
+            margin-top: 10px;
+        }
+        .insight-item {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        /* Partner Card */
+        .partner-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid var(--gold);
+        }
+        
+        /* Analytics Section */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .analytic-card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+        }
+        .risk-critical { color: var(--danger); font-weight: bold; animation: pulse 1s infinite; }
+        .risk-high { color: var(--danger); }
+        .risk-medium { color: var(--warning); }
+        .risk-low { color: var(--success); }
+        
+        /* Animated Alert */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .alert-pulse { animation: pulse 1s infinite; }
+        
+        @media (max-width: 700px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .timer-display { font-size: 32px; padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <h1><i class="fas fa-ambulance" style="color: var(--danger);"></i> مركز الطوارئ الأكاديمي</h1>
+            <span class="badge"><i class="fas fa-user-graduate"></i> {{ session.user_name }} | إنقاذ معدلك</span>
+        </div>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+    </div>
+
+    <!-- Risk Prediction Alert -->
+    <div id="riskAlert" class="card" style="margin-bottom: 25px; background: linear-gradient(135deg, #1e1b4b, #0f172a); display: none;">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: var(--danger);"></i>
+            <div>
+                <div id="riskMessage" style="font-weight: bold;"></div>
+                <div id="riskDetails" style="font-size: 14px; color: var(--text-dim);"></div>
+            </div>
+            <button onclick="closeRiskAlert()" style="background: none; border: none; color: white; cursor: pointer;">✖</button>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 1. المواد المهددة بالرسوب -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-skull-crosswalk" style="color: var(--danger);"></i> ⚠️ المواد المهددة بالرسوب</div>
+            <div id="endangeredCoursesList">
+                <p style="color: var(--text-dim);"><i class="fas fa-spinner fa-pulse"></i> جاري تحليل أدائك...</p>
+            </div>
+        </div>
+
+        <!-- 2. سلسلة التعافي ودرجة الصمود -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-fire" style="color: var(--gold);"></i> 🔥 سلسلة التعافي</div>
+            <div style="text-align: center;">
+                <div style="font-size: 48px; font-weight: 900; color: var(--gold);" id="streakValue">0</div>
+                <div style="color: var(--text-dim);">أيام متواصلة بدون إخفاق</div>
+                <div class="progress-bar-container" style="margin-top: 20px;">
+                    <div class="progress-bar" id="resilienceBar" style="width: 0%;"></div>
+                </div>
+                <div><span id="resilienceValue">0</span>% <i class="fas fa-shield-alt"></i> درجة الصمود</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rescue Plan Modal -->
+    <div id="rescueModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: var(--gold);"><i class="fas fa-life-ring"></i> خطة الإنقاذ</h2>
+                <button onclick="closeModal()" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">✖</button>
+            </div>
+            <div id="planContent"></div>
+            <button onclick="activatePlan()" class="rescue-btn" style="background: var(--success); width: 100%; margin-top: 15px;">
+                <i class="fas fa-play"></i> تفعيل الخطة الآن
+            </button>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 3. مؤقت الضغط الذكي -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-hourglass-half" style="color: var(--warning);"></i> ⏰ مؤقت الضغط الذكي</div>
+            <div class="pressure-timer">
+                <div class="timer-display" id="timerDisplay">25:00</div>
+                <div style="margin-top: 15px;">
+                    <button onclick="startPressureTimer()" class="rescue-btn" style="background: var(--success);"><i class="fas fa-play"></i> ابدأ التحدي</button>
+                    <button onclick="resetPressureTimer()" class="rescue-btn" style="background: #374151;"><i class="fas fa-redo-alt"></i> إعادة</button>
+                </div>
+                <div id="motivationMessage" style="margin-top: 15px; color: var(--gold); font-size: 14px;"></div>
+            </div>
+        </div>
+
+        <!-- 4. Mini Boss Fight -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-dragon" style="color: #8b5cf6;"></i> 🎮 Mini Boss Fight</div>
+            <div id="miniBossContainer">
+                <p style="color: var(--text-dim);">اختار مادة من المواد المهددة لمواجهة الـ Boss</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 5. خريطة الأخطاء الحرارية -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-map" style="color: var(--warning);"></i> 🗺️ خريطة الأخطاء الحرارية</div>
+            <canvas id="errorHeatmapChart" style="max-height: 250px;"></canvas>
+            <div style="margin-top: 15px;">
+                <select id="heatmapCourseSelect" class="journal-input" style="width: 100%;">
+                    <option>اختر مادة لعرض تحليل الأخطاء</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 6. شريك المساءلة -->
+        <div class="card">
+            <div class="card-title"><i class="fas fa-handshake" style="color: var(--success);"></i> 🤝 شريك المساءلة</div>
+            <div id="partnerContainer">
+                <p style="color: var(--text-dim);">اختر مادة لإيجاد شريك بنفس التحدي</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 7. يوميات الإخفاق مع تحليل AI -->
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-title"><i class="fas fa-book" style="color: #8b5cf6;"></i> 📔 يوميات الإخفاق - اسأل فهيم</div>
+            <textarea id="journalEntry" class="journal-input" rows="4" placeholder="اكتب هنا سبب شعورك بالضغط أو الصعوبة... (مثال: مش فاهم حاجة في الفيزياء، الوقت ضيق، صعوبة في التركيز)"></textarea>
+            <button onclick="analyzeJournal()" class="rescue-btn" style="background: var(--accent); margin-top: 10px; width: 100%;"><i class="fas fa-robot"></i> حلل مشاعري</button>
+            <div id="journalAnalysis" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <!-- 8. تحليلات المخاطر المتقدمة -->
+    <div class="card" style="margin-top: 25px;">
+        <div class="card-title"><i class="fas fa-chart-line" style="color: var(--success);"></i> 📊 تحليلات المخاطر والتوقعات</div>
+        <div class="analytics-grid" id="analyticsGrid">
+            <div class="analytic-card">
+                <div><i class="fas fa-chart-simple"></i></div>
+                <div id="totalFailures">0</div>
+                <div style="font-size: 12px;">إجمالي الإخفاقات</div>
+            </div>
+            <div class="analytic-card">
+                <div><i class="fas fa-arrow-trend-up"></i></div>
+                <div id="improvementRate">0</div>
+                <div style="font-size: 12px;">نسبة التحسن</div>
+            </div>
+            <div class="analytic-card">
+                <div><i class="fas fa-calendar-day"></i></div>
+                <div id="worstDay">-</div>
+                <div style="font-size: 12px;">أسوأ يوم</div>
+            </div>
+            <div class="analytic-card">
+                <div><i class="fas fa-book"></i></div>
+                <div id="worstCourse">-</div>
+                <div style="font-size: 12px;">أصعب مادة</div>
+            </div>
+        </div>
+        <div id="riskLevelDisplay" style="margin-top: 15px; padding: 12px; background: #1e293b; border-radius: 20px; text-align: center;"></div>
+    </div>
+
+    <!-- 9. اتجاهات الأداء (Trends) -->
+    <div class="card" style="margin-top: 25px;">
+        <div class="card-title"><i class="fas fa-chart-line" style="color: var(--info);"></i> 📈 اتجاهات أدائك</div>
+        <canvas id="trendsChart" style="max-height: 300px;"></canvas>
+    </div>
+</div>
+
+<script>
+    let pressureTimerInterval = null;
+    let pressureTime = 25 * 60;
+    let selectedCourseId = null;
+    let errorChart = null;
+    let trendsChart = null;
+    let currentPlan = null;
+
+    // Load all data
+    async function loadEndangeredCourses() {
+        const res = await fetch('/api/failure/endangered-courses');
+        const courses = await res.json();
+        const container = document.getElementById('endangeredCoursesList');
+        const heatmapSelect = document.getElementById('heatmapCourseSelect');
+        
+        if (courses.length === 0) {
+            container.innerHTML = '<p style="color: var(--success);">🎉 مبروك! مافيش مواد مهددة حالياً. استمر 🔥</p>';
+            heatmapSelect.innerHTML = '<option>لا توجد مواد لعرضها</option>';
+            return;
+        }
+        
+        container.innerHTML = courses.map(c => `
+            <div class="course-item">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <strong style="color: white;">📘 ${c.name}</strong>
+                        <div>الدرجة الحالية: <span class="${c.risk_level === 'high' ? 'risk-high' : 'risk-medium'}">${c.current_score}%</span></div>
+                        <div style="font-size: 12px;">⏰ ساعات الإنقاذ المطلوبة: ${c.hours_needed} ساعة</div>
+                    </div>
+                    <div>
+                        <button class="rescue-btn" onclick="showRescuePlan(${c.id})">🆘 خطة إنقاذ</button>
+                    </div>
+                </div>
+                <div class="progress-bar-container" style="margin-top: 10px;">
+                    <div class="progress-bar" style="width: ${c.current_score}%;"></div>
+                </div>
+            </div>
+        `).join('');
+        
+        heatmapSelect.innerHTML = '<option value="">اختر مادة لعرض تحليل الأخطاء</option>' + 
+            courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
+    
+    async function loadRecoveryStreak() {
+        const res = await fetch('/api/failure/recovery-streak');
+        const data = await res.json();
+        document.getElementById('streakValue').innerText = data.streak;
+        document.getElementById('resilienceValue').innerText = data.resilience;
+        document.getElementById('resilienceBar').style.width = data.resilience + '%';
+    }
+    
+    async function showRescuePlan(courseId) {
+        selectedCourseId = courseId;
+        const res = await fetch(`/api/failure/rescue-plan/${courseId}`);
+        const plan = await res.json();
+        currentPlan = plan;
+        
+        if (plan && plan.total_hours_needed) {
+            const planContent = document.getElementById('planContent');
+            planContent.innerHTML = `
+                <div><strong>📚 ${plan.course_name}</strong></div>
+                <div>الدرجة الحالية: ${plan.current_score}% → الهدف: ${plan.target_score}%</div>
+                <div>⏱️ ساعات مطلوبة: ${plan.total_hours_needed} ساعة</div>
+                <div>📅 أيام متبقية: ${plan.days_remaining} يوم</div>
+                <div>⚡ المعدل اليومي: ${plan.daily_hours_recommended} ساعة</div>
+                <div style="margin-top: 15px;"><strong>📌 المهام المطلوبة:</strong></div>
+                ${plan.tasks.map((task, idx) => `
+                    <div class="task-item">
+                        <span>📖 اليوم ${task.day}: ${task.hours} ساعات</span>
+                        <input type="checkbox" data-task-idx="${idx}" onchange="updateTaskProgress(this, ${courseId})">
+                    </div>
+                `).join('')}
+                <div style="margin-top: 10px;"><strong>🎯 أولويات الدراسة:</strong> ${plan.priority_topics.join(' → ')}</div>
+            `;
+            document.getElementById('rescueModal').style.display = 'flex';
+        } else {
+            alert('لا توجد خطة إنقاذ متاحة حالياً');
+        }
+    }
+    
+    async function updateTaskProgress(checkbox, courseId) {
+        const points = 10;
+        await fetch('/api/failure/complete-recovery', { method: 'POST' });
+        loadRecoveryStreak();
+        alert(`✅ أكملت المهمة! حصلت على ${points} نقطة خبرة!`);
+        
+        // تحديث الخطة
+        showRescuePlan(courseId);
+    }
+    
+    function activatePlan() {
+        closeModal();
+        alert('🚀 تم تفعيل خطة الإنقاذ! ستبدأ المهام غداً. حظاً موفقاً!');
+        fetch('/api/failure/complete-recovery', { method: 'POST' });
+        loadRecoveryStreak();
+    }
+    
+    function closeModal() {
+        document.getElementById('rescueModal').style.display = 'none';
+    }
+    
+    async function loadErrorHeatmap(courseId) {
+        if (!courseId) return;
+        const res = await fetch(`/api/failure/error-heatmap/${courseId}`);
+        const data = await res.json();
+        
+        if (errorChart) errorChart.destroy();
+        
+        const ctx = document.getElementById('errorHeatmapChart').getContext('2d');
+        errorChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(d => d.type),
+                datasets: [{
+                    data: data.map(d => d.percentage),
+                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#6366f1']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom', labels: { color: 'white' } } }
+            }
+        });
+    }
+    
+    async function loadMiniBoss(courseId) {
+        if (!courseId) return;
+        const res = await fetch(`/api/failure/mini-boss/${courseId}`);
+        const boss = await res.json();
+        
+        const container = document.getElementById('miniBossContainer');
+        container.innerHTML = `
+            <div class="boss-card">
+                <div class="boss-name">${boss.name}</div>
+                <div>${boss.course_name}</div>
+                <div class="${boss.difficulty === 'easy' ? 'difficulty-easy' : boss.difficulty === 'medium' ? 'difficulty-medium' : 'difficulty-hard'}">
+                    🎯 الصعوبة: ${boss.difficulty === 'easy' ? 'سهل' : boss.difficulty === 'medium' ? 'متوسط' : 'صعب'}
+                </div>
+                <div>⭐ المكافأة: ${boss.xp_reward} نقطة</div>
+                <div>⏱️ الوقت المحدد: ${boss.time_limit} دقيقة</div>
+                <button class="rescue-btn" style="background: var(--gold); color: black; margin-top: 10px;" onclick="startBossFight(${boss.xp_reward})">
+                    ⚔️ هاجم Boss
+                </button>
+            </div>
+        `;
+    }
+    
+    async function startBossFight(xpReward) {
+        alert(`🎉 بدأت المعركة! ادرس بتركيز لمدة ${xpReward} دقيقة\n⚡ هزمت Boss وحصلت على ${xpReward} نقطة!`);
+        await fetch('/api/failure/complete-recovery', { method: 'POST' });
+        loadRecoveryStreak();
+        if (selectedCourseId) loadMiniBoss(selectedCourseId);
+    }
+    
+    async function loadAccountabilityPartner() {
+        if (!selectedCourseId) {
+            document.getElementById('partnerContainer').innerHTML = '<p style="color: var(--text-dim);">اختر مادة من الأعلى لإيجاد شريك</p>';
+            return;
+        }
+        
+        const res = await fetch(`/api/failure/accountability-partner/${selectedCourseId}`);
+        const partner = await res.json();
+        
+        const container = document.getElementById('partnerContainer');
+        if (partner && partner.name) {
+            container.innerHTML = `
+                <div class="partner-card">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-user-circle" style="font-size: 40px; color: var(--gold);"></i>
+                        <div>
+                            <strong style="color: white;">${partner.name}</strong>
+                            <div style="font-size: 12px;">نفس مشكلتك في المادة</div>
+                            <div>🔥 سلسلة تعافي: ${partner.streak} يوم</div>
+                        </div>
+                    </div>
+                    <button class="rescue-btn" style="background: var(--success); margin-top: 10px; width: 100%;" onclick="challengePartner()">
+                        📢 تحدى الشريك
+                    </button>
+                </div>
+            `;
+        } else {
+            container.innerHTML = '<p style="color: var(--text-dim);">لا يوجد شريك متاح حالياً. كن أول من يبدأ التحدي!</p>';
+        }
+    }
+    
+    function challengePartner() {
+        alert('🎯 تم إرسال تحديث لشريكك! من يكمل مهمة الإنقاذ أولاً يكسب 100 نقطة عنقاء 🐦‍🔥');
+    }
+    
+    async function analyzeJournal() {
+        const entry = document.getElementById('journalEntry').value;
+        if (!entry.trim()) {
+            alert('اكتب مشكلتك أولاً');
+            return;
+        }
+        
+        const res = await fetch('/api/failure/analyze-journal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entry: entry })
+        });
+        const analysis = await res.json();
+        
+        const container = document.getElementById('journalAnalysis');
+        container.innerHTML = `
+            <div style="background: #1e293b; border-radius: 20px; padding: 15px;">
+                <div><i class="fas fa-face-smile"></i> تحليل المشاعر: ${analysis.emotional_score === 'positive' ? 'إيجابي 😊' : analysis.emotional_score === 'negative' ? 'سلبي 😔' : 'محايد 😐'}</div>
+                <div style="margin-top: 10px;"><strong>💡 نصائح فهيم:</strong></div>
+                ${analysis.insights.map(i => `<div class="insight-item"><i class="fas fa-lightbulb" style="color: var(--gold);"></i> ${i}</div>`).join('')}
+                <div class="insight-item" style="background: var(--accent);"><i class="fas fa-rocket"></i> الإجراء الموصى به: ${analysis.recommended_action}</div>
+            </div>
+        `;
+    }
+    
+    async function loadAnalytics() {
+        const res = await fetch('/api/failure/analytics');
+        const data = await res.json();
+        if (data) {
+            document.getElementById('totalFailures').innerText = data.total_failures || 0;
+            document.getElementById('improvementRate').innerHTML = data.improvement_rate > 0 ? `+${data.improvement_rate}` : data.improvement_rate;
+            document.getElementById('worstDay').innerText = data.worst_day || '-';
+            document.getElementById('worstCourse').innerText = data.worst_course || '-';
+        }
+        
+        const riskRes = await fetch('/api/failure/predict-risk');
+        const riskData = await riskRes.json();
+        const riskDisplay = document.getElementById('riskLevelDisplay');
+        const riskAlert = document.getElementById('riskAlert');
+        
+        let riskClass = '';
+        if (riskData.risk_level === 'critical') riskClass = 'risk-critical';
+        else if (riskData.risk_level === 'high') riskClass = 'risk-high';
+        else if (riskData.risk_level === 'medium') riskClass = 'risk-medium';
+        else riskClass = 'risk-low';
+        
+        riskDisplay.innerHTML = `
+            <div class="${riskClass}">📊 مستوى الخطر: ${riskData.risk_level === 'critical' ? 'حرج' : riskData.risk_level === 'high' ? 'مرتفع' : riskData.risk_level === 'medium' ? 'متوسط' : 'منخفض'}</div>
+            <div style="font-size: 13px;">${riskData.message}</div>
+            <div style="font-size: 12px; margin-top: 5px;">مواد عالية الخطورة: ${riskData.high_risk_count || 0} | مواد متوسطة: ${riskData.medium_risk_count || 0}</div>
+        `;
+        
+        if (riskData.risk_level === 'critical' || riskData.risk_level === 'high') {
+            riskAlert.style.display = 'block';
+            document.getElementById('riskMessage').innerHTML = riskData.message;
+            document.getElementById('riskDetails').innerHTML = `⚠️ ${riskData.high_risk_count} مواد في خطر<br>اتخذ إجراء فورياً!`;
+        }
+    }
+    
+    async function loadTrends() {
+        const res = await fetch('/api/failure/trends');
+        const data = await res.json();
+        
+        if (trendsChart) trendsChart.destroy();
+        
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+        trendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels || [],
+                datasets: [
+                    {
+                        label: 'درجاتك',
+                        data: data.scores || [],
+                        borderColor: '#fbbf24',
+                        backgroundColor: 'rgba(251,191,36,0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'المتوسط المتحرك',
+                        data: data.moving_average || [],
+                        borderColor: '#8b5cf6',
+                        borderDash: [5, 5],
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: 'white' } } },
+                scales: { y: { grid: { color: '#1f2937' }, ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } }
+            }
+        });
+    }
+    
+    function closeRiskAlert() {
+        document.getElementById('riskAlert').style.display = 'none';
+    }
+    
+    // Pressure Timer Functions
+    function updateTimerDisplay() {
+        let minutes = Math.floor(pressureTime / 60);
+        let seconds = pressureTime % 60;
+        document.getElementById('timerDisplay').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        const messages = [
+            '🎯 أنت أقوى من هذا!',
+            '⚡ 80% من الناس يستسلموا هنا... هل انت منهم؟',
+            '🔥 تذكر: كل دقيقة بتقربك من النجاح',
+            '💪 أنت بطل'
+        ];
+        if (pressureTime <= 300 && pressureTime > 60) {
+            document.getElementById('motivationMessage').innerHTML = messages[0];
+        } else if (pressureTime <= 60 && pressureTime > 0) {
+            document.getElementById('motivationMessage').innerHTML = messages[1];
+        }
+    }
+    
+    function startPressureTimer() {
+        if (pressureTimerInterval) clearInterval(pressureTimerInterval);
+        pressureTimerInterval = setInterval(() => {
+            if (pressureTime > 0) {
+                pressureTime--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(pressureTimerInterval);
+                alert('🎉 أحسنت! أكملت التحدي تحت الضغط!');
+                fetch('/api/failure/complete-recovery', { method: 'POST' });
+                loadRecoveryStreak();
+                pressureTime = 25 * 60;
+                updateTimerDisplay();
+            }
+        }, 1000);
+    }
+    
+    function resetPressureTimer() {
+        if (pressureTimerInterval) clearInterval(pressureTimerInterval);
+        pressureTime = 25 * 60;
+        updateTimerDisplay();
+        document.getElementById('motivationMessage').innerHTML = '';
+    }
+    
+    // Event Listeners
+    document.getElementById('heatmapCourseSelect').addEventListener('change', (e) => {
+        if (e.target.value) {
+            const courseId = parseInt(e.target.value);
+            loadErrorHeatmap(courseId);
+            selectedCourseId = courseId;
+            loadMiniBoss(courseId);
+            loadAccountabilityPartner();
+        }
+    });
+    
+    // Initial Load
+    loadEndangeredCourses();
+    loadRecoveryStreak();
+    loadAnalytics();
+    loadTrends();
+    updateTimerDisplay();
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('rescueModal');
+        if (event.target === modal) closeModal();
+    }
+</script>
+</body>
+</html>

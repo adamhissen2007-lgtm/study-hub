@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تقريرك الأسبوعي - Study Hub</title>
+</head>
+<body style="background:#0f172a; font-family:'Tajawal', sans-serif; padding:40px;">
+    <div style="max-width:500px; margin:auto; background:#1e293b; border-radius:32px; padding:30px; text-align:center;">
+        <h1 style="color:#fbbf24;">📊 تقريرك الأسبوعي</h1>
+        <h2 style="color:white;">مرحباً {{ name }}!</h2>
+        <div style="background:#0f172a; padding:20px; border-radius:20px; margin:15px 0;">
+            <p style="color:#fbbf24;"><strong>⭐ النقاط هذا الأسبوع:</strong> {{ points }}</p>
+            <p style="color:#fbbf24;"><strong>🔥 أيام متواصلة:</strong> {{ streak }}</p>
+            <p style="color:#fbbf24;"><strong>✅ المهام المكتملة:</strong> {{ tasks_completed }}</p>
+        </div>
+        <p style="color:#94a3b8;">نحتفي بتقدمك! استمر في التفوق 🚀</p>
+        <a href="{{ url_for('dashboard', _external=True) }}" style="display:inline-block; background:#4f46e5; color:white; padding:12px 30px; border-radius:40px; text-decoration:none; margin:20px 0;">العودة للوحة التحكم</a>
+    </div>
+</body>
+</html>

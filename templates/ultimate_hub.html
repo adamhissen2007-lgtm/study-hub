@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI Command Center - Study Hub Ultimate</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Animations */
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(50px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes borderFlow {
+            0% { border-color: #4f46e5; }
+            50% { border-color: #fbbf24; }
+            100% { border-color: #4f46e5; }
+        }
+
+        /* Header Styles */
+        .header {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            animation: floatIn 0.5s ease-out;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #fbbf24, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Tab Styles */
+        .tabs-container {
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            color: #9ca3af;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            color: #fbbf24;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
+        }
+
+        /* Card Styles */
+        .section-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease;
+            animation: floatIn 0.5s ease-out;
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            border-color: #8b5cf6;
+            box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.3);
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4f46e5;
+            display: inline-block;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: rgba(79, 70, 229, 0.1);
+            border-color: #8b5cf6;
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #111827, #0f172a);
+            border-radius: 32px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #8b5cf6;
+            animation: floatIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #ef4444;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fbbf24;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(0.98);
+            filter: brightness(1.1);
+        }
+
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 16px;
+            display: none;
+        }
+
+        /* Loading animation */
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #334155;
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs-container { flex-direction: column; }
+            .tab-btn { justify-content: center; }
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container" style="max-width: 1400px; margin: 0 auto;">
+    <!-- Header -->
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1><i class="fas fa-crown" style="color: #fbbf24;"></i> AI Command Center</h1>
+                <p style="color: #9ca3af; margin-top: 8px;">مركز القيادة الذكي - جميع الميزات الجبارة في مكان واحد</p>
+            </div>
+            <div>
+                <span style="background: #1e293b; padding: 8px 16px; border-radius: 50px;">
+                    <i class="fas fa-user"></i> {{ user_name }}
+                </span>
+                <a href="/dashboard" style="background: #4f46e5; padding: 8px 16px; border-radius: 50px; color: white; text-decoration: none; margin-right: 10px;">
+                    <i class="fas fa-home"></i> الرئيسية
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-container">
+        <button class="tab-btn active" data-tab="digital-twin">🧬 التوأم الرقمي</button>
+        <button class="tab-btn" data-tab="time-capsule">⏰ كبسولة الزمن</button>
+        <button class="tab-btn" data-tab="ai-lab">🤖 معمل AI</button>
+        <button class="tab-btn" data-tab="gamified">🎮 الألعاب</button>
+        <button class="tab-btn" data-tab="dream-weaver">🌙 ناسج الأحلام</button>
+        <button class="tab-btn" data-tab="creativity">🎨 مسرع الإبداع</button>
+        <button class="tab-btn" data-tab="global-arena">🌍 الساحة العالمية</button>
+        <button class="tab-btn" data-tab="ai-actor">🎭 الممثل الذكي</button>
+        <button class="tab-btn" data-tab="destiny">🔮 خريطة القدر</button>
+    </div>
+
+    <!-- Tab 1: Digital Twin -->
+    <div id="tab-digital-twin" class="tab-content active">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-robot"></i> التوأم الرقمي - Digital Twin</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">التوأم الرقمي الخاص بك! شجرة معرفة تنمو معك، Avatar يتفاعل مع حالتك المزاجية، وآلة زمن ترى تطورك.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('digitalTwinModal')">
+                    <div class="feature-icon">🧬</div>
+                    <div class="feature-title">إنشاء توأم رقمي</div>
+                    <div class="feature-desc">أنشئ نسخة رقمية من نفسك</div>
+                </div>
+                <div class="feature-card" onclick="viewKnowledgeTree()">
+                    <div class="feature-icon">🌳</div>
+                    <div class="feature-title">شجرة المعرفة</div>
+                    <div class="feature-desc">شاهد شجرة معرفتك تنمو</div>
+                </div>
+                <div class="feature-card" onclick="viewAchievements()">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-title">قاعة الجوائز</div>
+                    <div class="feature-desc">كل إنجازاتك في مكان واحد</div>
+                </div>
+                <div class="feature-card" onclick="timeTravel()">
+                    <div class="feature-icon">⏰</div>
+                    <div class="feature-title">آلة الزمن</div>
+                    <div class="feature-desc">شاهد تطورك عبر الزمن</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Time Capsule -->
+    <div id="tab-time-capsule" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-hourglass-half"></i> كبسولة الزمن - Time Capsule</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">سجل نفسك اليوم، وافتح الكبسولة بعد 6 شهور لترى كم تطورت!</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('timeCapsuleModal')">
+                    <div class="feature-icon">📦</div>
+                    <div class="feature-title">إنشاء كبسولة</div>
+                    <div class="feature-desc">سجل نفسك في كبسولة زمنية</div>
+                </div>
+                <div class="feature-card" onclick="listCapsules()">
+                    <div class="feature-icon">🗂️</div>
+                    <div class="feature-title">كبسولاتي</div>
+                    <div class="feature-desc">شاهد كل كبسولاتك</div>
+                </div>
+                <div class="feature-card" onclick="futureVision()">
+                    <div class="feature-icon">🔮</div>
+                    <div class="feature-title">سافر للمستقبل</div>
+                    <div class="feature-desc">شاهد نفسك بعد 5 سنوات</div>
+                </div>
+                <div class="feature-card" onclick="parallelLife()">
+                    <div class="feature-icon">🌍</div>
+                    <div class="feature-title">حياة موازية</div>
+                    <div class="feature-desc">ماذا لو اخترت طريقاً آخر؟</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: AI Lab -->
+    <div id="tab-ai-lab" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-microchip"></i> معمل الذكاء الاصطناعي - AI Lab</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">ابنِ نماذج الذكاء الاصطناعي الخاصة بك بدون برمجة!</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('aiLabModal')">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-title">إنشاء نموذج</div>
+                    <div class="feature-desc">ابني نموذج AI جديد</div>
+                </div>
+                <div class="feature-card" onclick="trainModel()">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">تدريب نموذج</div>
+                    <div class="feature-desc">درب النموذج على بياناتك</div>
+                </div>
+                <div class="feature-card" onclick="myModels()">
+                    <div class="feature-icon">📁</div>
+                    <div class="feature-title">نماذجي</div>
+                    <div class="feature-desc">شاهد كل نماذجك</div>
+                </div>
+                <div class="feature-card" onclick="openMarketplace()">
+                    <div class="feature-icon">🛒</div>
+                    <div class="feature-title">متجر النماذج</div>
+                    <div class="feature-desc">بع واشتري نماذج AI</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 4: Gamified -->
+    <div id="tab-gamified" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-gamepad"></i> الكون التفاعلي - Gamified Universe</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">تعلّم من خلال اللعب! تحدّى الزعماء، كوّن نقابات، واربح جوائز حقيقية.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('gamifiedModal')">
+                    <div class="feature-icon">⚔️</div>
+                    <div class="feature-title">بدء معركة</div>
+                    <div class="feature-desc">تحدى زعيماً وأهزمه</div>
+                </div>
+                <div class="feature-card" onclick="createGuild()">
+                    <div class="feature-icon">👥</div>
+                    <div class="feature-title">إنشاء نقابة</div>
+                    <div class="feature-desc">كون فريقاً مع أصدقائك</div>
+                </div>
+                <div class="feature-card" onclick="viewLeaderboard()">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-title">الترتيب العالمي</div>
+                    <div class="feature-desc">شاهد ترتيبك بين اللاعبين</div>
+                </div>
+                <div class="feature-card" onclick="claimReward()">
+                    <div class="feature-icon">🎁</div>
+                    <div class="feature-title">الجوائز</div>
+                    <div class="feature-desc">استبدل نقاطك بجوائز حقيقية</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 5: Dream Weaver -->
+    <div id="tab-dream-weaver" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-moon"></i> ناسج الأحلام - Dream Weaver</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">حوّل حلمك إلى خطة تعليمية واقعية. أخبرنا بحلمك وسنرسم لك الطريق!</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('dreamWeaverModal')">
+                    <div class="feature-icon">💭</div>
+                    <div class="feature-title">اسرد حلمك</div>
+                    <div class="feature-desc">قل لنا ما هو حلمك</div>
+                </div>
+                <div class="feature-card" onclick="viewDreamPlan()">
+                    <div class="feature-icon">📋</div>
+                    <div class="feature-title">خططي</div>
+                    <div class="feature-desc">شاهد خطتك لتحقيق حلمك</div>
+                </div>
+                <div class="feature-card" onclick="findMentor()">
+                    <div class="feature-icon">👨‍🏫</div>
+                    <div class="feature-title">مرشدين</div>
+                    <div class="feature-desc">تواصل مع من حققوا حلمك</div>
+                </div>
+                <div class="feature-card" onclick="inspireMe()">
+                    <div class="feature-icon">✨</div>
+                    <div class="feature-title">قصص ملهمة</div>
+                    <div class="feature-desc">استلهم من قصص الناجحين</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 6: Creativity Accelerator -->
+    <div id="tab-creativity" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i> مسرع الإبداع - Creativity Accelerator</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">أطلق العنان لعبقريتك! ولّد 100 فكرة من فكرة واحدة.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('creativityModal')">
+                    <div class="feature-icon">💥</div>
+                    <div class="feature-title">انفجار فكرة</div>
+                    <div class="feature-desc">أدخل فكرة واحدة واحصل على 100 فكرة</div>
+                </div>
+                <div class="feature-card" onclick="startBrainstorming()">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-title">عصف ذهني جماعي</div>
+                    <div class="feature-desc">ابتكر مع طلاب آخرين</div>
+                </div>
+                <div class="feature-card" onclick="getThinkingTool()">
+                    <div class="feature-icon">🔧</div>
+                    <div class="feature-title">أدوات تفكير</div>
+                    <div class="feature-desc">أدوات إبداعية لتنمية التفكير</div>
+                </div>
+                <div class="feature-card" onclick="getChallenge()">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">تحدي يومي</div>
+                    <div class="feature-desc">تحدي إبداعي جديد كل يوم</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 7: Global Arena -->
+    <div id="tab-global-arena" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-globe"></i> الساحة العالمية - Global Arena</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">تنافس مع طلاب من جميع أنحاء العالم في تحديات فورية!</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="findMatch()">
+                    <div class="feature-icon">⚔️</div>
+                    <div class="feature-title">تحدي 1v1</div>
+                    <div class="feature-desc">تحدى لاعباً من أي دولة</div>
+                </div>
+                <div class="feature-card" onclick="joinTournament()">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-title">بطولات</div>
+                    <div class="feature-desc">شارك في بطولات عالمية</div>
+                </div>
+                <div class="feature-card" onclick="globalRanking()">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">الترتيب العالمي</div>
+                    <div class="feature-desc">شاهد ترتيبك في العالم</div>
+                </div>
+                <div class="feature-card" onclick="watchLive()">
+                    <div class="feature-icon">📺</div>
+                    <div class="feature-title">بث مباشر</div>
+                    <div class="feature-desc">شاهد المباريات النهائية</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 8: AI Actor -->
+    <div id="tab-ai-actor" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-theater-masks"></i> الممثل الذكي - AI Actor</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">تحدث مع العظماء! إينشتاين، الخوارزمي، ستيف جوبز - اسألهم أي شيء!</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('aiActorModal')">
+                    <div class="feature-icon">🧙</div>
+                    <div class="feature-title">اختر عبقرياً</div>
+                    <div class="feature-desc">اختر شخصية تاريخية</div>
+                </div>
+                <div class="feature-card" onclick="startDebate()">
+                    <div class="feature-icon">🎭</div>
+                    <div class="feature-title">جادل العظماء</div>
+                    <div class="feature-desc">ناقش أينشتاين في الفيزياء</div>
+                </div>
+                <div class="feature-card" onclick="getAdvice()">
+                    <div class="feature-icon">💡</div>
+                    <div class="feature-title">خذ نصيحة</div>
+                    <div class="feature-desc">احصل على نصائح حكيمة</div>
+                </div>
+                <div class="feature-card" onclick="rolePlay()">
+                    <div class="feature-icon">🎪</div>
+                    <div class="feature-title">تمثيل أدوار</div>
+                    <div class="feature-desc">جرب مواقف مختلفة</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 9: Destiny Mapper -->
+    <div id="tab-destiny" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-chart-line"></i> خريطة القدر - Destiny Mapper</h2>
+            <p style="color: #9ca3af; margin-bottom: 20px;">اكتشف مستقبلك! خريطة كاملة لمسيرتك المهنية للسنوات العشر القادمة.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card" onclick="openModal('destinyModal')">
+                    <div class="feature-icon">🔮</div>
+                    <div class="feature-title">ارسم قدرك</div>
+                    <div class="feature-desc">أدخل بياناتك وشاهد مستقبلك</div>
+                </div>
+                <div class="feature-card" onclick="viewSalary()">
+                    <div class="feature-icon">💰</div>
+                    <div class="feature-title">توقع المرتب</div>
+                    <div class="feature-desc">شاهد تطور مرتبك عبر السنوات</div>
+                </div>
+                <div class="feature-card" onclick="viewSkills()">
+                    <div class="feature-icon">📚</div>
+                    <div class="feature-title">المهارات المطلوبة</div>
+                    <div class="feature-desc">اكتشف المهارات التي تحتاجها</div>
+                </div>
+                <div class="feature-card" onclick="alternativePaths()">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-title">مسارات بديلة</div>
+                    <div class="feature-desc">ماذا لو اخترت طريقاً آخر؟</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Digital Twin -->
+<div id="digitalTwinModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="color: #fbbf24;"><i class="fas fa-robot"></i> إنشاء توأم رقمي</h2>
+            <button class="close-modal" onclick="closeModal('digitalTwinModal')">&times;</button>
+        </div>
+        <form id="digitalTwinForm">
+            <div class="form-group">
+                <label>👤 اسم التوأم</label>
+                <input type="text" id="twinName" placeholder="مثلاً: توأمي الذكي" required>
+            </div>
+            <div class="form-group">
+                <label>🎨 اختر الشخصية</label>
+                <select id="twinPersonality">
+                    <option value="wizard">🧙 الساحر الحكيم - يحلل بعمق</option>
+                    <option value="warrior">⚔️ المحارب - يتحدى ويحفز</option>
+                    <option value="scientist">👨‍🔬 العالم - يشرح بدقة</option>
+                    <option value="friend">🤝 الصديق - ودود ومشجع</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary">🚀 إنشاء التوأم الآن</button>
+        </form>
+        <div id="twinResult" class="result-area"></div>
+    </div>
+</div>
+
+<!-- Modal: Time Capsule -->
+<div id="timeCapsuleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="color: #fbbf24;"><i class="fas fa-hourglass-half"></i> إنشاء كبسولة زمنية</h2>
+            <button class="close-modal" onclick="closeModal('timeCapsuleModal')">&times;</button>
+        </div>
+        <form id="timeCapsuleForm">
+            <div class="form-group">
+                <label>📚 المفهوم أو المهارة</label>
+                <input type="text" id="capsuleConcept" placeholder="مثلاً: البرمجة، الذكاء الاصطناعي، اللغة الإنجليزية" required>
+            </div>
+            <div class="form-group">
+                <label>✍️ سجل نفسك الآن</label>
+                <textarea id="capsuleContent" rows="5" placeholder="اكتب فهمك الحالي للموضوع... سجل شرحك، مشاعرك، توقعاتك..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary">📦 احفظ الكبسولة - ستفتح بعد 6 شهور</button>
+        </form>
+        <div id="capsuleResult" class="result-area"></div>
+    </div>
+</div>
+
+<!-- Modal: Dream Weaver -->
+<div id="dreamWeaverModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="color: #fbbf24;"><i class="fas fa-moon"></i> ناسج الأحلام</h2>
+            <button class="close-modal" onclick="closeModal('dreamWeaverModal')">&times;</button>
+        </div>
+        <form id="dreamWeaverForm">
+            <div class="form-group">
+                <label>💭 ما هو حلمك؟</label>
+                <textarea id="dreamText" rows="5" placeholder="مثلاً: أريد أن أصبح مهندس ذكاء اصطناعي أعمل في جوجل، أو أريد إنشاء شركة ناشئة تغير مجال التعليم..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary">🔮 حلل حلمي وارسم الطريق</button>
+        </form>
+        <div id="dreamResult" class="result-area"></div>
+    </div>
+</div>
+
+<!-- Modal: Creativity Accelerator -->
+<div id="creativityModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="color: #fbbf24;"><i class="fas fa-lightbulb"></i> مسرع الإبداع</h2>
+            <button class="close-modal" onclick="closeModal('creativityModal')">&times;</button>
+        </div>
+        <form id="creativityForm">
+            <div class="form-group">
+                <label>💡 اكتب فكرتك الأساسية</label>
+                <textarea id="ideaText" rows="5" placeholder="مثلاً: تطبيق لتعلم اللغة العربية، أو روبوت لمساعدة كبار السن..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary">💥 انفجار الفكرة! ولّد 100 فكرة</button>
+        </form>
+        <div id="creativityResult" class="result-area"></div>
+    </div>
+</div>
+
+<!-- Modal: AI Actor -->
+<div id="aiActorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="color: #fbbf24;"><i class="fas fa-theater-masks"></i> اختر عبقرياً لتتحدث معه</h2>
+            <button class="close-modal" onclick="closeModal('aiActorModal')">&times;</button>
+        </div>
+        <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="feature-card" onclick="startConversation('einstein')">
+                <div class="feature-icon">🧙</div>
+                <div class="feature-title">ألبرت إينشتاين</div>
+                <div class="feature-desc">عبقري الفيزياء والنظرية النسبية</div>
+            </div>
+            <div class="feature-card" onclick="startConversation('alkhwarizmi')">
+                <div class="feature-icon">🧮</div>
+                <div class="feature-title">الخوارزمي</div>
+                <div class="feature-desc">أبو الخوارزميات والجبر</div>
+            </div>
+            <div class="feature-card" onclick="startConversation('jobs')">
+                <div class="feature-icon">🍎</div>
+                <div class="feature-title">ستيف جوبز</div>
+                <div class="feature-desc">مؤسس آبل، عبقري الابتكار</div>
+            </div>
+            <div class="feature-card" onclick="startConversation('musk')">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-title">إيلون ماسك</div>
+                <div class="feature-desc">رائد فضاء ورجل أعمال</div>
+            </div>
+        </div>
+        <div id="conversationResult" class="result-area"></div>
+    </div>
+</div>
+
+<!-- Modal: Destiny Mapper -->
+<div id="destinyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="color: #fbbf24;"><i class="fas fa-chart-line"></i> خريطة قدرك</h2>
+            <button class="close-modal" onclick="closeModal('destinyModal')">&times;</button>
+        </div>
+        <form id="destinyForm">
+            <div class="form-group">
+                <label>📊 المعدل التراكمي (GPA)</label>
+                <input type="number" id="destinyGpa" step="0.1" min="0" max="4" placeholder="مثلاً: 3.5">
+            </div>
+            <div class="form-group">
+                <label>⏰ ساعات الدراسة الأسبوعية</label>
+                <input type="number" id="destinyHours" placeholder="مثلاً: 15">
+            </div>
+            <div class="form-group">
+                <label>🎯 مجالك أو تخصصك</label>
+                <input type="text" id="destinyMajor" placeholder="مثلاً: حاسبات، هندسة، طب">
+            </div>
+            <div class="form-group">
+                <label>🔧 المهارات الحالية</label>
+                <input type="text" id="destinySkills" placeholder="مثلاً: Python, JavaScript, Communication">
+            </div>
+            <button type="submit" class="btn-primary">🔮 ارسم مستقبلي</button>
+        </form>
+        <div id="destinyResult" class="result-area"></div>
+    </div>
+</div>
+
+<script>
+    // Tab切换功能
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const tabId = btn.dataset.tab;
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(`tab-${tabId}`).style.display = 'block';
+        });
+    });
+
+    // Modal functions
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    function showResult(elementId, message, isSuccess = true) {
+        const resultDiv = document.getElementById(elementId);
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = isSuccess ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+        resultDiv.style.border = isSuccess ? '1px solid #10b981' : '1px solid #ef4444';
+        resultDiv.innerHTML = message;
+        setTimeout(() => {
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    }
+
+    // Digital Twin Form
+    document.getElementById('digitalTwinForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showResult('twinResult', '<div class="loader"></div><p style="text-align:center;">جاري إنشاء توأمك الرقمي...</p>');
+        
+        const response = await fetch('/api/twin/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: document.getElementById('twinName').value,
+                personality: document.getElementById('twinPersonality').value
+            })
+        });
+        const data = await response.json();
+        showResult('twinResult', `
+            <div style="text-align:center;">
+                <div style="font-size:50px;">🧬✨</div>
+                <h3>تم إنشاء توأمك الرقمي!</h3>
+                <p>الاسم: ${data.bot?.name || 'توأمك'}</p>
+                <p>${data.message || 'استمتع برحلتك مع توأمك الرقمي!'}</p>
+            </div>
+        `);
+        setTimeout(() => closeModal('digitalTwinModal'), 3000);
+    });
+
+    // Time Capsule Form
+    document.getElementById('timeCapsuleForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showResult('capsuleResult', '<div class="loader"></div><p style="text-align:center;">جاري حفظ كبسولتك...</p>');
+        
+        const response = await fetch('/api/capsule/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                concept: document.getElementById('capsuleConcept').value,
+                content: document.getElementById('capsuleContent').value
+            })
+        });
+        const data = await response.json();
+        showResult('capsuleResult', `
+            <div style="text-align:center;">
+                <div style="font-size:50px;">📦✨</div>
+                <h3>تم حفظ كبسولتك الزمنية!</h3>
+                <p>ستُفتح بعد 6 أشهر</p>
+                <p style="color:#10b981;">${data.message || 'هيا بنا نرى تطورك مع الوقت!'}</p>
+            </div>
+        `);
+        setTimeout(() => closeModal('timeCapsuleModal'), 3000);
+    });
+
+    // Dream Weaver Form
+    document.getElementById('dreamWeaverForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showResult('dreamResult', '<div class="loader"></div><p style="text-align:center;">جاري تحليل حلمك ووضع الخطة...</p>');
+        
+        const response = await fetch('/api/dream/weave', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dream: document.getElementById('dreamText').value })
+        });
+        const data = await response.json();
+        
+        let html = `<div style="text-align:center;"><div style="font-size:50px;">💭✨</div>`;
+        html += `<h3 style="color:#fbbf24;">${data.dream_category?.name || 'تم تحليل حلمك'}</h3>`;
+        html += `<p>احتمالية النجاح: ${data.predictions?.success_probability || 'عالية'}%</p>`;
+        html += `<p>الوقت المتوقع: ${data.predictions?.estimated_time || 'غير محدد'} سنوات</p>`;
+        html += `<div style="background:#1e293b; padding:15px; border-radius:16px; margin-top:15px;">`;
+        html += `<strong>📋 خطتك:</strong><br>`;
+        if (data.personalized_plan?.phases) {
+            data.personalized_plan.phases.forEach(phase => {
+                html += `<p style="margin-top:10px;"><strong>${phase.name}</strong>: ${phase.duration}</p>`;
+            });
+        }
+        html += `</div>`;
+        html += `<button onclick="closeModal('dreamWeaverModal')" class="btn-primary" style="margin-top:15px;">حلمي في الطريق 🚀</button>`;
+        html += `</div>`;
+        showResult('dreamResult', html);
+    });
+
+    // Creativity Form
+    document.getElementById('creativityForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showResult('creativityResult', '<div class="loader"></div><p style="text-align:center;">جاري انفجار الفكرة... 💥</p>');
+        
+        const response = await fetch('/api/creativity/explode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idea: document.getElementById('ideaText').value })
+        });
+        const data = await response.json();
+        
+        let html = `<div style="text-align:center;"><div style="font-size:50px;">💥✨</div>`;
+        html += `<h3 style="color:#fbbf24;">تم توليد ${data.total_ideas_generated || 50} فكرة جديدة!</h3>`;
+        html += `<div style="background:#1e293b; padding:15px; border-radius:16px; margin-top:15px; text-align:right;">`;
+        if (data.top_10_ideas) {
+            data.top_10_ideas.forEach((idea, i) => {
+                html += `<p><strong>${i+1}.</strong> ${idea.idea}</p>`;
+            });
+        }
+        html += `</div>`;
+        html += `<button onclick="closeModal('creativityModal')" class="btn-primary" style="margin-top:15px;">رائع! 💡</button>`;
+        html += `</div>`;
+        showResult('creativityResult', html);
+    });
+
+    // Destiny Form
+    document.getElementById('destinyForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showResult('destinyResult', '<div class="loader"></div><p style="text-align:center;">جاري رسم خريطة قدرك...</p>');
+        
+        const response = await fetch('/api/destiny/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                gpa: parseFloat(document.getElementById('destinyGpa').value),
+                weekly_study_hours: parseInt(document.getElementById('destinyHours').value),
+                major: document.getElementById('destinyMajor').value,
+                skills: document.getElementById('destinySkills').value.split(',').map(s => s.trim())
+            })
+        });
+        const data = await response.json();
+        
+        let html = `<div style="text-align:center;"><div style="font-size:50px;">🔮✨</div>`;
+        html += `<h3 style="color:#fbbf24;">خريطة مستقبلك</h3>`;
+        html += `<p>احتمالية النجاح: ${data.success_probability?.percentage || 75}%</p>`;
+        if (data.primary_path?.timeline) {
+            html += `<div style="background:#1e293b; padding:15px; border-radius:16px; margin-top:15px; text-align:right;">`;
+            html += `<strong>⏰ الجدول الزمني:</strong><br>`;
+            data.primary_path.timeline.forEach(m => {
+                html += `<p style="margin-top:8px;">📅 ${m.year}: ${m.milestone} - ${m.details || ''}</p>`;
+            });
+            html += `</div>`;
+        }
+        html += `<button onclick="closeModal('destinyModal')" class="btn-primary" style="margin-top:15px;">شكراً! أرى مستقبلي الآن 🚀</button>`;
+        html += `</div>`;
+        showResult('destinyResult', html);
+    });
+
+    // AI Actor conversation
+    async function startConversation(characterId) {
+        closeModal('aiActorModal');
+        Swal.fire({
+            title: '🎭 جاري تحضير الشخصية...',
+            text: `سيتم فتح نافذة دردشة مع ${characterId === 'einstein' ? 'أينشتاين' : characterId === 'alkhwarizmi' ? 'الخوارزمي' : characterId === 'jobs' ? 'ستيف جوبز' : 'إيلون ماسك'}`,
+            icon: 'info',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        setTimeout(() => {
+            Swal.fire({
+                title: '🎭 بدء المحادثة',
+                html: `
+                    <div style="text-align:center;">
+                        <div style="font-size:60px;">${characterId === 'einstein' ? '🧙' : characterId === 'alkhwarizmi' ? '🧮' : characterId === 'jobs' ? '🍎' : '🚀'}</div>
+                        <h3>${characterId === 'einstein' ? 'ألبرت أينشتاين' : characterId === 'alkhwarizmi' ? 'الخوارزمي' : characterId === 'jobs' ? 'ستيف جوبز' : 'إيلون ماسك'}</h3>
+                        <p>ماذا تريد أن تسأل العبقري؟</p>
+                        <input type="text" id="questionInput" style="width:100%; padding:10px; margin:10px 0; border-radius:20px; border:1px solid #4f46e5; background:#1e293b; color:white;" placeholder="اكتب سؤالك هنا...">
+                        <button onclick="askQuestion('${characterId}')" class="btn-primary">اسأل</button>
+                        <div id="answerArea" style="margin-top:15px;"></div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: '500px'
+            });
+        }, 2000);
+    }
+
+    window.askQuestion = async function(characterId) {
+        const question = document.getElementById('questionInput')?.value;
+        if (!question) return;
+        
+        const answerDiv = document.getElementById('answerArea');
+        answerDiv.innerHTML = '<div class="loader"></div><p>جاري التفكير...</p>';
+        
+        // محاكاة رد العبقري
+        setTimeout(() => {
+            const answers = {
+                einstein: [
+                    `"${question}"... سؤال عميق! الخيال أهم من المعرفة. استمر في التساؤل والاستكشاف.`,
+                    `فيزيائياً، هذا يتعلق بمبدأ النسبية. تذكر أن كل شيء نسبي في هذا الكون.`
+                ],
+                alkhwarizmi: [
+                    `لحل "${question}"، دعنا نقسم المشكلة إلى خطوات صغيرة. هذا هو جوهر الخوارزميات.`,
+                    `الرياضيات تخبرنا أن لكل مشكلة حلاً، فقط نحتاج إلى الصبر والمعادلة الصحيحة.`
+                ],
+                jobs: [
+                    `Stay hungry, stay foolish! بخصوص "${question}"، الحل هو أن تثق بحدسك وتتبع شغفك.`,
+                    `العمل العظيم يأتي من شغف لا من منطق. اسأل نفسك: هل هذا سيغير العالم؟`
+                ],
+                musk: [
+                    `من الناحية التقنية، "${question}" ممكن. الفيزياء لا تمنعه، فقط نحتاج إلى الهندسة المناسبة.`,
+                    `المستقبل متعدد الكواكب قد يحمل إجابة لـ "${question}". استمر في الحلم والعمل.`
+                ]
+            };
+            const answerList = answers[characterId] || answers.einstein;
+            const answer = answerList[Math.floor(Math.random() * answerList.length)];
+            answerDiv.innerHTML = `<div style="background:#1e293b; padding:15px; border-radius:16px; text-align:right;">💬 ${answer}</div>`;
+        }, 1500);
+    };
+
+    // Feature placeholder functions
+    function viewKnowledgeTree() { Swal.fire('🌳 شجرة المعرفة', 'سيتم عرض شجرة معرفتك قريباً! كلما تتعلم، تنمو الشجرة.', 'info'); }
+    function viewAchievements() { Swal.fire('🏆 قاعة الجوائز', 'هنا ستظهر كل إنجازاتك وشاراتك!', 'info'); }
+    function timeTravel() { Swal.fire('⏰ آلة الزمن', 'شاهد كيف تطورت عبر السنوات! قريباً...', 'info'); }
+    function listCapsules() { Swal.fire('📦 كبسولاتي', 'هنا ستظهر كل كبسولاتك الزمنية!', 'info'); }
+    function futureVision() { Swal.fire('🔮 رؤية المستقبل', 'تخيل نفسك بعد 5 سنوات... قريباً سنعرض لك رؤية مخصصة!', 'info'); }
+    function parallelLife() { Swal.fire('🌍 حياة موازية', 'ماذا لو اخترت طريقاً آخر؟ قريباً سنعرض لك سيناريوهات بديلة!', 'info'); }
+    function trainModel() { Swal.fire('📊 تدريب نموذج', 'اختر بياناتك وابدأ تدريب نموذج الذكاء الاصطناعي الخاص بك!', 'info'); }
+    function myModels() { Swal.fire('📁 نماذجي', 'كل نماذج الذكاء الاصطناعي التي قمت بإنشائها ستظهر هنا!', 'info'); }
+    function openMarketplace() { Swal.fire('🛒 متجر النماذج', 'بع واشتري نماذج الذكاء الاصطناعي مع طلاب آخرين!', 'info'); }
+    function createGuild() { Swal.fire('👥 إنشاء نقابة', 'كون فريقاً مع أصدقائك وتنافسوا مع الفرق الأخرى!', 'info'); }
+    function viewLeaderboard() { Swal.fire('🏆 الترتيب العالمي', 'شاهد ترتيبك بين أفضل اللاعبين في العالم!', 'info'); }
+    function claimReward() { Swal.fire('🎁 الجوائز', 'استبدل نقاطك بجوائز حقيقية: لابتوبات، منح، مكافآت مالية!', 'info'); }
+    function viewDreamPlan() { Swal.fire('📋 خططي', 'خططك لتحقيق أحلامك ستظهر هنا!', 'info'); }
+    function findMentor() { Swal.fire('👨‍🏫 مرشدين', 'تواصل مع خبراء حققوا أحلامك! قريباً...', 'info'); }
+    function inspireMe() { Swal.fire('✨ قصص ملهمة', 'قصص نجاح ملهمة من جميع أنحاء العالم!', 'info'); }
+    function startBrainstorming() { Swal.fire('🧠 عصف ذهني جماعي', 'ادعُ أصدقاءك لتبادل الأفكار معاً!', 'info'); }
+    function getThinkingTool() { Swal.fire('🔧 أدوات تفكير', 'اختر أداة إبداعية لتنمية تفكيرك الناقد!', 'info'); }
+    function getChallenge() { Swal.fire('🎯 التحدي اليومي', 'تحدٍ جديد كل يوم لتنمية إبداعك!', 'info'); }
+    function findMatch() { Swal.fire('⚔️ تحدٍ 1v1', 'ابحث عن خصم من أي دولة وابدأ التحدي!', 'info'); }
+    function joinTournament() { Swal.fire('🏆 بطولات', 'شارك في بطولات عالمية واربح جوائز قيمة!', 'info'); }
+    function globalRanking() { Swal.fire('📊 الترتيب العالمي', 'شاهد ترتيبك بين طلاب العالم!', 'info'); }
+    function watchLive() { Swal.fire('📺 بث مباشر', 'شاهد المباريات النهائية للمسابقات العالمية!', 'info'); }
+    function startDebate() { Swal.fire('🎭 جادل العظماء', 'ناقش أينشتاين في الفيزياء أو الخوارزمي في الرياضيات!', 'info'); }
+    function getAdvice() { Swal.fire('💡 خذ نصيحة', 'احصل على نصائح حكيمة من عباقرة العالم!', 'info'); }
+    function rolePlay() { Swal.fire('🎪 تمثيل أدوار', 'جرب مواقف مختلفة وتعلم منها!', 'info'); }
+    function viewSalary() { Swal.fire('💰 توقع المرتب', 'شاهد كيف سيتطور مرتبك عبر السنوات!', 'info'); }
+    function viewSkills() { Swal.fire('📚 المهارات المطلوبة', 'المهارات التي تحتاجها لتحقيق أهدافك!', 'info'); }
+    function alternativePaths() { Swal.fire('🔄 مسارات بديلة', 'سيناريوهات مختلفة لو اخترت طريقاً آخر!', 'info'); }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

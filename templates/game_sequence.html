@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التسلسل المنطقي - العقل الذكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0b1120, #030712);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            background: #111827;
+            border-radius: 48px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 { color: #fbbf24; margin-bottom: 20px; }
+        .sequence { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 30px 0; }
+        .number { background: #1e293b; padding: 15px 25px; border-radius: 20px; color: white; font-size: 28px; font-weight: bold; }
+        .question-mark { background: #4f46e5; padding: 15px 25px; border-radius: 20px; color: white; font-size: 28px; font-weight: bold; }
+        .options { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+        .option { background: #1e293b; padding: 12px 25px; border-radius: 30px; color: white; font-size: 20px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { background: #10b981; transform: scale(0.98); }
+        .score { font-size: 20px; color: #10b981; margin: 15px 0; }
+        .message { margin-top: 20px; color: #fbbf24; }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>🔢 التسلسل المنطقي</h1>
+    <div class="score">⭐ النقاط: <span id="score">0</span> | ✅ المستوى: <span id="level">1</span></div>
+    <div class="sequence" id="sequence"></div>
+    <div class="options" id="options"></div>
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+    let score = 0;
+    let level = 1;
+    let currentSequence = [];
+    let correctAnswer = 0;
+    
+    function generateSequence() {
+        const types = ['arithmetic', 'geometric', 'square', 'fibonacci'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        let sequence = [];
+        
+        if(type === 'arithmetic') {
+            let diff = Math.floor(Math.random() * 5) + 1;
+            let start = Math.floor(Math.random() * 10) + 1;
+            for(let i=0; i<4; i++) sequence.push(start + i * diff);
+            correctAnswer = sequence[sequence.length-1] + diff;
+        } else if(type === 'geometric') {
+            let ratio = Math.floor(Math.random() * 3) + 2;
+            let start = Math.floor(Math.random() * 3) + 1;
+            for(let i=0; i<4; i++) sequence.push(start * Math.pow(ratio, i));
+            correctAnswer = sequence[sequence.length-1] * ratio;
+        } else if(type === 'square') {
+            let start = Math.floor(Math.random() * 5) + 1;
+            for(let i=0; i<4; i++) sequence.push(Math.pow(start + i, 2));
+            correctAnswer = Math.pow(start + 4, 2);
+        } else {
+            sequence = [0, 1, 1, 2];
+            correctAnswer = 3;
+        }
+        
+        return { sequence: sequence, answer: correctAnswer };
+    }
+    
+    function generateOptions(correct) {
+        let options = [correct];
+        while(options.length < 4) {
+            let offset = Math.floor(Math.random() * 10) + 1;
+            let wrong = correct + (Math.random() > 0.5 ? offset : -offset);
+            if(wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return options.sort(() => Math.random() - 0.5);
+    }
+    
+    function newRound() {
+        const data = generateSequence();
+        currentSequence = data.sequence;
+        correctAnswer = data.answer;
+        
+        const sequenceDiv = document.getElementById('sequence');
+        sequenceDiv.innerHTML = currentSequence.map(n => `<div class="number">${n}</div>`).join('') + `<div class="question-mark">?</div>`;
+        
+        const options = generateOptions(correctAnswer);
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = options.map(opt => `<div class="option" onclick="checkAnswer(${opt})">${opt}</div>`).join('');
+    }
+    
+    function checkAnswer(selected) {
+        if(selected === correctAnswer) {
+            score += level * 5;
+            level++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('level').innerText = level;
+            document.getElementById('message').innerHTML = '✅ أحسنت!';
+            setTimeout(() => document.getElementById('message').innerHTML = '', 800);
+            newRound();
+        } else {
+            document.getElementById('message').innerHTML = '❌ خطأ! حاول مرة أخرى';
+            setTimeout(() => document.getElementById('message').innerHTML = '', 1000);
+        }
+        
+        if(score >= 50) {
+            const xpEarned = score;
+            document.getElementById('message').innerHTML = `🎉 ممتاز! حصلت على ${xpEarned} نقطة خبرة!`;
+            fetch('/api/academic/complete-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points: xpEarned, course_name: 'التسلسل المنطقي' })
+            });
+            setTimeout(() => { window.location.href = '/smart-games'; }, 2000);
+        }
+    }
+    
+    newRound();
+</script>
+</body>
+</html>

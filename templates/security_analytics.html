@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تحليلات الأمان - Study Hub AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(135deg, #0f172a, #1e1b4b); }
+        .stat-card { transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="bg-gray-800 rounded-2xl p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-amber-400"><i class="fas fa-chart-line"></i> 📊 تقارير الأمان والتحليلات</h1>
+                <a href="/admin/dashboard" class="bg-indigo-600 px-4 py-2 rounded-xl text-white hover:bg-indigo-700">← العودة</a>
+            </div>
+        </div>
+
+        <!-- Threat Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 stat-card">
+                <div class="text-3xl font-bold" id="criticalThreats">0</div>
+                <div class="text-sm">تهديدات حرجة</div>
+            </div>
+            <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-2xl p-6 stat-card">
+                <div class="text-3xl font-bold" id="highThreats">0</div>
+                <div class="text-sm">تهديدات عالية</div>
+            </div>
+            <div class="bg-gradient-to-r from-yellow-600 to-yellow-800 rounded-2xl p-6 stat-card">
+                <div class="text-3xl font-bold" id="mediumThreats">0</div>
+                <div class="text-sm">تهديدات متوسطة</div>
+            </div>
+            <div class="bg-gradient-to-r from-green-600 to-green-800 rounded-2xl p-6 stat-card">
+                <div class="text-3xl font-bold" id="blockedAttacks">0</div>
+                <div class="text-sm">هجمات محظورة</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gray-800 rounded-2xl p-6">
+                <h3 class="text-white font-bold mb-4">أنماط الهجمات</h3>
+                <canvas id="attackPatternsChart" height="200"></canvas>
+            </div>
+            <div class="bg-gray-800 rounded-2xl p-6">
+                <h3 class="text-white font-bold mb-4">المحاولات خلال 7 أيام</h3>
+                <canvas id="attacksTimelineChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Suspicious IPs Table -->
+        <div class="bg-gray-800 rounded-2xl p-6">
+            <h3 class="text-white font-bold mb-4"><i class="fas fa-exclamation-triangle text-yellow-500"></i> العناوين المشبوهة</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-white">
+                    <thead class="border-b border-gray-700">
+                        <tr><th class="text-right p-3">IP</th><th class="text-right p-3">عدد المحاولات</th><th class="text-right p-3">آخر نشاط</th><th class="text-right p-3">الإجراء</th></tr>
+                    </thead>
+                    <tbody id="suspiciousIPs"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadSecurityAnalytics() {
+            try {
+                const res = await fetch('/api/security/analytics');
+                const data = await res.json();
+                
+                document.getElementById('criticalThreats').innerText = data.critical || 0;
+                document.getElementById('highThreats').innerText = data.high || 0;
+                document.getElementById('mediumThreats').innerText = data.medium || 0;
+                document.getElementById('blockedAttacks').innerText = data.blocked_total || 0;
+                
+                // Threat Patterns Chart
+                new Chart(document.getElementById('attackPatternsChart'), {
+                    type: 'bar', data: { labels: data.pattern_labels || [], datasets: [{ label: 'عدد الهجمات', data: data.pattern_data || [], backgroundColor: '#ef4444' }] },
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+                
+                // Timeline Chart
+                new Chart(document.getElementById('attacksTimelineChart'), {
+                    type: 'line', data: { labels: data.timeline_labels || [], datasets: [{ label: 'محاولات', data: data.timeline_data || [], borderColor: '#fbbf24', fill: false }] }
+                });
+                
+                // Suspicious IPs Table
+                const tbody = document.getElementById('suspiciousIPs');
+                tbody.innerHTML = (data.suspicious_ips || []).map(ip => `<tr class="border-b border-gray-700"><td class="p-3">${ip.ip}</td><td class="p-3">${ip.attempts}</td><td class="p-3">${ip.last_seen}</td><td class="p-3"><button onclick="blockIP('${ip.ip}')" class="bg-red-600 px-3 py-1 rounded-lg text-sm">حظر</button></td></tr>`).join('');
+            } catch(e) { console.error(e); }
+        }
+        
+        async function blockIP(ip) {
+            await fetch('/api/security/block-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) });
+            loadSecurityAnalytics();
+        }
+        
+        loadSecurityAnalytics(); setInterval(loadSecurityAnalytics, 30000);
+    </script>
+</body>
+</html>

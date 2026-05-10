@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Forge - منشئ الأكواد الذكي | Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #111827;
+            --border: #1f2937;
+            --accent: #6366f1;
+            --gold: #fbbf24;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, var(--bg-dark), #030712);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
+        .back-btn {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .forge-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 25px;
+            border: 1px solid var(--border);
+        }
+        .card-title {
+            color: var(--gold);
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .query-input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .language-select {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 12px 20px;
+            color: white;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .result-card {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .result-title {
+            color: var(--gold);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        pre {
+            background: #030712;
+            padding: 15px;
+            border-radius: 15px;
+            overflow-x: auto;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .copy-btn {
+            background: var(--success);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 700px) {
+            .forge-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <h1><i class="fas fa-magic" style="color: var(--gold);"></i> Code Forge - منشئ الأكواد الذكي</h1>
+        </div>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+
+    <div class="forge-container">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-comment"></i> 🔮 ماذا تريد إنشاء؟</div>
+            <textarea id="queryInput" class="query-input" rows="4" placeholder="مثال: اعمل لي آلة حاسبة متكاملة في Python&#10;أو: اكتب كود لتطبيق ملاحظات في JavaScript&#10;أو: قالب تسجيل دخول عصري"></textarea>
+            
+            <select id="languageSelect" class="language-select">
+                <option value="python">🐍 Python</option>
+                <option value="javascript">⚡ JavaScript</option>
+                <option value="html_css">🌐 HTML/CSS</option>
+                <option value="sql">🗄️ SQL</option>
+                <option value="">🌍 أي لغة</option>
+            </select>
+            
+            <button class="btn-primary" onclick="generateCode()"><i class="fas fa-code"></i> توليد الكود</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-file-code"></i> 📄 الكود المولّد</div>
+            <div id="resultsContainer">
+                <p style="color: var(--text-dim); text-align: center;">اكتب ما تريد إنشاءه واضغط "توليد الكود"</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function generateCode() {
+        const query = document.getElementById('queryInput').value;
+        const language = document.getElementById('languageSelect').value;
+        
+        if (!query.trim()) {
+            alert('الرجاء إدخال ما تريد إنشاءه');
+            return;
+        }
+        
+        const container = document.getElementById('resultsContainer');
+        container.innerHTML = '<p style="text-align: center;"><i class="fas fa-spinner fa-pulse"></i> جاري البحث عن الكود المناسب...</p>';
+        
+        try {
+            const res = await fetch('/api/code/forge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query, language: language })
+            });
+            const data = await res.json();
+            
+            if (data.success && data.results && data.results.length > 0) {
+                container.innerHTML = data.results.map(result => {
+                    if (result.type === 'code') {
+                        return `
+                            <div class="result-card">
+                                <div class="result-title">📌 ${result.title}</div>
+                                <div>${result.explanation || ''}</div>
+                                <div style="font-size: 12px; margin: 5px 0;">${result.complexity || '🟢 بسيط'} | 💡 ${result.use_case || 'تطبيقات متنوعة'}</div>
+                                <pre>${escapeHtml(result.code || '')}</pre>
+                                <button class="copy-btn" onclick="copyCode('${escapeHtml(result.code || '').replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i> نسخ الكود</button>
+                            </div>
+                        `;
+                    } else if (result.type === 'project') {
+                        return `
+                            <div class="result-card">
+                                <div class="result-title">🎯 ${result.title}</div>
+                                <div>${result.description || ''}</div>
+                                <div style="margin: 10px 0;">
+                                    <strong>🛠️ التقنيات:</strong> ${result.technologies?.join(', ') || ''}<br>
+                                    <strong>✨ المميزات:</strong> ${result.features?.join(', ') || ''}
+                                </div>
+                                <div>${result.difficulty || '🟡 متوسط'}</div>
+                            </div>
+                        `;
+                    } else if (result.type === 'html_template') {
+                        return `
+                            <div class="result-card">
+                                <div class="result-title">🎨 ${result.name}</div>
+                                <div>${result.explanation || ''}</div>
+                                <pre>${escapeHtml(result.code || '')}</pre>
+                                <button class="copy-btn" onclick="copyCode('${escapeHtml(result.code || '').replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i> نسخ الكود</button>
+                            </div>
+                        `;
+                    }
+                    return '';
+                }).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="result-card">
+                        <div style="color: var(--warning);">⚠️ ${data.message || 'لم يتم العثور على نتائج'}</div>
+                        <div style="margin-top: 10px;">💡 ${data.suggestion || 'جرب صياغة مختلفة مثل "آلة حاسبة" أو "قائمة مهام"'}</div>
+                    </div>
+                `;
+            }
+        } catch(e) {
+            container.innerHTML = '<p style="color: var(--danger);">⚠️ حدث خطأ في الاتصال</p>';
+        }
+    }
+    
+    function copyCode(code) {
+        navigator.clipboard.writeText(code);
+        alert('✅ تم نسخ الكود!');
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+    }
+</script>
+</body>
+</html>

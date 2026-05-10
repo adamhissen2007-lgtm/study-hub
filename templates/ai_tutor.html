@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المعلم الخصوصي - AI Tutor | Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #111827;
+            --border: #1f2937;
+            --accent: #6366f1;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --gold: #fbbf24;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --info: #06b6d4;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, var(--bg-dark), #030712);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
+        .back-btn {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .tutor-container {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        .chat-area {
+            flex: 2;
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 25px;
+            border: 1px solid var(--border);
+        }
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .user-message { justify-content: flex-end; }
+        .user-message .message-bubble {
+            background: var(--accent);
+            color: white;
+            border-radius: 20px 20px 5px 20px;
+        }
+        .bot-message .message-bubble {
+            background: #1e293b;
+            color: white;
+            border-radius: 20px 20px 20px 5px;
+        }
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 20px;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        .input-area input {
+            flex: 1;
+            background: #1e293b;
+            border: 1px solid var(--border);
+            border-radius: 60px;
+            padding: 15px;
+            color: white;
+        }
+        .input-area button {
+            background: var(--accent);
+            border: none;
+            border-radius: 60px;
+            padding: 15px 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .subjects-area {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 25px;
+            border: 1px solid var(--border);
+        }
+        .subject-btn {
+            background: #1e293b;
+            border: none;
+            padding: 12px;
+            border-radius: 16px;
+            color: white;
+            width: 100%;
+            margin-bottom: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .subject-btn:hover { background: var(--accent); }
+        
+        .quick-questions {
+            margin-top: 20px;
+        }
+        .quick-q {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .bookmark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--gold);
+            border-radius: 50px;
+            padding: 12px 20px;
+            color: black;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 700px) {
+            .tutor-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <h1><i class="fas fa-robot" style="color: var(--success);"></i> المعلم الخصوصي - AI Tutor</h1>
+            <span class="badge">ذكي | متفاعل | مجاني</span>
+        </div>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+
+    <div class="tutor-container">
+        <div class="chat-area">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-bubble">👋 مرحباً! أنا فهيم، معلمك الخصوصي. اسألني أي سؤال في الرياضيات، الفيزياء، البرمجة، أو اللغة العربية وسأشرحه لك ببساطة!</div>
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="questionInput" placeholder="اكتب سؤالك هنا..." onkeypress="if(event.key==='Enter') askQuestion()">
+                <button onclick="askQuestion()"><i class="fas fa-paper-plane"></i> أرسل</button>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; color: var(--text-dim); text-align: center;">
+                <i class="fas fa-microphone"></i> اسأل عن أي موضوع: رياضيات، فيزياء، برمجة، نحو
+            </div>
+        </div>
+
+        <div class="subjects-area">
+            <h3 style="color: white; margin-bottom: 15px;"><i class="fas fa-book"></i> المواد الدراسية</h3>
+            <button class="subject-btn" onclick="askAbout('التفاضل')">📐 التفاضل والتكامل</button>
+            <button class="subject-btn" onclick="askAbout('نيوتن')">⚛️ قوانين نيوتن</button>
+            <button class="subject-btn" onclick="askAbout('python')">🐍 برمجة بايثون</button>
+            <button class="subject-btn" onclick="askAbout('النحو')">📖 قواعد النحو</button>
+            
+            <div class="quick-questions">
+                <h4 style="color: var(--text-dim); margin-bottom: 10px;">أسئلة سريعة</h4>
+                <div class="quick-q" onclick="askQuick('ما هو التفاضل؟')">📌 ما هو التفاضل؟</div>
+                <div class="quick-q" onclick="askQuick('ماذا يقول قانون نيوتن الثاني؟')">📌 ماذا يقول قانون نيوتن الثاني؟</div>
+                <div class="quick-q" onclick="askQuick('كيف أتعلم بايثون بسرعة؟')">📌 كيف أتعلم بايثون بسرعة؟</div>
+                <div class="quick-q" onclick="askQuick('ما الفرق بين المبتدأ والخبر؟')">📌 ما الفرق بين المبتدأ والخبر؟</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bookmark" onclick="saveToBookmarks()">
+    <i class="fas fa-bookmark"></i> حفظ آخر سؤال
+</div>
+
+<script>
+    let bookmarks = JSON.parse(localStorage.getItem('tutorBookmarks')) || [];
+    
+    function addMessage(text, isUser) {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+        div.innerHTML = `<div class="message-bubble">${text}</div>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    async function askQuestion() {
+        const input = document.getElementById('questionInput');
+        const question = input.value.trim();
+        if (!question) return;
+        
+        addMessage(question, true);
+        input.value = '';
+        
+        addMessage('<i class="fas fa-spinner fa-pulse"></i> جاري التفكير...', false);
+        
+        const res = await fetch('/api/tutor/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: question })
+        });
+        const data = await res.json();
+        
+        document.getElementById('chatMessages').removeChild(document.getElementById('chatMessages').lastChild);
+        addMessage(data.response, false);
+    }
+    
+    function askAbout(topic) {
+        document.getElementById('questionInput').value = `اشرح لي ${topic}`;
+        askQuestion();
+    }
+    
+    function askQuick(q) {
+        document.getElementById('questionInput').value = q;
+        askQuestion();
+    }
+    
+    function saveToBookmarks() {
+        const lastUserMsg = Array.from(document.getElementById('chatMessages').querySelectorAll('.user-message .message-bubble')).pop();
+        if (lastUserMsg) {
+            bookmarks.push(lastUserMsg.innerText);
+            localStorage.setItem('tutorBookmarks', JSON.stringify(bookmarks));
+            alert('✅ تم حفظ السؤال في علاماتك المرجعية');
+        } else {
+            alert('لا يوجد سؤال لحفظه');
+        }
+    }
+</script>
+</body>
+</html>

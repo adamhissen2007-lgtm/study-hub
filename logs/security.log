@@ -1,0 +1,64 @@
+2026-04-28 20:58:45,601 SECURITY: Failed login attempt 1 for adamhissen2007@gmail.com
+2026-04-28 20:58:45,612 SECURITY: SECURITY: LOGIN_FAILED - User:None - Failed login for adamhissen2007@gmail.com from IP 127.0.0.1
+2026-04-28 20:58:57,982 SECURITY: SECURITY: REGISTER - User:1 - New user registered from IP 127.0.0.1
+2026-04-28 21:00:25,945 SECURITY: SECURITY: LOGIN_SUCCESS - User:1 - Successful login from IP 127.0.0.1
+2026-04-28 21:52:18,071 SECURITY: Failed login attempt 1 for adamhissen2007@gmail.com
+2026-04-28 21:52:18,080 SECURITY: SECURITY: LOGIN_FAILED - User:None - Failed login for adamhissen2007@gmail.com from IP 127.0.0.1
+2026-04-28 21:52:28,785 SECURITY: SECURITY: REGISTER - User:1 - New user registered from IP 127.0.0.1
+2026-04-28 21:52:30,240 SECURITY: SECURITY: LOGIN_SUCCESS - User:1 - Successful login from IP 127.0.0.1
+2026-04-28 22:07:32,669 SECURITY: SECURITY: LOGIN_FAILED - Failed login for adamhissen2007@gmail.com
+2026-04-28 22:07:46,202 SECURITY: SECURITY: REGISTER - New user from IP 127.0.0.1
+2026-04-28 22:07:51,123 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-28 22:23:01,752 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-28 22:58:30,766 SECURITY: SECURITY: LOGIN_FAILED - Failed login for adamhissen2007@gmail.com
+2026-04-28 22:58:41,799 SECURITY: SECURITY: REGISTER - New user from IP 127.0.0.1
+2026-04-28 22:58:44,019 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-29 00:51:24,734 SECURITY: SECURITY: LOGIN_FAILED - Failed login for adamhissen2007@gmail.com
+2026-04-29 00:52:22,415 SECURITY: SECURITY: LOGIN_FAILED - Failed login for adamhissen2007@gmail.com
+2026-04-29 01:09:20,892 SECURITY: SECURITY: REGISTER - New user registered with email adamhissen2007@gmail.com
+2026-04-29 01:15:54,365 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-29 19:36:34,192 SECURITY: SECURITY: LOGIN_FAILED - Failed login for adamhissen2007@gmail.com
+2026-04-29 19:37:13,458 SECURITY: Failed to send email to adamhissen2007@gmail.com: The message does not specify a sender and a default sender has not been configured
+2026-04-29 19:37:13,977 SECURITY: Failed to send email to adamhissen2007@gmail.com: The message does not specify a sender and a default sender has not been configured
+2026-04-29 19:37:13,987 SECURITY: SECURITY: REGISTER - New user registered with email adamhissen2007@gmail.com
+2026-04-29 20:09:24,109 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-29 20:10:05,041 SECURITY: SECURITY: LOGOUT - User logged out
+2026-04-29 20:20:59,606 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 20:21:00,094 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 20:21:00,105 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-29 21:22:15,330 SECURITY: SECURITY: LOGIN_FAILED - Failed login for 255378@eru.edu.eg
+2026-04-29 21:23:31,538 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:23:32,063 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:23:32,111 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-29 21:32:02,149 SECURITY: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-29 21:33:04,660 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-29 21:38:51,001 SECURITY: SECURITY: LOGOUT - User logged out
+2026-04-29 21:41:05,960 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:41:06,520 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:41:06,542 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-29 21:50:55,796 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:50:56,643 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:50:56,663 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-29 21:52:31,365 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:52:31,876 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 21:52:31,905 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-29 21:53:17,572 SECURITY: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-29 21:53:24,420 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-29 22:07:17,371 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 22:07:17,913 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 22:07:17,981 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-29 22:20:04,483 SECURITY: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-29 22:20:08,782 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-30 17:44:31,498 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 17:44:33,825 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 17:44:33,845 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-30 17:46:45,140 SECURITY: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-30 17:47:02,433 SECURITY: Failed to send email to 255378@eru.edu.eg: emails/magic_login.html
+2026-04-30 17:47:58,987 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-30 17:51:35,072 SECURITY: SECURITY: LOGOUT - User logged out
+2026-04-30 17:51:56,629 SECURITY: SECURITY: LOGIN_SUCCESS - 2FA Login from IP 127.0.0.1
+2026-04-30 18:38:52,977 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 18:38:53,780 SECURITY: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 18:38:53,795 SECURITY: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-30 18:42:18,681 SECURITY: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-30 18:42:23,623 SECURITY: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1

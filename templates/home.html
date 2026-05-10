@@ -19,9 +19,40 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
             position: relative;
             overflow-x: hidden;
+            transition: background 0.3s ease;
         }
 
-        /* خلفية ديناميكية متحركة */
+        /* Dark/Light Mode */
+        body.light-mode {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        }
+        body.light-mode .hero-card {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        body.light-mode h1 {
+            background: linear-gradient(135deg, #0f172a, #4f46e5);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        body.light-mode .subtitle,
+        body.light-mode .footer-text,
+        body.light-mode .stat-label,
+        body.light-mode .feature {
+            color: #334155;
+        }
+        body.light-mode .btn-secondary {
+            color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        body.light-mode .eru-logo-text {
+            color: #0f172a;
+        }
+        body.light-mode .made-by {
+            color: #475569;
+        }
+
+        /* خلفية متحركة */
         .animated-bg {
             position: fixed;
             top: 0;
@@ -48,22 +79,12 @@
             100% { transform: translateY(-100vh) scale(1); opacity: 0; }
         }
 
-        /* 30 نقطة متحركة */
         .animated-bg span:nth-child(1) { left: 10%; animation-duration: 12s; width: 30px; height: 30px; }
         .animated-bg span:nth-child(2) { left: 20%; animation-duration: 18s; width: 15px; height: 15px; animation-delay: 2s; }
         .animated-bg span:nth-child(3) { left: 35%; animation-duration: 14s; width: 25px; height: 25px; animation-delay: 4s; }
         .animated-bg span:nth-child(4) { left: 50%; animation-duration: 20s; width: 10px; height: 10px; animation-delay: 1s; }
         .animated-bg span:nth-child(5) { left: 65%; animation-duration: 16s; width: 35px; height: 35px; animation-delay: 3s; }
         .animated-bg span:nth-child(6) { left: 80%; animation-duration: 22s; width: 20px; height: 20px; animation-delay: 5s; }
-        .animated-bg span:nth-child(7) { left: 15%; animation-duration: 11s; width: 8px; height: 8px; animation-delay: 7s; }
-        .animated-bg span:nth-child(8) { left: 45%; animation-duration: 19s; width: 40px; height: 40px; animation-delay: 2s; }
-        .animated-bg span:nth-child(9) { left: 70%; animation-duration: 13s; width: 12px; height: 12px; animation-delay: 6s; }
-        .animated-bg span:nth-child(10) { left: 90%; animation-duration: 17s; width: 28px; height: 28px; animation-delay: 1s; }
-        .animated-bg span:nth-child(11) { left: 5%; animation-duration: 25s; width: 18px; height: 18px; animation-delay: 3s; }
-        .animated-bg span:nth-child(12) { left: 55%; animation-duration: 21s; width: 22px; height: 22px; animation-delay: 4s; }
-        .animated-bg span:nth-child(13) { left: 75%; animation-duration: 15s; width: 14px; height: 14px; animation-delay: 8s; }
-        .animated-bg span:nth-child(14) { left: 30%; animation-duration: 24s; width: 45px; height: 45px; animation-delay: 0s; }
-        .animated-bg span:nth-child(15) { left: 85%; animation-duration: 14s; width: 9px; height: 9px; animation-delay: 9s; }
 
         .container {
             position: relative;
@@ -85,9 +106,9 @@
             padding: 50px 40px;
             text-align: center;
             border: 1px solid rgba(99, 102, 241, 0.3);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             animation: fadeInUp 0.8s ease-out;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, background 0.3s ease;
         }
 
         .hero-card:hover {
@@ -100,7 +121,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* اللوجو */
+        /* لوجو Study Hub */
         .logo {
             font-size: 65px;
             background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
@@ -135,7 +156,44 @@
             line-height: 1.6;
         }
 
-        /* إحصائيات سريعة */
+        /* لوجو الجامعة */
+        .university-brand {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 60px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .eru-logo {
+            width: 40px;
+            height: 40px;
+            background: #1e3a8a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 20px;
+        }
+        .eru-logo-text {
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+        .eru-logo-sub {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* إحصائيات */
         .stats-showcase {
             display: flex;
             justify-content: center;
@@ -248,7 +306,45 @@
             font-size: 14px;
         }
 
-        /* زر الصوت */
+        /* التوقيع */
+        .made-by {
+            margin-top: 35px;
+            font-size: 12px;
+            color: #475569;
+            text-align: center;
+        }
+        .made-by i {
+            color: #ec4899;
+            margin: 0 4px;
+        }
+        .made-by a {
+            color: #a855f7;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        /* أزرار التحكم */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
+        }
+        .theme-toggle:hover {
+            background: #4f46e5;
+            transform: scale(1.05);
+        }
+
         .voice-fab {
             position: fixed;
             bottom: 30px;
@@ -280,12 +376,6 @@
             50% { transform: translateY(-8px); }
         }
 
-        .footer-text {
-            margin-top: 35px;
-            font-size: 12px;
-            color: #475569;
-        }
-
         @media (max-width: 550px) {
             .hero-card { padding: 35px 25px; }
             h1 { font-size: 32px; }
@@ -297,11 +387,23 @@
 <div class="animated-bg">
     <span></span><span></span><span></span><span></span><span></span>
     <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
 </div>
+
+<button class="theme-toggle" id="themeToggle">🌙</button>
 
 <div class="container">
     <div class="hero-card">
+        <!-- لوجو الجامعة -->
+        <div class="university-brand">
+            <div class="eru-logo">
+                <span>ERU</span>
+            </div>
+            <div>
+                <div class="eru-logo-text">الجامعة الروسية</div>
+                <div class="eru-logo-sub">Russian University</div>
+            </div>
+        </div>
+
         <div class="logo">
             <i class="fas fa-graduation-cap"></i>
         </div>
@@ -339,8 +441,9 @@
             <div class="feature"><i class="fas fa-video"></i> مكالمات فيديو</div>
         </div>
 
-        <div class="footer-text">
-            <i class="fas fa-heart" style="color: #ec4899;"></i> تعليم المستقبل، بلمسة عربية
+        <!-- التوقيع -->
+        <div class="made-by">
+            Made with <i class="fas fa-heart"></i> by <a href="#">Adam Hussien</a>
         </div>
     </div>
 </div>
@@ -350,7 +453,7 @@
 </button>
 
 <script>
-    // ترحيب صوتي
+    // الترحيب الصوتي
     function speakWelcome() {
         const msg = new SpeechSynthesisUtterance('مرحباً بك في ستادي هاب! منصتك التعليمية المتكاملة بالذكاء الاصطناعي. سجل دخول وابدأ رحلة التفوق الآن!');
         msg.lang = 'ar-SA';
@@ -391,7 +494,21 @@
         }, 25);
     }
 
+    // Dark/Light Mode
+    function initTheme() {
+        const toggle = document.getElementById('themeToggle');
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (!isDark) document.body.classList.add('light-mode');
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const darkMode = document.body.classList.contains('light-mode');
+            localStorage.setItem('darkMode', darkMode);
+            toggle.innerHTML = darkMode ? '☀️' : '🌙';
+        });
+    }
+
     fetchStats();
+    initTheme();
 
     // PWA Service Worker
     if ('serviceWorker' in navigator) {

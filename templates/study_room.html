@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>غرفة مذاكرة - Study Hub AI</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .back-btn { background: #4f46e5; color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; }
+        
+        .room-grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        @media (max-width: 900px) { .room-grid { grid-template-columns: 1fr; } }
+        
+        /* Focus Area */
+        .focus-area { background: #111827; border-radius: 30px; padding: 25px; border: 1px solid #1f2937; }
+        .topic-header { background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .timer { text-align: center; margin-bottom: 30px; }
+        .timer-display { font-size: 72px; font-weight: bold; font-family: monospace; background: #1e293b; display: inline-block; padding: 20px 40px; border-radius: 60px; }
+        .progress-bar { background: #1e293b; border-radius: 20px; height: 12px; margin: 20px 0; }
+        .progress-fill { background: linear-gradient(95deg, #10b981, #fbbf24); width: 0%; height: 12px; border-radius: 20px; transition: width 0.5s; }
+        .controls { display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+        .btn { padding: 12px 25px; border-radius: 40px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-start { background: #10b981; color: white; }
+        .btn-pause { background: #f59e0b; color: white; }
+        .btn-end { background: #ef4444; color: white; }
+        .btn:hover { transform: scale(1.02); }
+        
+        /* Chat Area */
+        .chat-area { background: #111827; border-radius: 30px; padding: 20px; border: 1px solid #1f2937; display: flex; flex-direction: column; height: 600px; }
+        .chat-messages { flex: 1; overflow-y: auto; margin-bottom: 15px; padding: 10px; }
+        .message { margin-bottom: 12px; padding: 8px 12px; border-radius: 15px; max-width: 85%; }
+        .message-user { background: #4f46e5; color: white; margin-right: auto; }
+        .message-other { background: #1e293b; color: white; margin-left: auto; }
+        .message-time { font-size: 10px; opacity: 0.7; margin-top: 4px; }
+        .chat-input { display: flex; gap: 10px; }
+        .chat-input input { flex: 1; padding: 12px; border-radius: 30px; background: #1e293b; border: none; color: white; }
+        .chat-input button { background: #4f46e5; border: none; padding: 12px 20px; border-radius: 30px; color: white; cursor: pointer; }
+        
+        /* Participants */
+        .participants { margin-top: 20px; padding: 15px; background: #1e293b; border-radius: 20px; }
+        .participant { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #334155; }
+        .participant-status { width: 10px; height: 10px; border-radius: 50%; }
+        .status-online { background: #10b981; }
+        .status-focusing { background: #fbbf24; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 style="color: #fbbf24;"><i class="fas fa-users"></i> 🎓 غرفة مذاكرة</h1>
+        <a href="/study-matches" class="back-btn"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+
+    <div class="room-grid">
+        <div class="focus-area">
+            <div class="topic-header">
+                <i class="fas fa-book-open"></i> جلسة مذاكرة: <span id="topic">تحميل...</span>
+            </div>
+            <div class="timer">
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="focusProgress"></div></div>
+            <div class="controls">
+                <button class="btn btn-start" onclick="startFocus()"><i class="fas fa-play"></i> بدء التركيز</button>
+                <button class="btn btn-pause" onclick="pauseFocus()"><i class="fas fa-pause"></i> إيقاف مؤقت</button>
+                <button class="btn btn-end" onclick="endSession()"><i class="fas fa-stop"></i> إنهاء الجلسة</button>
+            </div>
+            <div class="participants" id="participantsList"></div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const socket = io();
+    let roomName = "{{ room_name }}";
+    let userName = "{{ user_name }}";
+    let isFocusing = false;
+    let focusSeconds = 0;
+    let focusInterval = null;
+    let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    socket.emit('join_study_room', { room_name: roomName, username: userName });
+
+    socket.on('chat_message', (data) => {
+        addMessage(data.username, data.message);
+    });
+
+    socket.on('user_joined', (data) => {
+        addSystemMessage(`✨ ${data.username} انضم إلى الغرفة`);
+        loadParticipants();
+    });
+
+    socket.on('user_left', (data) => {
+        addSystemMessage(`👋 ${data.username} غادر الغرفة`);
+        loadParticipants();
+    });
+
+    socket.on('focus_update', (data) => {
+        updateParticipantFocus(data.username, data.isFocusing);
+    });
+
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
+        if (!message) return;
+        socket.emit('chat_message', { room_name: roomName, username: userName, message: message });
+        input.value = '';
+    }
+
+    function addMessage(username, message) {
+        const container = document.getElementById('chatMessages');
+        const isCurrentUser = (username === userName);
+        const div = document.createElement('div');
+        div.className = `message ${isCurrentUser ? 'message-user' : 'message-other'}`;
+        div.innerHTML = `<div><strong>${username}</strong>: ${message}</div><div class="message-time">${new Date().toLocaleTimeString()}</div>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function addSystemMessage(message) {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.style.textAlign = 'center';
+        div.style.color = '#9ca3af';
+        div.style.fontSize = '12px';
+        div.style.margin = '10px 0';
+        div.innerHTML = message;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function startFocus() {
+        if (focusInterval) return;
+        isFocusing = true;
+        focusInterval = setInterval(() => {
+            focusSeconds++;
+            updateTimerDisplay();
+            socket.emit('focus_update', { room_name: roomName, username: userName, isFocusing: true, seconds: focusSeconds });
+        }, 1000);
+        addSystemMessage('🧠 بدأت جلسة التركيز!');
+    }
+
+    function pauseFocus() {
+        if (focusInterval) {
+            clearInterval(focusInterval);
+            focusInterval = null;
+            isFocusing = false;
+            socket.emit('focus_update', { room_name: roomName, username: userName, isFocusing: false, seconds: focusSeconds });
+            addSystemMessage('⏸️ تم إيقاف التركيز مؤقتاً');
+        }
+    }
+
+    function updateTimerDisplay() {
+        const hours = Math.floor(focusSeconds / 3600);
+        const minutes = Math.floor((focusSeconds % 3600) / 60);
+        const seconds = focusSeconds % 60;
+        document.getElementById('timerDisplay').innerHTML = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        const progress = Math.min(100, (focusSeconds / 3600) * 100);
+        document.getElementById('focusProgress').style.width = `${progress}%`;
+    }
+
+    async function endSession() {
+        if (confirm('هل أنت متأكد من إنهاء الجلسة؟')) {
+            pauseFocus();
+            const response = await fetch('/api/study/session/end', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ room_name: roomName, duration: focusSeconds })
+            });
+            window.location.href = '/study-matches';
+        }
+    }
+
+    async function loadParticipants() {
+        try {
+            const response = await fetch(`/api/study/room/participants/${roomName}`);
+            const data = await response.json();
+            const container = document.getElementById('participantsList');
+            container.innerHTML = '<div style="margin-bottom: 10px;"><i class="fas fa-users"></i> المشاركون</div>';
+            data.participants.forEach(p => {
+                container.innerHTML += `
+                    <div class="participant">
+                        <div class="participant-status ${p.isFocusing ? 'status-focusing' : 'status-online'}"></div>
+                        <span>${p.username}</span>
+                        ${p.isFocusing ? '<span style="font-size: 11px; color: #fbbf24;">🎯 مركز</span>' : ''}
+                        <span style="font-size: 11px; margin-right: auto;">${Math.floor(p.focus_seconds / 60)} دقيقة</span>
+                    </div>
+                `;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    function updateParticipantFocus(username, isFocusing) {
+        loadParticipants();
+    }
+
+    loadParticipants();
+    setInterval(loadParticipants, 5000);
+</script>
+</body>
+</html>

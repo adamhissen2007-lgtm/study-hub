@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي الرياضيات - العقل الذكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0b1120, #030712);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            background: #111827;
+            border-radius: 48px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 { color: #fbbf24; margin-bottom: 20px; }
+        .timer { font-size: 48px; color: #ef4444; font-weight: bold; margin: 20px 0; }
+        .question { font-size: 48px; color: white; margin: 30px 0; }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .option {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 30px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option:hover { background: #6366f1; transform: scale(0.98); }
+        .score { font-size: 20px; color: #10b981; margin: 15px 0; }
+        .btn { background: #6366f1; border: none; padding: 12px 30px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; }
+        .message { margin-top: 20px; color: #fbbf24; }
+        @media (max-width: 500px) { .question { font-size: 32px; } .option { font-size: 18px; } }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>➕ تحدي الرياضيات</h1>
+    <div class="timer">⏱️ <span id="timer">60</span> ثانية</div>
+    <div class="score">⭐ النقاط: <span id="score">0</span></div>
+    <div class="question" id="question">5 + 3 = ?</div>
+    <div class="options" id="options"></div>
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+    let score = 0;
+    let timeLeft = 60;
+    let timerInterval = null;
+    let currentQuestion = null;
+    
+    function generateQuestion() {
+        const operations = ['+', '-', '*'];
+        const op = operations[Math.floor(Math.random() * operations.length)];
+        let a = Math.floor(Math.random() * 20) + 1;
+        let b = Math.floor(Math.random() * 20) + 1;
+        
+        if(op === '-') { if(a < b) [a, b] = [b, a]; }
+        if(op === '*') { a = Math.floor(Math.random() * 10) + 1; b = Math.floor(Math.random() * 10) + 1; }
+        
+        let answer;
+        if(op === '+') answer = a + b;
+        else if(op === '-') answer = a - b;
+        else answer = a * b;
+        
+        return { text: `${a} ${op} ${b}`, answer: answer };
+    }
+    
+    function generateOptions(correct) {
+        let options = [correct];
+        while(options.length < 4) {
+            let offset = Math.floor(Math.random() * 10) + 1;
+            let wrong = correct + (Math.random() > 0.5 ? offset : -offset);
+            if(wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return options.sort(() => Math.random() - 0.5);
+    }
+    
+    function newQuestion() {
+        currentQuestion = generateQuestion();
+        document.getElementById('question').innerHTML = currentQuestion.text + ' = ?';
+        const options = generateOptions(currentQuestion.answer);
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = options.map(opt => `<div class="option" onclick="checkAnswer(${opt})">${opt}</div>`).join('');
+    }
+    
+    function checkAnswer(selected) {
+        if(selected === currentQuestion.answer) {
+            score++;
+            document.getElementById('score').innerText = score;
+            newQuestion();
+        } else {
+            document.getElementById('message').innerHTML = '❌ خطأ! حاول مرة أخرى';
+            setTimeout(() => document.getElementById('message').innerHTML = '', 1000);
+        }
+    }
+    
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').innerText = timeLeft;
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                const xpEarned = score * 2;
+                document.getElementById('message').innerHTML = `🎉 انتهى الوقت! حصلت على ${xpEarned} نقطة خبرة!`;
+                fetch('/api/academic/complete-course', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ points: xpEarned, course_name: 'تحدي الرياضيات' })
+                });
+                setTimeout(() => { window.location.href = '/smart-games'; }, 2000);
+            }
+        }, 1000);
+    }
+    
+    newQuestion();
+    startTimer();
+</script>
+</body>
+</html>

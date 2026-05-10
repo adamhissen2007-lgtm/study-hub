@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفعيل المصادقة الثنائية - Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 48px;
+            padding: 35px;
+            border: 1px solid rgba(99,102,241,0.3);
+        }
+        h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        h2 i { color: #fbbf24; }
+        .step {
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .step h3 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .qr-container {
+            text-align: center;
+            margin: 20px 0;
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            display: inline-block;
+            width: 100%;
+        }
+        .qr-container img {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        .secret-key {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 16px;
+            font-family: monospace;
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 2px;
+            color: #fbbf24;
+            margin: 15px 0;
+        }
+        .backup-codes {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 16px;
+            font-family: monospace;
+            text-align: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .backup-code {
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 40px;
+            border: 1px solid #4f46e5;
+            background: #0f172a;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.02); opacity: 0.9; }
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 20px;
+        }
+        .success { background: rgba(16,185,129,0.2); color: #34d399; }
+        .error { background: rgba(239,68,68,0.2); color: #fca5a5; }
+        .info-text {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .btn-back {
+            background: #334155;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2><i class="fas fa-shield-alt"></i> المصادقة الثنائية (2FA)</h2>
+    
+    <div class="step">
+        <h3><i class="fas fa-download"></i> الخطوة 1: حمّل التطبيق</h3>
+        <p style="color: #cbd5e1;">حمّل Google Authenticator أو Microsoft Authenticator من متجر التطبيقات على هاتفك.</p>
+    </div>
+
+    <div class="step" id="qrStep">
+        <h3><i class="fas fa-qrcode"></i> الخطوة 2: امسح الرمز</h3>
+        <div class="qr-container" id="qrContainer">
+            <div id="qrLoader" style="color:#fbbf24;"><i class="fas fa-spinner fa-pulse"></i> جاري التحميل...</div>
+            <img id="qrImage" style="display: none;">
+        </div>
+        <div class="secret-key" id="secretKey"></div>
+        <p style="color:#94a3b8; font-size:12px; text-align:center;">أو أدخل هذا المفتاح يدوياً في التطبيق</p>
+    </div>
+
+    <div class="step">
+        <h3><i class="fas fa-code"></i> الخطوة 3: أدخل الكود</h3>
+        <input type="text" id="otpCode" placeholder="أدخل الرقم المكون من 6 أرقام" maxlength="6">
+        <div id="backupCodesContainer" style="display: none;">
+            <h3 style="color:#fbbf24; font-size:16px; margin:15px 0 10px;"><i class="fas fa-save"></i> أكواد النسخ الاحتياطي</h3>
+            <div id="backupCodesList" class="backup-codes"></div>
+            <p class="info-text">⚠️ احفظ هذه الأكواد في مكان آمن. كل كود يستخدم مرة واحدة فقط.</p>
+        </div>
+        <button id="verifyBtn">تأكيد وتفعيل</button>
+        <div id="message"></div>
+    </div>
+
+    <a href="/dashboard" class="btn-back" style="display: block; text-align: center; background: #334155; color: white; text-decoration: none; padding: 12px; border-radius: 40px; margin-top: 15px;">
+        <i class="fas fa-arrow-right"></i> العودة للوحة
+    </a>
+</div>
+
+<script>
+    let backupCodes = [];
+
+    async function setup2FA() {
+        try {
+            const res = await fetch('/2fa/enable', { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.qr_code) {
+                document.getElementById('qrImage').src = 'data:image/png;base64,' + data.qr_code;
+                document.getElementById('qrImage').style.display = 'block';
+                document.getElementById('qrLoader').style.display = 'none';
+                document.getElementById('secretKey').innerText = data.secret;
+                backupCodes = data.backup_codes;
+                
+                const backupDiv = document.getElementById('backupCodesList');
+                backupDiv.innerHTML = backupCodes.map(code => `<div class="backup-code">${code}</div>`).join('');
+                document.getElementById('backupCodesContainer').style.display = 'block';
+            }
+        } catch(e) {
+            console.log(e);
+            document.getElementById('qrLoader').innerHTML = '<span style="color:#ef4444;">❌ خطأ في التحميل</span>';
+        }
+    }
+
+    document.getElementById('verifyBtn').addEventListener('click', async () => {
+        const code = document.getElementById('otpCode').value.trim();
+        if (code.length !== 6) {
+            document.getElementById('message').innerHTML = '<div class="message error">الرجاء إدخال 6 أرقام</div>';
+            return;
+        }
+        
+        try {
+            const res = await fetch('/2fa/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                document.getElementById('message').innerHTML = '<div class="message success">✅ ' + data.message + '<br>سيتم توجيهك للوحة التحكم...</div>';
+                setTimeout(() => { window.location.href = '/dashboard'; }, 2000);
+            } else {
+                document.getElementById('message').innerHTML = '<div class="message error">❌ ' + data.message + '</div>';
+            }
+        } catch(e) {
+            document.getElementById('message').innerHTML = '<div class="message error">❌ خطأ في الاتصال</div>';
+        }
+    });
+
+    setup2FA();
+</script>
+</body>
+</html>

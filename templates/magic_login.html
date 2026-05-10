@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول السحري - Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            padding: 20px;
+        }
+        .magic-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 48px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            border: 1px solid rgba(99,102,241,0.3);
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #fff, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        .magic-icon {
+            font-size: 70px;
+            background: linear-gradient(135deg, #10b981, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #94a3b8;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 30px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 20px;
+            direction: ltr;
+        }
+        input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16,185,129,0.3);
+        }
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 800;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.02); box-shadow: 0 10px 25px rgba(16,185,129,0.5); }
+        .error {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid #ef4444;
+            padding: 10px;
+            border-radius: 20px;
+            color: #fca5a5;
+            margin-bottom: 20px;
+        }
+        .footer {
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #c084fc;
+            text-decoration: none;
+        }
+        .info-note {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid #10b981;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #34d399;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="magic-card">
+    <div class="magic-icon">
+        <i class="fas fa-magic"></i>
+    </div>
+    <h1>تسجيل الدخول السحري</h1>
+    
+    <div class="info-note">
+        <i class="fas fa-info-circle"></i> ستصلك رسالة على بريدك الإلكتروني تحتوي على رابط سحري. الرابط صالح لمدة 5 دقائق فقط.
+    </div>
+    
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    
+    <form method="POST">
+        <input type="email" name="email" placeholder="your-email@eru.edu.eg" required dir="ltr">
+        <button type="submit"><i class="fas fa-paper-plane"></i> إرسال الرابط السحري</button>
+    </form>
+    
+    <div class="footer">
+        <a href="/login">← تسجيل الدخول بكلمة المرور</a>
+    </div>
+</div>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const emailInput = document.querySelector('input[name="email"]');
+        let email = emailInput.value.trim();
+        
+        if (!email.includes('@')) {
+            e.preventDefault();
+            alert('❌ الرجاء إدخال بريد إلكتروني صحيح');
+            return false;
+        }
+        
+        const parts = email.split('@');
+        if (parts.length !== 2 || parts[0].length === 0 || parts[1].length === 0) {
+            e.preventDefault();
+            alert('❌ البريد الإلكتروني غير صحيح');
+            return false;
+        }
+        
+        emailInput.value = email.toLowerCase();
+    });
+</script>
+</body>
+</html>

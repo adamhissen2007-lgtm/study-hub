@@ -2,11 +2,13 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - Study Hub AI</title>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>لوحة التحكم الذكية - Study Hub AI</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --bg-dark: #0b1120;
@@ -16,14 +18,76 @@
             --gold: #fbbf24;
             --text: #f3f4f6;
             --text-dim: #9ca3af;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --pink: #ec4899;
+            --purple: #8b5cf6;
+            --orange: #f97316;
+            --cyan: #06b6d4;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
         body {
             background: radial-gradient(circle at 10% 20%, var(--bg-dark), #030712);
             padding: 20px;
             min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container { max-width: 1400px; margin: 0 auto; overflow-x: hidden; }
+        
+        ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; overflow-x: visible; }
+        html, body { max-width: 100%; overflow-x: hidden; }
+        .courses-grid { overflow-x: visible; overflow-y: visible; }
+        
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 5px var(--gold), 0 0 10px var(--gold); }
+            50% { text-shadow: 0 0 20px var(--gold), 0 0 30px #fbbf24; }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); text-shadow: 0 0 10px var(--gold); }
+        }
+        @keyframes sparkle {
+            0% { left: -100%; top: 0; }
+            100% { left: 200%; top: 100%; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .card, .stat-card, .course-card {
+            animation: floatIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
+        }
+        
+        .user-info h1 i { animation: neonPulse 2s ease-in-out infinite; }
+        
+        .stat-number {
+            background: linear-gradient(135deg, var(--gold), #f97316, var(--gold), #f59e0b);
+            background-size: 300% auto;
+            animation: shimmer 3s linear infinite;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
         
         .header {
             background: rgba(17, 24, 39, 0.7);
@@ -37,6 +101,7 @@
             flex-wrap: wrap;
             gap: 20px;
             border: 1px solid rgba(99,102,241,0.2);
+            overflow-x: visible;
         }
         .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
         .badge {
@@ -46,34 +111,71 @@
             font-size: 13px;
             font-weight: 600;
             color: white;
-            display: inline-block;
         }
+        
         .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
         .header-link, .logout-btn {
-            background: rgba(31, 41, 55, 0.8);
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
             padding: 8px 18px;
             border-radius: 40px;
             color: var(--text);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 13px;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(99,102,241,0.3);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        .header-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .header-link:hover::before { width: 300px; height: 300px; }
         .header-link:hover, .logout-btn:hover {
-            background: var(--accent);
-            color: white;
-            transform: translateY(-2px);
-            border-color: var(--accent);
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-        .live-class-btn {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
-            color: black !important;
-            font-weight: 800 !important;
-        }
+        .live-class-btn { background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; color: black !important; }
+        .analytics-btn { background: linear-gradient(135deg, #10b981, #059669) !important; }
+        .schedule-btn { background: linear-gradient(135deg, #06b6d4, #0284c7) !important; }
+        .second-brain-btn { background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; }
+        .task-breakdown-btn { background: linear-gradient(135deg, #ec4899, #db2777) !important; }
+        .roadmap-btn { background: linear-gradient(135deg, #f97316, #ea580c) !important; }
+        .failure-tracker-btn { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+        .pressure-engine-btn { background: linear-gradient(135deg, #dc2626, #991b1b) !important; }
+        .life-dashboard-btn { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; }
+        .ai-tutor-btn { background: linear-gradient(135deg, #10b981, #047857) !important; }
+        .academic-roadmap-btn { background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important; }
+        .smart-games-btn { background: linear-gradient(135deg, #ec4899, #db2777) !important; }
+        .performance-btn { background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; }
+        .security-log-btn { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+        .notifications-btn { background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; }
+        .event-engine-btn { background: linear-gradient(135deg, #f97316, #dc2626) !important; }
+        .vector-search-btn { background: linear-gradient(135deg, #06b6d4, #0284c7) !important; }
+        .concept-graph-btn { background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important; }
+        .superbrain-btn { background: linear-gradient(135deg, #8b5cf6, #4c1d95) !important; }
+        .abtesting-btn { background: linear-gradient(135deg, #ec4899, #be185d) !important; }
+        .studyhall-btn { background: linear-gradient(135deg, #10b981, #047857) !important; }
+        .studybuddy-btn { background: linear-gradient(135deg, #f59e0b, #d97706) !important; }
+        .studymatches-btn { background: linear-gradient(135deg, #06b6d4, #0284c7) !important; }
+        .reputation-btn { background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important; }
+        .securityanalytics-btn { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+        .pentest-btn { background: linear-gradient(135deg, #f97316, #ea580c) !important; }
+        .command-center-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899) !important; border: 1px solid var(--gold); }
         
         .stats-grid {
             display: grid;
@@ -87,96 +189,95 @@
             padding: 24px 20px;
             text-align: center;
             border: 1px solid var(--border);
-            transition: 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .stat-card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .stat-number {
-            font-size: 38px;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--gold), #f97316);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+        .stat-card:hover { transform: translateY(-10px) scale(1.02); border-color: var(--accent); box-shadow: 0 20px 35px -10px rgba(99,102,241,0.5); }
+        .stat-number { font-size: 38px; font-weight: 900; }
         .stat-label { color: var(--text-dim); margin-top: 8px; font-weight: 500; }
         
-        .creative-clock {
-            background: linear-gradient(135deg, #1e1b4b, #0f172a);
-            border-radius: 32px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(251,191,36,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .clock-content h3 {
-            color: var(--gold);
-            font-size: 20px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .study-timer { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-        .timer-display { background: #030712; padding: 15px 25px; border-radius: 60px; }
-        .timer-display span { font-size: 42px; font-weight: 900; font-family: monospace; color: var(--gold); }
-        .timer-controls button { background: var(--accent); border: none; padding: 10px 20px; border-radius: 40px; color: white; font-weight: 700; margin: 0 5px; cursor: pointer; }
-        .quote-of-day { background: rgba(251,191,36,0.1); padding: 15px 20px; border-radius: 24px; max-width: 300px; text-align: center; }
-        .quote-of-day p { color: var(--text); font-size: 14px; font-style: italic; }
-        
-        .ai-plan-card {
-            background: linear-gradient(125deg, #1e1b4b, #0f172a);
-            border-radius: 32px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid #4f46e5;
-        }
-        
-        /* محاضرات حية */
-        .live-rooms-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border-radius: 32px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid #10b981;
-        }
-        
-        .courses-grid {
+        .grid-2cols {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
             gap: 25px;
-            margin-top: 25px;
+            margin-bottom: 30px;
         }
-        .course-card {
-            background: var(--bg-card);
-            border-radius: 28px;
-            overflow: hidden;
-            transition: 0.3s;
-            border: 1px solid var(--border);
+        .card {
+            position: relative;
+            background: linear-gradient(135deg, #111827, #0f172a);
+            border-radius: 32px;
+            padding: 25px;
+            border: 1px solid rgba(99,102,241,0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .course-card:hover { transform: translateY(-8px); border-color: var(--accent); }
-        .course-cover { height: 100px; background: linear-gradient(135deg, #4f46e5, #a855f7); }
-        .course-content { padding: 20px; }
-        .course-card h3 { color: white; margin-bottom: 8px; font-size: 1.3rem; }
-        .course-link {
-            display: inline-flex;
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--gold), var(--accent), var(--danger), var(--success));
+            border-radius: 34px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+        .card:hover::before { opacity: 1; }
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--accent);
+            box-shadow: 0 20px 35px -10px rgba(99,102,241,0.5);
+        }
+        .card-title {
+            color: var(--gold);
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(99,102,241,0.2);
-            padding: 8px 18px;
-            border-radius: 40px;
-            color: #c084fc;
-            text-decoration: none;
-            font-weight: 700;
-            margin-top: 12px;
         }
-        
+        .progress-bar-container {
+            background: #1e293b;
+            border-radius: 30px;
+            height: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            position: relative;
+            background: linear-gradient(95deg, var(--success), var(--gold));
+            width: 0%;
+            height: 100%;
+            border-radius: 30px;
+            transition: width 0.5s ease;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(95deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #4f46e5);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { transform: scale(0.98); filter: brightness(1.1); }
         .semester-btns { text-align: center; margin-bottom: 25px; }
         .semester-btn {
-            background: var(--bg-card);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
             border: none;
             padding: 10px 28px;
             border-radius: 50px;
@@ -184,50 +285,202 @@
             font-weight: 700;
             margin: 0 6px;
             cursor: pointer;
+            transition: all 0.2s;
         }
-        .semester-btn.active { background: var(--accent); box-shadow: 0 0 15px var(--accent); }
-        .fahim-fab {
-            position: fixed; bottom: 30px; right: 30px;
-            width: 60px; height: 60px;
-            background: linear-gradient(135deg, var(--gold), #f59e0b);
-            border-radius: 30px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(251,191,36,0.4);
-            z-index: 999;
+        .semester-btn.active {
+            background: linear-gradient(135deg, var(--accent), #4f46e5);
+            box-shadow: 0 0 15px var(--accent);
+        }
+        .semester-btn:hover { transform: translateY(-2px); }
+        
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+            overflow-x: visible;
+        }
+        .course-card {
+            background: var(--bg-card);
+            border-radius: 28px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--border);
+        }
+        .course-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 15px 30px -10px rgba(99,102,241,0.4); }
+        .course-cover { height: 100px; background: linear-gradient(135deg, #4f46e5, #a855f7); }
+        .course-content { padding: 20px; }
+        .course-card h3 { color: white; margin-bottom: 8px; font-size: 1.3rem; }
+        .course-link {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(99,102,241,0.1));
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: #c084fc;
             text-decoration: none;
-            color: black;
-            animation: pulseGlow 2s infinite;
+            font-weight: 700;
+            margin-top: 12px;
+            transition: all 0.2s;
         }
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(251,191,36,0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(251,191,36,0); }
-            100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); }
+        .course-link:hover { background: var(--accent); color: white; }
+        
+        .broadcast-bar {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 40px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid var(--gold);
+            overflow: hidden;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .course-card { animation: fadeIn 0.4s ease backwards; }
+        .scroll-text {
+            white-space: nowrap;
+            overflow: hidden;
+            animation: scroll 20s linear infinite;
+            color: var(--gold);
+            font-weight: 500;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        .treasure-box {
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .treasure-box::after {
+            content: '✨';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            font-size: 40px;
+            animation: sparkle 2s linear infinite;
+        }
+        .treasure-box:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(251,191,36,0.5); }
+        
+        .honor-list { margin-top: 10px; }
+        .honor-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        .honor-name { color: var(--gold); font-weight: bold; }
+        
+        .smart-decision-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-right: 4px solid #8b5cf6;
+            animation: slideIn 0.5s ease-out;
+        }
+        .ai-decision-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .push-2fa-card {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border: 1px solid #8b5cf6;
+        }
+        .biometric-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        .webauthn-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            transition: all 0.3s;
+        }
+        .webauthn-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(16,185,129,0.5);
+        }
+        
+        .timer-display span { animation: timerPulse 1s ease-in-out infinite; }
         
         @media (max-width: 700px) {
-            .creative-clock { flex-direction: column; text-align: center; }
-            .timer-display span { font-size: 32px; }
+            .grid-2cols { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .scroll-text { animation: none; white-space: normal; }
+        }
+
+        @keyframes footerGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100px); opacity: 0; }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="broadcast-bar">
+        <div class="scroll-text" id="broadcastMsg">✨ أحمد أنهى كورس الفيزياء! 🎉 نور حصلت على 50 نقطة! 🔥 يوسف كمل 7 أيام متواصلة! 💪 مريم تتصدر لوحة الشرف! 🏆</div>
+    </div>
+
     <div class="header">
         <div class="user-info">
             <h1><i class="fas fa-crown" style="color: var(--gold);"></i> مرحبا {{ user_name }}!</h1>
-            <span class="badge"><i class="fas fa-university"></i> {{ session['user_year'] }} | {{ session['user_major'] }}</span>
+            <span class="badge"><i class="fas fa-university"></i> {{ session['user_year'] }} | {{ session['user_major'] }} | مستوى {{ session.get('user_level', 1) }}</span>
         </div>
         <div class="header-actions">
-            <a href="/create-live-room" class="header-link live-class-btn"><i class="fas fa-chalkboard-teacher"></i> بدء محاضرة مباشرة</a>
+            <a href="/ultimate-hub" class="header-link command-center-btn"><i class="fas fa-crown"></i> 👑 AI Command Center - المركز المتقدم</a>
+            <a href="/create-live-room" class="header-link live-class-btn"><i class="fas fa-chalkboard-teacher"></i> بدء محاضرة</a>
+            <a href="/smart-schedule" class="header-link schedule-btn"><i class="fas fa-calendar-alt"></i> جدولي الذكي</a>
+            <a href="/career-roadmap" class="header-link roadmap-btn"><i class="fas fa-road"></i> رحلتي المهنية</a>
+            <a href="/second-brain" class="header-link second-brain-btn"><i class="fas fa-brain"></i> العقل الثاني</a>
+            <a href="/superbrain" class="header-link superbrain-btn"><i class="fas fa-brain"></i> 🧠 العقل الفائق</a>
+            <a href="/ab-testing/lab" class="header-link abtesting-btn"><i class="fas fa-flask"></i> 🧪 معمل التجارب</a>
+            <a href="/study-hall" class="header-link studyhall-btn"><i class="fas fa-users"></i> 📚 الصالة الدراسية</a>
+            <a href="/study-buddy" class="header-link studybuddy-btn"><i class="fas fa-robot"></i> 🤝 الرفيق الذكي</a>
+            <a href="/study-matches" class="header-link studymatches-btn"><i class="fas fa-handshake"></i> 🤝 طلبات المذاكرة</a>
+            <a href="/reputation" class="header-link reputation-btn"><i class="fas fa-star-of-life"></i> ⭐ سمعتي الأكاديمية</a>
+            <a href="/security-analytics" class="header-link securityanalytics-btn"><i class="fas fa-chart-line"></i> 📊 تحليلات الأمان</a>
+            <a href="/penetration-test-report" class="header-link pentest-btn"><i class="fas fa-shield-virus"></i> 🔒 تقرير الاختبار الأمني</a>
+            <a href="/task-breakdown" class="header-link task-breakdown-btn"><i class="fas fa-tasks"></i> تقسيم المهام</a>
+            <a href="/failure-tracker" class="header-link failure-tracker-btn"><i class="fas fa-ambulance"></i> الطوارئ الأكاديمية</a>
+            <a href="/pressure-engine" class="header-link pressure-engine-btn"><i class="fas fa-bolt"></i> محرك الضغط</a>
+            <a href="/life-dashboard" class="header-link life-dashboard-btn"><i class="fas fa-chart-pie"></i> لوحة الحياة</a>
+            <a href="/ai-tutor" class="header-link ai-tutor-btn"><i class="fas fa-robot"></i> المعلم الخصوصي</a>
+            <a href="/academic-roadmap" class="header-link academic-roadmap-btn"><i class="fas fa-graduation-cap"></i> الخريطة الأكاديمية</a>
+            <a href="/smart-games" class="header-link smart-games-btn"><i class="fas fa-gamepad"></i> 🧠 العقل الذكي</a>
+            <a href="/performance" class="header-link performance-btn"><i class="fas fa-chart-line"></i> تحليل أدائي</a>
+            <a href="/security-log" class="header-link security-log-btn"><i class="fas fa-shield-alt"></i> سجل الأمان</a>
+            <a href="/notifications" class="header-link notifications-btn"><i class="fas fa-bell"></i> الإشعارات</a>
+            <a href="/analytics-dashboard" class="header-link analytics-btn"><i class="fas fa-chart-line"></i> تحليلاتي</a>
+            <a href="/event-engine" class="header-link event-engine-btn"><i class="fas fa-broadcast-tower"></i> محرك الأحداث</a>
+            <a href="/vector-search" class="header-link vector-search-btn"><i class="fas fa-search"></i> البحث الدلالي</a>
+            <a href="/concept-graph" class="header-link concept-graph-btn"><i class="fas fa-project-diagram"></i> خريطة المفاهيم</a>
+            <a href="/code-mentor" class="header-link"><i class="fas fa-robot"></i> AI Mentor</a>
+            <a href="/code-analyzer" class="header-link"><i class="fas fa-code"></i> محلل الكود</a>
+            <a href="/smart-create" class="header-link"><i class="fas fa-wand-magic"></i> إنشاء ذكي</a>
+            <a href="/flashcards" class="header-link"><i class="fas fa-layer-group"></i> بطاقات</a>
             <a href="/chat" class="header-link"><i class="fas fa-comments"></i> دردشة</a>
             <a href="/video-chat" class="header-link"><i class="fas fa-video"></i> فيديو</a>
-            <a href="/flashcards" class="header-link"><i class="fas fa-layer-group"></i> بطاقات</a>
-            <a href="/smart-create" class="header-link"><i class="fas fa-wand-magic"></i> إنشاء ذكي</a>
-            <a href="/code-mentor" class="header-link"><i class="fas fa-robot"></i> AI Mentor</a>
+            {% if session.get('user_role') in ['admin', 'super_admin'] %}
+            <a href="/admin/dashboard" class="header-link"><i class="fas fa-shield-alt"></i> لوحة المشرف</a>
+            {% endif %}
             <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> خروج</a>
         </div>
     </div>
@@ -244,46 +497,180 @@
         <div class="stat-card"><div class="stat-number" data-target="{{ session.get('user_level', 1) }}">0</div><div class="stat-label">🚀 مستواك</div></div>
     </div>
 
-    <div class="creative-clock">
-        <div class="clock-content">
-            <h3><i class="fas fa-hourglass-half"></i> الساعة الدراسية التفاعلية</h3>
-            <div class="study-timer">
-                <div class="timer-display"><span id="timerDisplay">25:00</span></div>
-                <div class="timer-controls">
-                    <button onclick="startTimer()"><i class="fas fa-play"></i> ابدأ</button>
-                    <button onclick="pauseTimer()"><i class="fas fa-pause"></i> ايقاف</button>
-                    <button onclick="resetTimer()"><i class="fas fa-redo-alt"></i> اعادة</button>
+    <div id="ai-decision-container" class="mb-6">
+        <div class="smart-decision-card">
+            <div class="ai-decision-badge"><i class="fas fa-microchip"></i> 🧠 AI Real-Time Decision</div>
+            <div id="ai-decision-message" class="text-lg font-bold text-amber-400 mb-2">
+                <i class="fas fa-spinner fa-spin"></i> جاري تحليل سلوكك...
+            </div>
+            <div id="ai-decision-detail" class="text-sm text-gray-300"></div>
+            <button id="ai-decision-action-btn" class="mt-3 bg-amber-500 text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-amber-400 transition hidden" onclick="executeAIDecision()">
+                <i class="fas fa-play"></i> تنفيذ الاقتراح
+            </button>
+        </div>
+    </div>
+
+    <div class="grid-2cols">
+        <div class="card push-2fa-card">
+            <div class="card-title"><i class="fas fa-fingerprint"></i> 🔐 المصادقة المتقدمة (Push 2FA + بصمة)</div>
+            <div class="text-center">
+                <div class="biometric-icon">
+                    <i class="fas fa-mobile-alt text-4xl text-purple-400"></i>
+                    <i class="fas fa-fingerprint text-4xl text-amber-400 ml-2"></i>
                 </div>
+                <div class="text-sm text-gray-300 mb-3">تسجيل الدخول ببصمة الإصبع أو الوجه أو Push Notification</div>
+                <button id="enablePush2faBtn" class="btn-primary webauthn-btn" onclick="enablePush2FA()">
+                    <i class="fas fa-bell"></i> تفعيل الإشعارات الفورية
+                </button>
+                <button id="webauthnBtn" class="btn-primary webauthn-btn mt-2" onclick="registerWebAuthn()">
+                    <i class="fas fa-fingerprint"></i> تسجيل بصمة/وجه الجهاز
+                </button>
+            </div>
+            <div id="pushStatus" class="text-xs text-center mt-3 text-gray-400"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-brain"></i> 🧠 محلل العقل</div>
+            <div id="mindStatus">نشاط الدماغ: 78% 🔥</div>
+            <div class="progress-bar-container"><div class="progress-bar" id="mindBar" style="width: 78%;"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-moon"></i> 🕯️ وضع التركيز العميق</div>
+            <button class="btn-primary" onclick="startDeepFocus()">فعّل 30 دقيقة تركيز</button>
+            <div id="focusTimer" style="margin-top: 10px; color: var(--gold); text-align: center;"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-cloud-sun"></i> 📊 توقعات عاطفية</div>
+            <div id="emotionForecast" style="font-size: 16px;">🌞 يوم مليء بالطاقة الإيجابية</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-crystal-ball"></i> 🔮 كرة البلور</div>
+            <div id="crystalBall">غداً: ستنجز 3 مهام بسهولة</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-flask"></i> 🧪 معمل التجارب</div>
+            <div id="experiment">📢 جرّب المذاكرة فجراً غداً لمدة 3 أيام</div>
+            <button class="btn-primary" onclick="acceptExperiment()">أبدأ التجربة</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-bullseye"></i> 🎯 الهدف الفائق</div>
+            <div style="margin-bottom: 10px;">✨ تخلص 5 كورسات هذا الشهر ✨</div>
+            <div class="progress-bar-container"><div class="progress-bar" id="hyperGoalBar" style="width: 0%;"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-battery-full"></i> 🌈 شريط الطاقة الإيجابية</div>
+            <div class="progress-bar-container"><div class="progress-bar" id="energyBar" style="width: 20%; background: linear-gradient(95deg, var(--gold), #f97316);"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-scroll"></i> 📜 لفافة الحكمة</div>
+            <div id="wisdomScroll" style="font-style: italic; color: var(--gold);">"العلم بلا عمل كالشجر بلا ثمر." - مثل عربي</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-gem"></i> 💎 كنز اليوم</div>
+            <div class="treasure-box" onclick="openTreasure()">
+                <i class="fas fa-gem" style="font-size: 40px;"></i>
+                <div id="treasureStatus">اضغط لفتح الكنز</div>
             </div>
         </div>
-        <div class="quote-of-day">
-            <i class="fas fa-quote-right"></i>
-            <p>"النجاح ليس حكرا على احد، فقط من يجتهد يصل"</p>
-            <p style="font-size: 11px; margin-top: 8px;">- تذكر: الكويز بكرة وانت قادر 💪</p>
-        </div>
-    </div>
 
-    <!-- المحاضرات الحية والإشعارات -->
-    <div class="live-rooms-card" id="liveRoomsSection">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-            <h2 style="color: white; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-chalkboard-teacher" style="color: #10b981;"></i> محاضرات حية الآن
-                <span id="notificationBadge" style="background:#ef4444; color:white; font-size:12px; padding:2px 8px; border-radius:20px; display:none;">جديد</span>
-            </h2>
-            <button onclick="loadActiveRooms()" style="background:#334155; border:none; padding:8px 16px; border-radius:30px; color:white; cursor:pointer;"><i class="fas fa-sync-alt"></i> تحديث</button>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-spa"></i> 🧘 عداد التأمل السريع</div>
+            <div id="meditationTimer" style="font-size: 24px; text-align: center; margin: 10px 0;">30</div>
+            <button class="btn-primary" onclick="startMeditation()">ابدأ التأمل</button>
         </div>
-        <div id="activeRoomsList">
-            <p style="color: #94a3b8;"><i class="fas fa-spinner fa-pulse"></i> جاري تحميل المحاضرات...</p>
-        </div>
-    </div>
 
-    <div class="ai-plan-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-            <h2 style="color: white;"><i class="fas fa-brain" style="color: var(--gold);"></i> خطة دراسية بـ DeepSeek AI</h2>
-            <button onclick="openPlanModal()" style="background: var(--accent); border: none; padding: 8px 22px; border-radius: 50px; color: white; font-weight: 700; cursor: pointer;">✨ إنشاء خطة</button>
+        <div class="card">
+            <div class="card-title"><i class="fas fa-trophy"></i> 🏅 لوحة الشرف</div>
+            <div class="honor-list" id="honorList">
+                <div class="honor-item"><span class="honor-name">أحمد محمد</span><span>1250 نقطة</span></div>
+                <div class="honor-item"><span class="honor-name">نور علي</span><span>980 نقطة</span></div>
+                <div class="honor-item"><span class="honor-name">يوسف حسن</span><span>870 نقطة</span></div>
+            </div>
         </div>
-        <div id="planResult" style="background: #030712; border-radius: 20px; padding: 18px; margin-top: 18px; color: #cbd5e1;">
-            <p style="color: #9ca3af;">اضغط على "إنشاء خطة" لتحصل على برنامج دراسي مخصص بالذكاء الاصطناعي</p>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-fire"></i> 🔥 الأسبوع الذهبي</div>
+            <div style="font-size: 36px; text-align: center; margin: 10px 0;" id="goldenWeek">3</div>
+            <div style="text-align: center;">أيام متواصلة</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-arrow-up"></i> 📈 سهم التحدي</div>
+            <div style="font-size: 48px; text-align: center;" id="challengeArrow">⬆️ 0%</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-waveform"></i> 🌊 موجة الإنتاجية</div>
+            <div id="productivityWave" style="height: 60px; background: linear-gradient(95deg, var(--success), var(--gold)); border-radius: 30px; width: 45%; transition: width 0.5s;"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-shield-alt"></i> 🔐 المصادقة الثنائية (2FA)</div>
+            {% if is_2fa_enabled %}
+            <span style="color: var(--success);"><i class="fas fa-check-circle"></i> ✅ مفعلة</span>
+            {% else %}
+            <a href="/2fa/setup" class="btn-primary" style="display: inline-block; text-align: center; text-decoration: none;">🔐 تفعيل 2FA</a>
+            {% endif %}
+        </div>
+        
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-simple"></i> 📊 مؤشر الاستعداد للامتحان</div>
+            <div id="examReady" style="font-size: 36px; text-align: center; font-weight: bold; color: var(--gold);">78%</div>
+            <div class="progress-bar-container"><div class="progress-bar" id="examBar" style="width: 78%;"></div></div>
+            <div style="font-size: 12px; text-align: center; margin-top: 10px;">بناءً على أدائك في الاختبارات السابقة</div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title"><i class="fas fa-clock"></i> ⏰ عداد المذاكرة اليومي</div>
+            <div id="studyCounter" style="font-size: 36px; text-align: center; font-weight: bold; color: var(--info);">0:00</div>
+            <button class="btn-primary" onclick="startStudyTimer()">▶️ ابدأ المذاكرة</button>
+            <button class="btn-primary" onclick="stopStudyTimer()" style="background: var(--warning);">⏸️ إيقاف مؤقت</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-broadcast-tower"></i> 📡 محرك الأحداث (Event Engine)</div>
+            <div id="eventStats" style="font-size: 14px; color: var(--text-dim); margin-bottom: 10px;">جاري تحميل الإحصائيات...</div>
+            <button class="btn-primary" onclick="triggerTestEvent()">🎯 تشغيل حدث تجريبي +50 نقطة</button>
+            <button class="btn-primary" onclick="loadEventStats()" style="margin-top: 5px;">📊 تحديث الإحصائيات</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-search"></i> 🔍 البحث الدلالي</div>
+            <input type="text" id="semanticQuery" placeholder="اكتب سؤالك..." style="width: 100%; padding: 10px; border-radius: 20px; border: none; background: #1e293b; color: white; margin-bottom: 10px;">
+            <button class="btn-primary" onclick="semanticSearch()">🔎 بحث دلالي</button>
+            <div id="semanticResults" style="margin-top: 10px; font-size: 13px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-project-diagram"></i> 🕸️ خريطة المفاهيم</div>
+            <div id="conceptStats" style="font-size: 14px; color: var(--text-dim); margin-bottom: 10px;">جاري تحميل الخريطة...</div>
+            <button class="btn-primary" onclick="loadConceptStats()">📊 إحصائيات المفاهيم</button>
+            <button class="btn-primary" onclick="loadKnowledgeGaps()" style="margin-top: 5px;">🔍 فجوات المعرفة</button>
+            <button class="btn-primary" onclick="loadConceptRecommendations()" style="margin-top: 5px;">💡 توصيات ذكية</button>
+            <div id="conceptOutput" style="margin-top: 10px; font-size: 13px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-microchip"></i> 🧠 RL Smart Scheduler</div>
+            <div id="rl-decision-area" class="bg-gray-800 rounded-xl p-4 mb-3 text-center">
+                <i class="fas fa-spinner fa-spin"></i> جاري تحليل سلوكك للجدولة...
+            </div>
+            <div id="rl-reward-log" class="text-xs text-gray-400 text-center"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-chart-line"></i> 📈 توقعات الأداء (AI)</div>
+            <div id="prediction-area" class="text-center">جاري التوقع...</div>
+            <div class="progress-bar-container mt-2"><div id="readiness-bar" class="progress-bar" style="width: 0%;"></div></div>
+            <div class="text-center text-xs mt-1" id="readiness-text">جاهزية التقدم: 0%</div>
         </div>
     </div>
 
@@ -291,7 +678,7 @@
     {% if courses %}
         <div class="courses-grid">
             {% for course in courses %}
-                <div class="course-card" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+                <div class="course-card">
                     <div class="course-cover"></div>
                     <div class="course-content">
                         <h3>{{ course.name }}</h3>
@@ -306,64 +693,186 @@
     {% endif %}
 </div>
 
-<div id="planModal" style="display: none; position: fixed; top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;">
-    <div style="background:#1e293b;border-radius:48px;padding:30px;max-width:450px;width:90%;">
-        <h3 style="color:white;">🧠 خطة دراسية ذكية</h3>
-        <input type="text" id="planSubject" placeholder="المادة (مثال: فيزياء 2)" style="width:100%;margin:15px 0;padding:12px;border-radius:24px;border:none;background:#0f172a;color:white;">
-        <select id="planDuration" style="width:100%;margin-bottom:15px;padding:12px;border-radius:24px;background:#0f172a;color:white;">
-            <option>اسبوع</option><option>شهر</option><option>3 شهور</option>
-        </select>
-        <button onclick="generatePlan()" style="background:#fbbf24;border:none;padding:12px;border-radius:40px;width:100%;font-weight:700;">توليد الخطة</button>
-        <button onclick="closePlanModal()" style="margin-top:10px;background:#334155;width:100%;padding:10px;border-radius:40px;border:none;color:white;">الغاء</button>
-        <div id="planLoader" style="display:none;text-align:center;margin-top:15px;color:#fbbf24;">⏳ جاري التوليد...</div>
+<!-- ==================== FOOTER الجبار - تواصل مع المطور ==================== -->
+<footer style="margin-top: 80px; position: relative;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 100%; background: linear-gradient(135deg, #0f172a, #1e1b4b, #0f172a); z-index: -2;"></div>
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #4f46e5, #fbbf24, #ec4899, #4f46e5); background-size: 300% 100%; animation: footerGradient 4s ease infinite; z-index: -1;"></div>
+    
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 50px 20px 30px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 8px 24px; border-radius: 60px; margin-bottom: 20px;">
+                <span style="color: #fbbf24; font-weight: 700;">📢 تواصل مع المطور</span>
+            </div>
+            <h2 style="font-size: 28px; color: white; margin-bottom: 15px;">نحن هنا من أجلك!</h2>
+            <p style="color: #9ca3af; max-width: 600px; margin: 0 auto;">لديك اقتراح؟ فكرة تطوير؟ أو تريد فقط إبداء رأيك؟ لا تتردد في التواصل معي</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 50px;">
+            
+            <!-- بطاقة البريد الإلكتروني -->
+            <div style="background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border-radius: 28px; padding: 30px 20px; text-align: center; border: 1px solid rgba(99, 102, 241, 0.3); transition: all 0.4s; cursor: pointer;" onmouseover="this.style.transform='translateY(-10px)'; this.style.borderColor='#fbbf24';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(99,102,241,0.3)';" onclick="copyToClipboard('adamhissen2007@gmail.com', '📧 البريد الإلكتروني')">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <i class="fas fa-envelope" style="font-size: 32px; color: white;"></i>
+                </div>
+                <h3 style="color: #fbbf24; font-size: 20px; margin-bottom: 10px;">البريد الإلكتروني</h3>
+                <p style="color: #9ca3af; margin-bottom: 15px;">adamhissen2007@gmail.com</p>
+                <div style="display: inline-block; background: rgba(79, 70, 229, 0.2); padding: 8px 16px; border-radius: 40px;">
+                    <span style="color: #a78bfa; font-size: 13px;"><i class="fas fa-copy"></i> انقر للنسخ</span>
+                </div>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 15px;">📧 سأرد خلال 24 ساعة</p>
+            </div>
+
+            <!-- بطاقة واتساب - الرقم مخفي -->
+            <div style="background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border-radius: 28px; padding: 30px 20px; text-align: center; border: 1px solid rgba(99, 102, 241, 0.3); transition: all 0.4s;">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #25D366, #128C7E); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <i class="fab fa-whatsapp" style="font-size: 38px; color: white;"></i>
+                </div>
+                <h3 style="color: #25D366; font-size: 20px; margin-bottom: 10px;">واتساب</h3>
+                
+                <div id="whatsappNumberContainer" style="margin-bottom: 15px;">
+                    <p id="hiddenPhoneText" style="color: #9ca3af; margin-bottom: 10px;">🔒 الرقم مخفي للخصوصية</p>
+                    <div id="phoneNumberDisplay" style="display: none; color: #25D366; font-size: 18px; font-weight: bold; margin-bottom: 10px;"></div>
+                    <button id="revealPhoneBtn" onclick="revealPhoneNumber()" style="background: rgba(37, 211, 102, 0.2); border: none; padding: 8px 16px; border-radius: 40px; color: #34D399; font-size: 13px; cursor: pointer; transition: all 0.3s;">
+                        <i class="fas fa-eye"></i> اضغط لإظهار رقم واتساب
+                    </button>
+                    <button id="openWhatsappBtn" onclick="openWhatsApp()" style="display: none; background: #25D366; border: none; padding: 8px 16px; border-radius: 40px; color: white; font-size: 13px; cursor: pointer; margin-top: 10px; transition: all 0.3s;">
+                        <i class="fab fa-whatsapp"></i> اضغط للمراسلة
+                    </button>
+                </div>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 15px;">💬 سأكون سعيداً بالتواصل معك</p>
+            </div>
+
+            <!-- بطاقة اقتراحات وتقييم -->
+            <div style="background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border-radius: 28px; padding: 30px 20px; text-align: center; border: 1px solid rgba(99, 102, 241, 0.3); transition: all 0.4s; cursor: pointer;" onmouseover="this.style.transform='translateY(-10px)'; this.style.borderColor='#f59e0b';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(99,102,241,0.3)';" onclick="openFeedbackForm()">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #f59e0b, #ea580c); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <i class="fas fa-star" style="font-size: 32px; color: white;"></i>
+                </div>
+                <h3 style="color: #f59e0b; font-size: 20px; margin-bottom: 10px;">اقتراحات وتقييم</h3>
+                <p style="color: #9ca3af; margin-bottom: 15px;">رأيك يهمنا! أخبرنا بملاحظاتك</p>
+                <div style="display: inline-block; background: rgba(245, 158, 11, 0.2); padding: 8px 16px; border-radius: 40px;">
+                    <span style="color: #fbbf24; font-size: 13px;"><i class="fas fa-pen"></i> اكتب اقتراحك</span>
+                </div>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 15px;">⭐ ساهم في تطوير المنصة</p>
+            </div>
+        </div>
+
+       <div style="text-align: center; padding-top: 30px; border-top: 1px solid rgba(99, 102, 241, 0.2);">
+    <p style="color: #6b7280; font-size: 14px;">
+        <i class="fas fa-copyright"></i> 2025-2026 Study Hub AI | 
+        Created by <span style="color: #fbbf24; font-weight: 700;">Adam Hussien Shokaly</span> | 
+        First-year student - Faculty of Artificial Intelligence - Russian University
+    </p>
+    
+    <p style="color: #9ca3af; font-size: 13px; margin-top: 15px; max-width: 600px; margin-left: auto; margin-right: auto;">
+        <i class="fas fa-heart" style="color: #ec4899;"></i> 
+        Crafted with passion, driven by purpose. 
+        This platform is dedicated to every student striving for excellence.
+        Built from a student to fellow students, to support your academic journey.
+    </p>
+    
+    <p style="color: #4b5563; font-size: 12px; margin-top: 12px;">
+        <i class="fas fa-hands-helping"></i> 
+        May Allah bless your journey with knowledge, success, and guidance 🤲
+    </p>
+    
+    <div style="margin-top: 15px;">
+        <a href="/dashboard" style="color: #6b7280; text-decoration: none; margin: 0 10px; transition: color 0.3s;" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#6b7280'"><i class="fas fa-home"></i></a>
+        <a href="#" style="color: #6b7280; text-decoration: none; margin: 0 10px; transition: color 0.3s;" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#6b7280'" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></a>
     </div>
 </div>
-
-<a href="/code-mentor" class="fahim-fab">🤖</a>
+    </div>
+</footer>
 
 <script>
-    let timerInterval;
-    let timerTime = 25 * 60;
-    let timerRunning = false;
-
-    function updateTimerDisplay() {
-        let minutes = Math.floor(timerTime / 60);
-        let seconds = timerTime % 60;
-        document.getElementById('timerDisplay').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    function startTimer() {
-        if (timerRunning) return;
-        timerRunning = true;
-        timerInterval = setInterval(() => {
-            if (timerTime > 0) {
-                timerTime--;
-                updateTimerDisplay();
-            } else {
-                clearInterval(timerInterval);
-                timerRunning = false;
-                alert('🎉 وقت المذاكرة خلص! خد بريك 5 دقايق.');
-                timerTime = 25 * 60;
-                updateTimerDisplay();
+    let timerInterval = null;
+    let meditationInterval = null;
+    let studyTimerInterval = null;
+    let studySeconds = 0;
+    let currentAIDecision = null;
+    let phoneRevealed = false;
+    const MY_PHONE_NUMBER = "201080311720";
+    
+    // Browser Fingerprinting for Security
+    FingerprintJS.load().then(fp => {
+        fp.get().then(result => {
+            const visitorId = result.visitorId;
+            fetch('/api/set-fingerprint', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ fingerprint: visitorId })
+            });
+        });
+    });
+    
+    // Push 2FA & WebAuthn Functions
+    async function enablePush2FA() {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            try {
+                const registration = await navigator.serviceWorker.register('/static/sw.js');
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array('{{ vapid_public_key }}')
+                });
+                
+                const response = await fetch('/api/2fa/push/enable', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(subscription)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('pushStatus').innerHTML = '✅ تم تفعيل الإشعارات الفورية بنجاح';
+                    document.getElementById('pushStatus').style.color = '#10b981';
+                }
+            } catch(e) {
+                console.error('Push error:', e);
+                document.getElementById('pushStatus').innerHTML = '❌ فشل تفعيل الإشعارات';
+                document.getElementById('pushStatus').style.color = '#ef4444';
             }
-        }, 1000);
+        } else {
+            alert('المتصفح لا يدعم الإشعارات الفورية');
+        }
     }
-
-    function pauseTimer() {
-        clearInterval(timerInterval);
-        timerRunning = false;
+    
+    async function registerWebAuthn() {
+        try {
+            const response = await fetch('/api/2fa/webauthn/register/begin', { method: 'POST' });
+            const options = await response.json();
+            
+            const credential = await navigator.credentials.create({ publicKey: options });
+            
+            const completeResponse = await fetch('/api/2fa/webauthn/register/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credential)
+            });
+            const result = await completeResponse.json();
+            if (result.success) {
+                alert('✅ تم تسجيل بصمة/وجه جهازك بنجاح!');
+            } else {
+                alert('❌ فشل التسجيل: ' + result.error);
+            }
+        } catch(e) {
+            alert('❌ خطأ: ' + e.message);
+        }
     }
-
-    function resetTimer() {
-        pauseTimer();
-        timerTime = 25 * 60;
-        updateTimerDisplay();
+    
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
     }
-
-    updateTimerDisplay();
-
-    async function changeSemester(semester) {
-        await fetch('/api/update-semester', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({semester}) });
+    
+    function changeSemester(semester) {
+        fetch('/api/update-semester', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({semester}) });
         location.reload();
     }
     
@@ -380,112 +889,423 @@
         });
     }
     
-    function openPlanModal() { document.getElementById('planModal').style.display = 'flex'; }
-    function closePlanModal() { document.getElementById('planModal').style.display = 'none'; }
-    
-    async function generatePlan() {
-        const subject = document.getElementById('planSubject').value.trim();
-        if(!subject) { alert("ادخل اسم المادة"); return; }
-        const duration = document.getElementById('planDuration').value;
-        document.getElementById('planLoader').style.display = 'block';
-        try {
-            const res = await fetch('/api/generate-study-plan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject, duration, level: 'متوسط' })
-            });
-            const data = await res.json();
-            document.getElementById('planResult').innerHTML = `<pre style="white-space:pre-wrap; font-family:inherit;">${escapeHtml(data.plan)}</pre>`;
-            closePlanModal();
-        } catch(e) { alert("خطأ"); }
-        finally { document.getElementById('planLoader').style.display = 'none'; }
+    function startDeepFocus() {
+        let timeLeft = 25 * 60;
+        const focusDiv = document.getElementById('focusTimer');
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            focusDiv.innerHTML = `⏳ تركيز عميق: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert('🎉 أحسنت! أكملت 25 دقيقة تركيز.');
+                focusDiv.innerHTML = '';
+            }
+            timeLeft--;
+        }, 1000);
     }
     
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-    animateStats();
+    function acceptExperiment() {
+        alert('تم بدء التجربة! سنذكرك غداً.');
+        localStorage.setItem('experiment', 'started');
+    }
     
-    // ========== المحاضرات الحية والإشعارات ==========
-    let lastRoomsCount = 0;
-    let notificationAudio = null;
+    let treasureOpened = localStorage.getItem('treasureOpened');
+    function openTreasure() {
+        if (treasureOpened === 'today') {
+            alert('⏳ لقد فتحت الكنز اليوم! عاود غداً.');
+            return;
+        }
+        let points = Math.floor(Math.random() * 50) + 20;
+        alert(`🎁 مبروك! فتحت الكنز وحصلت على ${points} نقطة!`);
+        localStorage.setItem('treasureOpened', 'today');
+        document.getElementById('treasureStatus').innerHTML = '✅ تم فتح الكنز اليوم';
+        fetch('/api/academic/complete-course', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ points: points, course_name: 'كنز اليوم' })
+        });
+    }
     
-    // إنشاء صوت الإشعار
-    try {
-        notificationAudio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
-    } catch(e) { console.log('Audio not supported'); }
-    
-    async function loadActiveRooms() {
-        try {
-            const res = await fetch('/api/active-rooms');
-            const rooms = await res.json();
-            const container = document.getElementById('activeRoomsList');
-            
-            if(rooms.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8;">📭 لا توجد محاضرات حية الآن. ابدأ محاضرة جديدة!</p>';
-                document.getElementById('notificationBadge').style.display = 'none';
-                lastRoomsCount = 0;
-                return;
+    function startMeditation() {
+        let timeLeft = 30;
+        const timerDiv = document.getElementById('meditationTimer');
+        if (meditationInterval) clearInterval(meditationInterval);
+        meditationInterval = setInterval(() => {
+            timerDiv.innerHTML = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(meditationInterval);
+                timerDiv.innerHTML = '🧘 رائع! أكملت التأمل';
+                alert('🌿 أحسنت! استرخى عقلك وجاهز للمذاكرة.');
             }
-            
-            // التحقق من وجود محاضرات جديدة للإشعار
-            if(rooms.length > lastRoomsCount && lastRoomsCount !== 0) {
-                // إشعار جديد للمتصفح
-                if(Notification.permission === 'granted') {
-                    new Notification('📢 محاضرة جديدة على Study Hub!', {
-                        body: `انضموا إلى ${rooms[0].teacher_name} في ${rooms[0].room_name}`,
-                        icon: '/static/favicon.ico',
-                        sound: notificationAudio
-                    });
-                }
-                // صوت الإشعار
-                if(notificationAudio) notificationAudio.play();
-                // البادج
-                document.getElementById('notificationBadge').style.display = 'inline-block';
-                setTimeout(() => {
-                    document.getElementById('notificationBadge').style.display = 'none';
-                }, 5000);
-            }
-            lastRoomsCount = rooms.length;
-            
-            container.innerHTML = rooms.map(room => `
-                <div style="background: #1e293b; border-radius: 20px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <strong style="color: #10b981;"><i class="fas fa-video"></i> ${escapeHtml(room.room_name)}</strong>
-                        <p style="color: #94a3b8; font-size: 12px;">🎓 يشرح: ${escapeHtml(room.teacher_name)} | 🕐 ${new Date(room.created_at).toLocaleTimeString()}</p>
-                    </div>
-                    <a href="/live-class/${room.id}" class="header-link" style="background: #10b981; color:white;">انضم الآن →</a>
-                </div>
-            `).join('');
-        } catch(e) { 
-            console.log(e);
-            document.getElementById('activeRoomsList').innerHTML = '<p style="color: #ef4444;">⚠️ حدث خطأ في تحميل المحاضرات</p>';
+            timeLeft--;
+        }, 1000);
+    }
+    
+    function startStudyTimer() {
+        if (studyTimerInterval) return;
+        studyTimerInterval = setInterval(() => {
+            studySeconds++;
+            let hours = Math.floor(studySeconds / 3600);
+            let minutes = Math.floor((studySeconds % 3600) / 60);
+            let seconds = studySeconds % 60;
+            document.getElementById('studyCounter').innerHTML = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+            localStorage.setItem('studySeconds', studySeconds);
+        }, 1000);
+    }
+    
+    function stopStudyTimer() {
+        if (studyTimerInterval) {
+            clearInterval(studyTimerInterval);
+            studyTimerInterval = null;
+            let points = Math.floor(studySeconds / 60) * 2;
+            alert(`⏸️ توقفت بعد ${Math.floor(studySeconds/60)} دقائق. حصلت على ${points} نقطة خبرة!`);
+            fetch('/api/academic/complete-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points: points, course_name: 'مذاكرة' })
+            });
+            studySeconds = 0;
+            document.getElementById('studyCounter').innerHTML = '0:00:00';
+            localStorage.setItem('studySeconds', 0);
         }
     }
     
-    // طلب إذن الإشعارات
-    if(Notification.permission === 'default') {
-        Notification.requestPermission();
+    function updateProgress() {
+        let points = parseInt(document.querySelector('.stat-card .stat-number')?.innerText) || 0;
+        let progress = Math.min(100, points / 10);
+        document.getElementById('hyperGoalBar').style.width = Math.min(100, progress) + '%';
+        document.getElementById('energyBar').style.width = (30 + points / 20) + '%';
+        document.getElementById('productivityWave').style.width = Math.min(100, 30 + points / 15) + '%';
+        document.getElementById('challengeArrow').innerHTML = `⬆️ ${Math.min(100, Math.floor(points / 5))}%`;
+        document.getElementById('examBar').style.width = Math.min(100, 30 + Math.floor(points / 8)) + '%';
+        document.getElementById('examReady').innerHTML = Math.min(100, 30 + Math.floor(points / 8)) + '%';
+        
+        let streak = localStorage.getItem('studyStreak') || 0;
+        document.getElementById('goldenWeek').innerHTML = streak;
+        
+        let mind = Math.min(100, 30 + Math.floor(points / 15));
+        document.getElementById('mindBar').style.width = mind + '%';
+        document.getElementById('mindStatus').innerHTML = `نشاط الدماغ: ${mind}% ${mind > 70 ? '🔥' : mind > 40 ? '😊' : '😴'}`;
     }
     
-    loadActiveRooms();
-    setInterval(loadActiveRooms, 15000);
-    
-    async function loadRecommendations() {
+    async function loadAIDecision() {
         try {
-            const res = await fetch('/api/recommendations');
-            const data = await res.json();
-            if(data.recommendations?.length) {
-                let recHtml = '<div style="background:#0f172a; border-radius:28px; padding:20px; margin-top:30px;"><h3 style="color:var(--gold);"><i class="fas fa-lightbulb"></i> موصى لك</h3>';
-                data.recommendations.slice(0,3).forEach(rec => {
-                    recHtml += `<div style="display:flex; justify-content:space-between; background:#111827; border-radius:20px; padding:12px; margin-top:10px;"><div><b>${escapeHtml(rec.title)}</b><p style="font-size:12px;">${rec.reason}</p></div><a href="/recommendation/${rec.type}/${rec.id}" style="background:#4f46e5; padding:6px 14px; border-radius:30px; color:white;">عرض</a></div>`;
-                });
-                recHtml += '</div>';
-                document.querySelector('.container').insertAdjacentHTML('beforeend', recHtml);
+            const response = await fetch('/api/v3/real-time-decision');
+            const data = await response.json();
+            currentAIDecision = data;
+            document.getElementById('ai-decision-message').innerHTML = `<i class="fas fa-robot"></i> ${data.message}`;
+            document.getElementById('ai-decision-detail').innerHTML = `الحالة: الساعة ${new Date().getHours()}:00 | الإجراء: ${data.action === 0 ? 'مذاكرة' : data.action === 1 ? 'استراحة' : 'مراجعة'}`;
+            const btn = document.getElementById('ai-decision-action-btn');
+            btn.classList.remove('hidden');
+            btn.setAttribute('data-action', data.action);
+        } catch(e) {
+            console.error('AI Decision error:', e);
+        }
+    }
+    
+    function executeAIDecision() {
+        const btn = document.getElementById('ai-decision-action-btn');
+        const action = btn.getAttribute('data-action');
+        if (action == '0') {
+            startDeepFocus();
+            alert('🚀 تم بدء جلسة المذاكرة حسب اقتراح AI!');
+        } else if (action == '1') {
+            startMeditation();
+            alert('😌 وقت الاستراحة! خذ 10 دقائق راحة');
+        } else {
+            window.location.href = '/superbrain';
+        }
+    }
+    
+    async function loadRLDecision() {
+        try {
+            const response = await fetch('/api/v3/real-time-decision');
+            const data = await response.json();
+            document.getElementById('rl-decision-area').innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div><i class="fas fa-robot text-purple-400 text-2xl"></i></div>
+                    <div class="text-right">
+                        <div class="font-bold text-amber-400">RL Scheduler</div>
+                        <div class="text-sm">${data.message}</div>
+                    </div>
+                </div>
+            `;
+        } catch(e) {}
+    }
+    
+    async function loadPredictions() {
+        try {
+            const response = await fetch('/api/v3/predict-performance');
+            const data = await response.json();
+            if (data && data.predicted_points) {
+                document.getElementById('prediction-area').innerHTML = `
+                    <div>نقاط متوقعة: <span class="text-2xl font-bold text-gold">${data.predicted_points}</span></div>
+                    <div class="text-sm">الاتجاه: ${data.trend == 'up' ? '📈 صاعد' : '📉 هابط'}</div>
+                    <div class="text-sm">مخاطر الإرهاق: ${Math.round(data.burnout_risk * 100)}%</div>
+                `;
+                const readiness = Math.min(100, data.predicted_points / 10);
+                document.getElementById('readiness-bar').style.width = `${readiness}%`;
+                document.getElementById('readiness-text').innerText = `جاهزية التقدم: ${Math.round(readiness)}%`;
             }
         } catch(e) {}
     }
-    setTimeout(loadRecommendations, 1500);
     
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');
+    async function loadEventStats() {
+        try {
+            const response = await fetch('/api/events/stats');
+            const stats = await response.json();
+            document.getElementById('eventStats').innerHTML = `
+                📊 الأحداث المعالجة: ${stats.total_events || 0}<br>
+                ⚡ الأحداث في الساعة: ${stats.events_last_hour || 0}<br>
+                ✅ المستخدمون النشطون: ${stats.active_users || 0}
+            `;
+        } catch(e) {
+            document.getElementById('eventStats').innerHTML = '⚠️ خطأ في تحميل الإحصائيات';
+        }
+    }
+    
+    async function triggerTestEvent() {
+        try {
+            const response = await fetch('/api/events/trigger-test', { method: 'POST' });
+            const data = await response.json();
+            if(data.success) {
+                alert('✅ تم تشغيل الحدث التجريبي! تم إضافة 50 نقطة.');
+                location.reload();
+            }
+        } catch(e) {
+            alert('❌ حدث خطأ في تشغيل الحدث');
+        }
+    }
+    
+    async function semanticSearch() {
+        const query = document.getElementById('semanticQuery').value;
+        if(!query) {
+            alert('الرجاء كتابة سؤال للبحث');
+            return;
+        }
+        try {
+            const response = await fetch('/api/search/semantic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query, limit: 5 })
+            });
+            const data = await response.json();
+            const resultsDiv = document.getElementById('semanticResults');
+            if(data.results && data.results.length > 0) {
+                resultsDiv.innerHTML = data.results.map(r => `
+                    <div style="padding: 8px; border-bottom: 1px solid #1f2937;">
+                        <div style="color: var(--gold);">📌 درجة التشابه: ${(r.score * 100).toFixed(1)}%</div>
+                        <div style="font-size: 12px;">${r.content.substring(0, 150)}...</div>
+                    </div>
+                `).join('');
+            } else {
+                resultsDiv.innerHTML = '<div style="color: var(--text-dim);">❌ لم يتم العثور على نتائج</div>';
+            }
+        } catch(e) {
+            alert('❌ خطأ في البحث');
+        }
+    }
+    
+    async function loadConceptStats() {
+        try {
+            const response = await fetch('/api/concepts/graph');
+            const stats = await response.json();
+            document.getElementById('conceptOutput').innerHTML = `
+                🕸️ عدد المفاهيم: ${stats.total_concepts || 0}<br>
+                🔗 عدد الروابط: ${stats.total_edges || 0}<br>
+                📚 مستويات الإتقان: ${stats.mastery_levels || 0}
+            `;
+        } catch(e) {
+            document.getElementById('conceptOutput').innerHTML = '⚠️ خطأ في تحميل إحصائيات المفاهيم';
+        }
+    }
+    
+    async function loadKnowledgeGaps() {
+        try {
+            const response = await fetch('/api/concepts/knowledge-gaps');
+            const data = await response.json();
+            if(data.gaps && data.gaps.length > 0) {
+                document.getElementById('conceptOutput').innerHTML = `
+                    <div style="color: var(--warning);">⚠️ فجوات المعرفة لديك:</div>
+                    ${data.gaps.map(g => `<div style="padding: 5px 0;">📌 ${g.concept_name || g}: مستوى إتقان ${g.mastery || 'منخفض'}</div>`).join('')}
+                    <div style="color: var(--gold); margin-top: 10px;">💡 ركز على هذه المفاهيم لتحسين أدائك!</div>
+                `;
+            } else {
+                document.getElementById('conceptOutput').innerHTML = '🎉 لا توجد فجوات معرفية! أنت ممتاز!';
+            }
+        } catch(e) {
+            document.getElementById('conceptOutput').innerHTML = '⚠️ خطأ في تحميل فجوات المعرفة';
+        }
+    }
+    
+    async function loadConceptRecommendations() {
+        try {
+            const response = await fetch('/api/concepts/recommendations');
+            const data = await response.json();
+            if(data.recommendations && data.recommendations.length > 0) {
+                document.getElementById('conceptOutput').innerHTML = `
+                    <div style="color: var(--success);">💡 التوصيات المخصصة لك:</div>
+                    ${data.recommendations.map(r => `<div style="padding: 5px 0;">📚 ${r.concept_name || r}: ${r.reason || 'اقتراح لتحسين مستواك'}</div>`).join('')}
+                `;
+            } else {
+                document.getElementById('conceptOutput').innerHTML = '📘 استمر في التعلم! أنت على الطريق الصحيح.';
+            }
+        } catch(e) {
+            document.getElementById('conceptOutput').innerHTML = '⚠️ خطأ في تحميل التوصيات';
+        }
+    }
+    
+    let savedSeconds = parseInt(localStorage.getItem('studySeconds')) || 0;
+    if(savedSeconds > 0) {
+        studySeconds = savedSeconds;
+        let hours = Math.floor(studySeconds / 3600);
+        let minutes = Math.floor((studySeconds % 3600) / 60);
+        let seconds = studySeconds % 60;
+        document.getElementById('studyCounter').innerHTML = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }
+    
+    setInterval(() => {
+        let emotions = ['🌞 يوم مليء بالطاقة الإيجابية', '⛅ مذاكرة متوسطة التركيز', '🌈 يوم ممتع للتعلم', '⚡ طاقة عالية للحل', '🍃 يوم هادئ ومنتج', '🎯 فرصة ذهبية للإنجاز'];
+        document.getElementById('emotionForecast').innerHTML = emotions[Math.floor(Math.random() * emotions.length)];
+        let wisdoms = ['"العلم نور والجهل ظلام" - الإمام علي', '"من جد وجد" - مثل عربي', '"التعلم كنز لا يسرق"', '"النجاح ليس نهائياً، الفشل ليس قاتلاً"', '"المستقبل لأولئك الذين يؤمنون بجمال أحلامهم"'];
+        document.getElementById('wisdomScroll').innerHTML = wisdoms[Math.floor(Math.random() * wisdoms.length)];
+        let balls = ['غداً: يوم حافل بالإنجازات!', 'غداً: ركز على المواد العملية', 'غداً: ذاكر صباحاً للتركيز الأفضل', 'غداً: ستحقق أهدافك بسهولة'];
+        document.getElementById('crystalBall').innerHTML = balls[Math.floor(Math.random() * balls.length)];
+    }, 10000);
+    
+    setInterval(() => {
+        let msgs = ['✨ أحمد أنهى كورس الفيزياء! 🎉', '🔥 نور حصلت على 50 نقطة!', '💪 يوسف كمل 7 أيام متواصلة!', '⭐ مريم تتصدر الترتيب هذا الأسبوع!', '🏆 خالد حصل على شارة الأسطورة!'];
+        document.getElementById('broadcastMsg').innerHTML = msgs[Math.floor(Math.random() * msgs.length)];
+    }, 8000);
+    
+    animateStats();
+    setInterval(updateProgress, 2000);
+    updateProgress();
+    
+    setInterval(() => {
+        localStorage.removeItem('treasureOpened');
+        document.getElementById('treasureStatus').innerHTML = 'اضغط لفتح الكنز';
+    }, 86400000);
+    
+    loadEventStats();
+    loadConceptStats();
+    loadAIDecision();
+    loadRLDecision();
+    loadPredictions();
+    
+    setInterval(() => {
+        loadAIDecision();
+        loadRLDecision();
+        loadPredictions();
+    }, 30000);
+    
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/sw.js').catch(err => console.log('SW registration failed:', err));
+    }
+    
+    // ==================== Footer Functions ====================
+    async function copyToClipboard(text, type) {
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast(`✅ تم نسخ ${type} بنجاح!`, 'success');
+        } catch(err) {
+            showToast(`❌ فشل النسخ، حاول مرة أخرى`, 'error');
+        }
+    }
+    
+    function revealPhoneNumber() {
+        if (!phoneRevealed) {
+            document.getElementById('phoneNumberDisplay').innerHTML = `📱 01080311720`;
+            document.getElementById('phoneNumberDisplay').style.display = 'block';
+            document.getElementById('hiddenPhoneText').style.display = 'none';
+            document.getElementById('revealPhoneBtn').style.display = 'none';
+            document.getElementById('openWhatsappBtn').style.display = 'inline-block';
+            phoneRevealed = true;
+            showToast('🔓 تم إظهار رقم واتساب! يمكنك الآن المراسلة', 'info');
+        }
+    }
+    
+    function openWhatsApp() {
+        if (!phoneRevealed) {
+            Swal.fire({
+                title: '🔒 الرقم مخفي للخصوصية',
+                text: 'اضغط على "إظهار الرقم" أولاً ثم يمكنك المراسلة',
+                icon: 'info',
+                confirmButtonColor: '#4f46e5',
+                background: '#111827',
+                color: 'white'
+            });
+            return;
+        }
+        const message = encodeURIComponent("السلام عليكم، لدي استفسار بخصوص منصة Study Hub AI");
+        window.open(`https://wa.me/201080311720?text=${message}`, '_blank');
+    }
+    
+    function openFeedbackForm() {
+        Swal.fire({
+            title: '💡 شاركنا رأيك',
+            html: `
+                <textarea id="feedbackMessage" class="swal2-textarea" placeholder="اكتب اقتراحك أو ملاحظاتك هنا..." style="background: #1e293b; color: white; border-radius: 16px;"></textarea>
+                <select id="feedbackType" class="swal2-select" style="background: #1e293b; color: white; border-radius: 16px; margin-top: 10px;">
+                    <option value="suggestion">💡 اقتراح تطوير</option>
+                    <option value="bug">🐛 خطأ أو مشكلة</option>
+                    <option value="praise">🌟 إشادة وتقدير</option>
+                    <option value="other">📝 أخرى</option>
+                </select>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'إرسال ✉️',
+            cancelButtonText: 'إلغاء',
+            background: '#111827',
+            color: 'white',
+            confirmButtonColor: '#4f46e5',
+            preConfirm: () => {
+                const message = document.getElementById('feedbackMessage').value;
+                const type = document.getElementById('feedbackType').value;
+                if (!message) {
+                    Swal.showValidationMessage('❌ الرجاء كتابة رسالتك');
+                    return false;
+                }
+                return { message, type };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { message, type } = result.value;
+                const email = "adamhissen2007@gmail.com";
+                const subject = `اقتراح من مستخدم - ${type}`;
+                const body = `المستخدم كتب:\n\n${message}`;
+                window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                showToast('✨ شكراً لمشاركتك! سيتم التواصل معك قريباً', 'success');
+            }
+        });
+    }
+    
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.backgroundColor = type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '50px';
+        toast.style.fontWeight = 'bold';
+        toast.style.zIndex = '9999';
+        toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+        toast.style.animation = 'slideInRight 0.3s ease';
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
 </script>
 </body>
 </html>

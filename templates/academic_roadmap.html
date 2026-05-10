@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخريطة الأكاديمية - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #111827;
+            --border: #1f2937;
+            --accent: #6366f1;
+            --gold: #fbbf24;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, var(--bg-dark), #030712);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
+        .badge {
+            background: linear-gradient(95deg, #4f46e5, #7c3aed);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+        }
+        .back-btn {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+        .back-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        
+        .progress-overview {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 32px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .overall-progress {
+            text-align: center;
+            flex: 1;
+        }
+        .overall-progress h3 { color: var(--gold); margin-bottom: 10px; }
+        .progress-circle {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+        
+        .year-card {
+            background: var(--bg-card);
+            border-radius: 32px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .year-header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .year-header h2 { color: white; font-size: 24px; }
+        .year-progress { font-size: 14px; color: var(--gold); }
+        
+        .semester-section {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .semester-title {
+            color: var(--gold);
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subject-card {
+            background: #1e293b;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .subject-header {
+            padding: 15px 20px;
+            background: rgba(99,102,241,0.1);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .subject-name { font-size: 18px; color: white; font-weight: bold; }
+        .difficulty-easy { color: var(--success); }
+        .difficulty-medium { color: var(--warning); }
+        .difficulty-hard { color: var(--danger); }
+        
+        .courses-list {
+            padding: 15px 20px;
+            display: none;
+        }
+        .courses-list.show { display: block; }
+        
+        .course-item {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .course-name { font-weight: 500; }
+        .course-type {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: var(--accent);
+        }
+        .complete-btn {
+            background: var(--success);
+            border: none;
+            padding: 6px 15px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .complete-btn.completed { background: #374151; cursor: default; }
+        .course-link-btn {
+            background: var(--info);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .edit-btn {
+            background: var(--warning);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 40px;
+            color: black;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--gold);
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+        .fab:hover { transform: scale(1.05); background: #f59e0b; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #1e293b;
+            border-radius: 32px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-content input, .modal-content select, .modal-content textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 16px;
+            border: none;
+            background: #0f172a;
+            color: white;
+        }
+        
+        @media (max-width: 700px) {
+            .progress-overview { flex-direction: column; }
+            .subject-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <h1><i class="fas fa-map" style="color: var(--gold);"></i> الخريطة الأكاديمية</h1>
+            <span class="badge"><i class="fas fa-user-graduate"></i> {{ session.user_name }} | مسارك نحو التميز</span>
+        </div>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+
+    <div class="progress-overview">
+        <div class="overall-progress">
+            <h3><i class="fas fa-chart-line"></i> التقدم العام</h3>
+            <div class="progress-circle">
+                <canvas id="overallChart" width="100" height="100"></canvas>
+            </div>
+            <div style="margin-top: 10px;"><span id="overallPercent">0</span>% مكتمل</div>
+        </div>
+        <div class="overall-progress">
+            <h3><i class="fas fa-star"></i> نقاط الخبرة</h3>
+            <div style="font-size: 36px; font-weight: 900; color: var(--gold);" id="totalPoints">0</div>
+            <div>من إكمال الكورسات</div>
+        </div>
+        <div class="overall-progress">
+            <h3><i class="fas fa-graduation-cap"></i> إنجازك</h3>
+            <div style="font-size: 36px; font-weight: 900; color: var(--success);" id="completedCourses">0</div>
+            <div>كورس مكتمل</div>
+        </div>
+    </div>
+
+    <div id="yearsContainer"></div>
+</div>
+
+<div class="fab" onclick="openAddCourseModal()">
+    <i class="fas fa-plus"></i>
+</div>
+
+<div id="courseModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color: white;">➕ أضف كورس تطوير ذاتي</h3>
+        <input type="text" id="courseName" placeholder="اسم الكورس (مثال: React.js)">
+        <select id="courseYear">
+            <option value="1">الفرقة الأولى</option>
+            <option value="2">الفرقة الثانية</option>
+            <option value="3">الفرقة الثالثة</option>
+            <option value="4">الفرقة الرابعة</option>
+        </select>
+        <select id="courseSemester">
+            <option value="first">الترم الأول</option>
+            <option value="second">الترم الثاني</option>
+        </select>
+        <input type="text" id="courseResource" placeholder="رابط الكورس (يوتيوب)">
+        <input type="text" id="courseSubject" placeholder="اسم المادة (مثال: تطوير ويب)" value="تطوير ذاتي">
+        <button onclick="addCustomCourse()" style="background: var(--success); width: 100%; padding: 12px; border: none; border-radius: 40px; color: white; font-weight: bold; margin-top: 10px;">➕ إضافة الكورس</button>
+        <button onclick="closeModal()" style="background: #374151; width: 100%; padding: 10px; border: none; border-radius: 40px; color: white; margin-top: 5px;">إلغاء</button>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color: white;">✏️ تعديل رابط الكورس</h3>
+        <input type="text" id="editCourseId" hidden>
+        <input type="text" id="editCourseName" placeholder="اسم الكورس" readonly style="background: #374151;">
+        <input type="text" id="editResourceUrl" placeholder="رابط اليوتيوب أو الفيديو">
+        <select id="editResourceType">
+            <option value="youtube">📺 يوتيوب</option>
+            <option value="external">🌐 رابط خارجي</option>
+            <option value="pdf">📄 ملف PDF</option>
+        </select>
+        <button onclick="saveResource()" style="background: var(--success); width: 100%; padding: 12px; border: none; border-radius: 40px; color: white; font-weight: bold; margin-top: 10px;">💾 حفظ الرابط</button>
+        <button onclick="closeEditModal()" style="background: #374151; width: 100%; padding: 10px; border: none; border-radius: 40px; color: white; margin-top: 5px;">إلغاء</button>
+    </div>
+</div>
+
+<script>
+    let academicData = null;
+    let overallChart = null;
+    let currentEditCourse = null;
+    
+    function saveToLocalStorage(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+    
+    function getFromLocalStorage(key, defaultValue = []) {
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : defaultValue;
+    }
+    
+    async function loadAcademicData() {
+        const res = await fetch('/api/academic-data');
+        academicData = await res.json();
+        renderYears();
+        updateStats();
+    }
+    
+    function loadProgress() {
+        return getFromLocalStorage('academicProgress', {});
+    }
+    
+    function saveProgress(progress) {
+        saveToLocalStorage('academicProgress', progress);
+    }
+    
+    function loadLinks() {
+        return getFromLocalStorage('courseLinks', {});
+    }
+    
+    function saveLink(courseId, link, type) {
+        const links = loadLinks();
+        links[courseId] = { url: link, type: type, updated_at: new Date().toISOString() };
+        saveToLocalStorage('courseLinks', links);
+    }
+    
+    function getLink(courseId) {
+        const links = loadLinks();
+        return links[courseId] || null;
+    }
+    
+    function toggleCourses(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) element.classList.toggle('show');
+    }
+    
+    function toggleYear(yearId) {
+        const element = document.getElementById(`year-${yearId}`);
+        if (element) element.style.display = element.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function isCourseCompleted(yearNum, semester, subjectId, courseId) {
+        const progress = loadProgress();
+        const key = `${yearNum}_${semester}_${subjectId}_${courseId}`;
+        return !!progress[key];
+    }
+    
+    function completeCourse(yearNum, semester, subjectId, courseId, courseName, points = 10) {
+        const progress = loadProgress();
+        const key = `${yearNum}_${semester}_${subjectId}_${courseId}`;
+        
+        if (progress[key]) {
+            alert('✅ هذا الكورس مكتمل بالفعل!');
+            return;
+        }
+        
+        progress[key] = { completed: true, date: new Date().toISOString(), points: points };
+        saveProgress(progress);
+        
+        fetch('/api/academic/complete-course', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ points: points, course_name: courseName })
+        }).then(() => {
+            alert(`🎉 مبروك! أكملت "${courseName}" وحصلت على ${points} نقطة خبرة!`);
+            renderYears();
+            updateStats();
+        });
+    }
+    
+    function completeCustomCourse(courseId, courseName) {
+        let customCourses = getFromLocalStorage('customCourses', []);
+        const courseIndex = customCourses.findIndex(c => c.id === courseId);
+        
+        if (courseIndex !== -1 && !customCourses[courseIndex].completed) {
+            customCourses[courseIndex].completed = true;
+            saveToLocalStorage('customCourses', customCourses);
+            
+            fetch('/api/academic/complete-course', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ points: 15, course_name: courseName })
+            }).then(() => {
+                alert(`🎉 مبروك! أكملت "${courseName}" وحصلت على 15 نقطة خبرة!`);
+                renderYears();
+                updateStats();
+            });
+        }
+    }
+    
+    function openEditModal(courseId, courseName, currentUrl) {
+        currentEditCourse = courseId;
+        document.getElementById('editCourseId').value = courseId;
+        document.getElementById('editCourseName').value = courseName;
+        document.getElementById('editResourceUrl').value = currentUrl || '';
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        currentEditCourse = null;
+    }
+    
+    function saveResource() {
+        const url = document.getElementById('editResourceUrl').value.trim();
+        const type = document.getElementById('editResourceType').value;
+        
+        if (!url) {
+            alert('الرجاء إدخال رابط صحيح');
+            return;
+        }
+        
+        saveLink(currentEditCourse, url, type);
+        alert('✅ تم حفظ الرابط بنجاح!');
+        closeEditModal();
+        renderYears();
+    }
+    
+    function getCompletedCount() {
+        const progress = loadProgress();
+        return Object.keys(progress).length;
+    }
+    
+    function getOverallProgress() {
+        let total = 0;
+        let completed = 0;
+        
+        for (const [yearNum, yearData] of Object.entries(academicData.years || {})) {
+            for (const [semName, semData] of Object.entries(yearData.semesters || {})) {
+                if (semData.subjects) {
+                    for (const subject of semData.subjects) {
+                        if (subject.courses) {
+                            for (const course of subject.courses) {
+                                total++;
+                                if (isCourseCompleted(yearNum, semName, subject.id, course.id)) completed++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        const customCourses = getFromLocalStorage('customCourses', []);
+        total += customCourses.length;
+        completed += customCourses.filter(c => c.completed).length;
+        
+        return total > 0 ? Math.round((completed / total) * 100) : 0;
+    }
+    
+    function updateStats() {
+        const overallProgress = getOverallProgress();
+        document.getElementById('overallPercent').innerText = overallProgress;
+        
+        const customCourses = getFromLocalStorage('customCourses', []);
+        const regularCompleted = getCompletedCount();
+        const customCompleted = customCourses.filter(c => c.completed).length;
+        
+        document.getElementById('completedCourses').innerText = regularCompleted + customCompleted;
+        
+        let totalPoints = 0;
+        for (const [key, value] of Object.entries(loadProgress())) {
+            totalPoints += value.points || 10;
+        }
+        totalPoints += customCompleted * 15;
+        document.getElementById('totalPoints').innerText = totalPoints;
+        
+        if (overallChart) overallChart.destroy();
+        const ctx = document.getElementById('overallChart').getContext('2d');
+        overallChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['مكتمل', 'متبقي'],
+                datasets: [{ data: [overallProgress, 100 - overallProgress], backgroundColor: ['#10b981', '#374151'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: 'white' } } } }
+        });
+    }
+    
+    function renderYears() {
+        const container = document.getElementById('yearsContainer');
+        container.innerHTML = '';
+        
+        for (const [yearNum, yearData] of Object.entries(academicData.years || {})) {
+            const yearCard = document.createElement('div');
+            yearCard.className = 'year-card';
+            yearCard.innerHTML = `
+                <div class="year-header" onclick="toggleYear(${yearNum})">
+                    <h2>🎓 ${yearData.name}</h2>
+                    <div class="year-progress">📊 0% مكتمل</div>
+                </div>
+                <div id="year-${yearNum}" style="display: block;">
+                    ${renderSemesters(yearNum, yearData)}
+                </div>
+            `;
+            container.appendChild(yearCard);
+        }
+    }
+    
+    function renderSemesters(yearNum, yearData) {
+        let html = '';
+        for (const [semKey, semData] of Object.entries(yearData.semesters || {})) {
+            const semName = semKey === 'first' ? '📚 الترم الأول' : '📚 الترم الثاني';
+            html += `
+                <div class="semester-section">
+                    <div class="semester-title"><i class="fas fa-calendar"></i> ${semName}</div>
+                    ${renderSubjects(yearNum, semKey, semData)}
+                </div>
+            `;
+        }
+        return html;
+    }
+    
+    function renderSubjects(yearNum, semKey, semData) {
+        let html = '';
+        
+        if (semData.subjects) {
+            for (const subject of semData.subjects) {
+                let subjectCompleted = 0;
+                let subjectTotal = 0;
+                if (subject.courses) {
+                    subjectTotal = subject.courses.length;
+                    subjectCompleted = subject.courses.filter(c => isCourseCompleted(yearNum, semKey, subject.id, c.id)).length;
+                }
+                const subjectPercent = subjectTotal > 0 ? Math.round((subjectCompleted / subjectTotal) * 100) : 0;
+                const difficultyClass = subject.difficulty === 'easy' ? 'difficulty-easy' : subject.difficulty === 'medium' ? 'difficulty-medium' : 'difficulty-hard';
+                const difficultyText = subject.difficulty === 'easy' ? 'سهل' : subject.difficulty === 'medium' ? 'متوسط' : 'صعب';
+                
+                html += `
+                    <div class="subject-card">
+                        <div class="subject-header" onclick="toggleCourses('${subject.id}')">
+                            <div>
+                                <span class="subject-name">📘 ${subject.name}</span>
+                                <span class="${difficultyClass}" style="margin-right: 10px; font-size: 12px;">🎯 ${difficultyText}</span>
+                            </div>
+                            <div>✅ ${subjectCompleted}/${subjectTotal} كورس | 📊 ${subjectPercent}%</div>
+                        </div>
+                        <div class="courses-list" id="${subject.id}">
+                            ${subject.courses.map(course => {
+                                const savedLink = getLink(course.id);
+                                const displayUrl = savedLink ? savedLink.url : (course.resources?.youtube || '');
+                                const linkType = savedLink ? savedLink.type : 'youtube';
+                                return `
+                                    <div class="course-item">
+                                        <div>
+                                            <div class="course-name">📌 ${course.name}</div>
+                                            <div class="course-type">${course.type === 'technical' ? '💻 تقني' : '📖 نظري'}</div>
+                                            ${displayUrl ? `<a href="${displayUrl}" target="_blank" class="course-link-btn"><i class="fab ${linkType === 'youtube' ? 'fa-youtube' : 'fa-external-link-alt'}"></i> مشاهدة الكورس</a>` : '<span class="course-link-btn" style="background: #374151;"><i class="fas fa-link"></i> لا يوجد رابط</span>'}
+                                            <button class="edit-btn" onclick="event.stopPropagation(); openEditModal('${course.id}', '${course.name}', '${displayUrl}')"><i class="fas fa-edit"></i> تعديل الرابط</button>
+                                        </div>
+                                        <div>
+                                            ${!isCourseCompleted(yearNum, semKey, subject.id, course.id) ? 
+                                                `<button class="complete-btn" onclick="completeCourse(${yearNum}, '${semKey}', '${subject.id}', '${course.id}', '${course.name}', 10)"><i class="fas fa-check"></i> أنهيت هذا الكورس</button>` : 
+                                                `<button class="complete-btn completed" disabled><i class="fas fa-check-circle"></i> مكتمل</button>`}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        const customCourses = getFromLocalStorage('customCourses', []);
+        const customForYear = customCourses.filter(c => c.year == yearNum && c.semester == semKey);
+        
+        if (customForYear.length > 0) {
+            html += `
+                <div class="subject-card" style="border: 2px solid var(--gold);">
+                    <div class="subject-header" onclick="toggleCourses('custom_${yearNum}_${semKey}')">
+                        <div>
+                            <span class="subject-name">✨ كورساتي التطويرية</span>
+                            <span class="difficulty-easy" style="margin-right: 10px; font-size: 12px;">🎯 أضفتها بنفسي</span>
+                        </div>
+                        <div>✅ ${customForYear.filter(c => c.completed).length}/${customForYear.length} كورس</div>
+                    </div>
+                    <div class="courses-list" id="custom_${yearNum}_${semKey}">
+                        ${customForYear.map(course => `
+                            <div class="course-item">
+                                <div>
+                                    <div class="course-name">📌 ${course.name}</div>
+                                    <div class="course-type">💻 ${course.subject || 'تطوير ذاتي'}</div>
+                                    <a href="${course.resource}" target="_blank" class="course-link-btn"><i class="fab fa-youtube"></i> مشاهدة الكورس</a>
+                                </div>
+                                <div>
+                                    ${!course.completed ? 
+                                        `<button class="complete-btn" onclick="completeCustomCourse('${course.id}', '${course.name}')"><i class="fas fa-check"></i> أنهيت هذا الكورس</button>` : 
+                                        `<button class="complete-btn completed" disabled><i class="fas fa-check-circle"></i> مكتمل</button>`}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        return html;
+    }
+    
+    function openAddCourseModal() {
+        document.getElementById('courseModal').style.display = 'flex';
+    }
+    
+    function closeModal() {
+        document.getElementById('courseModal').style.display = 'none';
+    }
+    
+    function addCustomCourse() {
+        const name = document.getElementById('courseName').value.trim();
+        const year = document.getElementById('courseYear').value;
+        const semester = document.getElementById('courseSemester').value;
+        const resource = document.getElementById('courseResource').value.trim();
+        const subject = document.getElementById('courseSubject').value.trim();
+        
+        if (!name) { alert('الرجاء إدخال اسم الكورس'); return; }
+        if (!resource) { alert('الرجاء إدخال رابط الكورس'); return; }
+        
+        let customCourses = getFromLocalStorage('customCourses', []);
+        
+        customCourses.push({
+            id: `custom_${Date.now()}`,
+            name: name,
+            year: year,
+            semester: semester,
+            resource: resource,
+            subject: subject || 'تطوير ذاتي',
+            completed: false,
+            added_at: new Date().toISOString()
+        });
+        
+        saveToLocalStorage('customCourses', customCourses);
+        
+        alert(`✅ تم إضافة "${name}" بنجاح!`);
+        
+        closeModal();
+        document.getElementById('courseName').value = '';
+        document.getElementById('courseResource').value = '';
+        
+        renderYears();
+        updateStats();
+    }
+    
+    loadAcademicData();
+</script>
+</body>
+</html>

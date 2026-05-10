@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تقسيم المهام - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .header h1 { color: white; display: flex; align-items: center; gap: 10px; }
+        .header a { background: rgba(255,255,255,0.1); padding: 10px 24px; border-radius: 40px; color: white; text-decoration: none; }
+        .idea-input { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 30px; margin-bottom: 30px; }
+        .idea-input textarea { width: 100%; height: 120px; background: #0f172a; border: 1px solid #4f46e5; border-radius: 24px; padding: 15px; color: white; margin-bottom: 15px; }
+        .idea-input button { background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; padding: 12px 28px; border-radius: 40px; color: white; font-weight: 700; cursor: pointer; }
+        .tasks-container { background: rgba(255,255,255,0.03); border-radius: 32px; padding: 25px; }
+        .task-card { background: #1e293b; border-radius: 20px; padding: 20px; margin-bottom: 15px; border-right: 4px solid #4f46e5; transition: 0.2s; }
+        .task-card.completed { border-right-color: #10b981; opacity: 0.7; }
+        .task-title { color: white; font-size: 18px; display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .task-desc { color: #94a3b8; font-size: 14px; margin-bottom: 12px; }
+        .task-meta { display: flex; gap: 15px; font-size: 12px; color: #64748b; }
+        .task-status { background: #4f46e5; padding: 4px 12px; border-radius: 30px; font-size: 11px; color: white; display: inline-block; }
+        .task-status.completed { background: #10b981; }
+        .progress-bar { width: 100%; height: 6px; background: #334155; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #a855f7); width: 0%; }
+        @media (max-width: 700px) { .task-title { flex-direction: column; gap: 8px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-tasks"></i> Task Breakdown - تقسيم المهام بالذكاء الاصطناعي</h1>
+        <a href="/dashboard"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+
+    <div class="idea-input">
+        <h3 style="color: #fbbf24; margin-bottom: 15px;">🤖 أخبرني عن مشروعك، وسأقسمه لك</h3>
+        <textarea id="projectIdea" placeholder="مثال: أريد تطوير موقع ويب لإدارة المهام يشمل تسجيل دخول، لوحة تحكم، وإشعارات"></textarea>
+        <button onclick="breakdownProject()"><i class="fas fa-magic"></i> تقسيم المشروع</button>
+        <div id="loading" style="display: none; margin-top: 15px; color: #fbbf24;"><i class="fas fa-spinner fa-pulse"></i> جاري تحليل المشروع وتقسيمه...</div>
+    </div>
+
+    <div class="tasks-container" id="tasksContainer">
+        <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-list-check"></i> مشاريعي</h3>
+        <div id="projectsList"></div>
+    </div>
+</div>
+
+<script>
+    async function breakdownProject() {
+        const idea = document.getElementById('projectIdea').value.trim();
+        if(!idea) { alert('الرجاء إدخال فكرة المشروع'); return; }
+        
+        document.getElementById('loading').style.display = 'block';
+        try {
+            const res = await fetch('/api/task/breakdown', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_idea: idea })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert(`✅ تم تقسيم المشروع إلى ${data.tasks.length} مهمة!`);
+                loadProjects();
+                document.getElementById('projectIdea').value = '';
+            } else alert('حدث خطأ');
+        } catch(e) { alert('خطأ: ' + e.message); }
+        finally { document.getElementById('loading').style.display = 'none'; }
+    }
+
+    async function loadProjects() {
+        const res = await fetch('/api/task/suggest');
+        const tasks = await res.json();
+        const container = document.getElementById('projectsList');
+        if(tasks.length === 0) {
+            container.innerHTML = '<p style="color:#94a3b8; text-align:center;">لا توجد مهام بعد. ابدأ بتقسيم مشروعك!</p>';
+            return;
+        }
+        
+        // Group tasks by project (parent)
+        container.innerHTML = `
+            <div style="background:#0f172a; border-radius:24px; padding:20px;">
+                <div style="margin-bottom:15px; display:flex; justify-content:space-between;">
+                    <span>⏳ المهام المقترحة التالية:</span>
+                    <span>🎯 أولوية عالية</span>
+                </div>
+                ${tasks.map(t => `
+                    <div class="task-card">
+                        <div class="task-title">
+                            <span>${escapeHtml(t.title)}</span>
+                            <span class="task-status">${t.priority === 3 ? '🔥 عاجل' : (t.priority === 2 ? '⚡ متوسط' : '📘 عادي')}</span>
+                        </div>
+                        <div class="task-meta">
+                            <span><i class="fas fa-clock"></i> ${t.estimated_hours} ساعات</span>
+                            ${t.deadline ? `<span><i class="fas fa-calendar"></i> ${new Date(t.deadline).toLocaleDateString()}</span>` : ''}
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    loadProjects();
+</script>
+</body>
+</html>

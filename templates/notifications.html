@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإشعارات - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, #0b1120, #030712);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
+        .back-btn {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .notif-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .stat-badge {
+            background: #111827;
+            border-radius: 60px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-item {
+            background: #111827;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-right: 4px solid;
+        }
+        .notification-item:hover { transform: translateX(-5px); background: #1e293b; }
+        .notification-icon { font-size: 32px; }
+        .notification-content { flex: 1; }
+        .notification-time { font-size: 11px; color: #9ca3af; margin-top: 5px; }
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            background: #111827;
+            border-radius: 40px;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .notification-item { animation: slideIn 0.3s ease forwards; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <h1><i class="fas fa-bell" style="color: #fbbf24;"></i> مركز الإشعارات</h1>
+        </div>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+
+    <div class="notif-stats">
+        <div class="stat-badge"><i class="fas fa-bell"></i> <span id="unreadCount">0</span> غير مقروءة</div>
+        <div class="stat-badge"><i class="fas fa-check-circle"></i> <span id="totalCount">0</span> إجمالي</div>
+        <button onclick="markAllRead()" style="background: #4f46e5; border: none; padding: 8px 20px; border-radius: 40px; color: white; cursor: pointer;">تحديد الكل كمقروء</button>
+    </div>
+
+    <div id="notificationsList">
+        <div class="empty-state"><i class="fas fa-bell-slash" style="font-size: 48px; color: #9ca3af;"></i><p style="margin-top: 15px;">لا توجد إشعارات جديدة</p></div>
+    </div>
+</div>
+
+<script>
+    async function loadNotifications() {
+        const res = await fetch('/api/notifications');
+        const data = await res.json();
+        
+        document.getElementById('unreadCount').innerText = data.unread_count;
+        document.getElementById('totalCount').innerText = data.notifications.length;
+        
+        const container = document.getElementById('notificationsList');
+        if(data.notifications.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash" style="font-size: 48px; color: #9ca3af;"></i><p style="margin-top: 15px;">لا توجد إشعارات جديدة</p></div>';
+            return;
+        }
+        
+        container.innerHTML = data.notifications.map(n => `
+            <div class="notification-item" style="border-right-color: ${n.color}; opacity: ${n.is_read ? 0.6 : 1};" onclick="markAsRead(${n.id})">
+                <div class="notification-icon">${n.icon}</div>
+                <div class="notification-content">
+                    <div style="font-weight: bold;">${n.title}</div>
+                    <div>${n.message}</div>
+                    <div class="notification-time">${new Date(n.created_at).toLocaleString('ar-EG')}</div>
+                </div>
+                <div>
+                    <button class="mark-read-btn" onclick="event.stopPropagation(); markAsRead(${n.id})"><i class="fas fa-check-circle"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    async function markAsRead(id) {
+        await fetch('/api/notifications/mark-read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+        loadNotifications();
+    }
+    
+    async function markAllRead() {
+        await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+        loadNotifications();
+    }
+    
+    loadNotifications();
+    setInterval(loadNotifications, 30000);
+</script>
+</body>
+</html>

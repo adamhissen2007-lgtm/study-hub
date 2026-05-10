@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الجدول الذكي - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 20px 30px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border: 1px solid rgba(99,102,241,0.3); }
+        .header h1 { color: white; display: flex; align-items: center; gap: 10px; }
+        .header a { background: rgba(255,255,255,0.1); padding: 10px 24px; border-radius: 40px; color: white; text-decoration: none; transition: 0.3s; }
+        .header a:hover { background: #4f46e5; }
+        .form-card, .schedule-card { background: rgba(255,255,255,0.05); border-radius: 32px; padding: 25px; margin-bottom: 30px; backdrop-filter: blur(10px); }
+        .form-group { margin-bottom: 20px; }
+        label { color: #fbbf24; display: block; margin-bottom: 8px; font-weight: 700; }
+        input, select { width: 100%; padding: 12px 16px; border-radius: 20px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: #4f46e5; }
+        button { background: linear-gradient(135deg, #fbbf24, #f59e0b); border: none; padding: 12px 28px; border-radius: 40px; color: black; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        button:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(251,191,36,0.4); }
+        .course-check { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; max-height: 200px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 20px; }
+        .course-check label { color: white; font-weight: normal; display: flex; align-items: center; gap: 8px; cursor: pointer; background: #1e293b; padding: 8px 15px; border-radius: 40px; transition: 0.2s; }
+        .course-check label:hover { background: #4f46e5; }
+        .task-card { background: #1e293b; border-radius: 20px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-right: 4px solid #fbbf24; transition: 0.2s; }
+        .task-card:hover { transform: translateX(-5px); background: #0f172a; }
+        .task-card.completed { opacity: 0.6; border-right-color: #10b981; text-decoration: line-through; }
+        .task-date { color: #94a3b8; font-size: 12px; }
+        .task-title { color: white; font-weight: 700; font-size: 16px; }
+        .task-points { background: #4f46e5; padding: 4px 12px; border-radius: 30px; font-size: 12px; color: white; }
+        .complete-btn { background: #10b981; border: none; padding: 6px 16px; border-radius: 30px; color: white; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .complete-btn:hover { background: #059669; transform: scale(1.02); }
+        .loader { display: none; text-align: center; padding: 20px; color: #fbbf24; }
+        .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
+        @media (max-width: 700px) { .header h1 { font-size: 20px; } .course-check label { font-size: 12px; padding: 5px 12px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-calendar-alt" style="color: #fbbf24;"></i> Smart Schedule Builder</h1>
+        <a href="/dashboard"><i class="fas fa-arrow-right"></i> العودة للوحة</a>
+    </div>
+
+    <div class="form-card">
+        <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-sliders-h"></i> إعدادات خطتك الذكية</h3>
+        
+        <div class="form-group">
+            <label>📚 اختر المواد اللي عايز تذاكرها:</label>
+            <div class="course-check" id="coursesList">
+                <div class="loader" id="coursesLoader"><i class="fas fa-spinner fa-pulse"></i> جاري تحميل المواد...</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>⏰ عدد الساعات اليومية المتاحة:</label>
+            <input type="number" id="dailyHours" value="2" step="0.5" min="0.5" max="8">
+        </div>
+        
+        <div class="form-group">
+            <label>📅 تاريخ البداية:</label>
+            <input type="date" id="startDate">
+        </div>
+        
+        <div class="form-group">
+            <label>📅 تاريخ النهاية:</label>
+            <input type="date" id="endDate">
+        </div>
+        
+        <div class="form-group" id="examDatesContainer">
+            <label>📝 مواعيد الامتحانات (اختياري):</label>
+            <div id="examDatesList"></div>
+            <button type="button" id="addExamBtn" style="background:#334155; margin-top:5px; padding:8px 20px;"><i class="fas fa-plus"></i> إضافة امتحان</button>
+        </div>
+        
+        <button id="generateBtn"><i class="fas fa-magic"></i> أنشئ جدولي الذكي</button>
+        <div id="genLoader" class="loader"><i class="fas fa-spinner fa-pulse"></i> جاري بناء الجدول الأمثل باستخدام الخوارزميات التطورية...</div>
+    </div>
+
+    <div class="schedule-card" id="scheduleCard" style="display: none;">
+        <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-list-check"></i> 📋 خطتك اليومية المفصلة</h3>
+        <div id="tasksList"></div>
+    </div>
+</div>
+
+<script>
+    let examDates = {};
+
+    // وظيفة تحميل المواد من API
+    async function loadCourses() {
+        const container = document.getElementById('coursesList');
+        const loader = document.getElementById('coursesLoader');
+        loader.style.display = 'block';
+        try {
+            const res = await fetch('/api/user-courses');
+            const courses = await res.json();
+            loader.style.display = 'none';
+            if(courses.length === 0) {
+                container.innerHTML = '<p class="empty-state">📭 لا توجد مواد متاحة. تواصل مع المشرف لإضافة مواد.</p>';
+                return;
+            }
+            container.innerHTML = courses.map(course => `
+                <label><input type="checkbox" value="${course.id}" class="course-checkbox"> ${course.name}</label>
+            `).join('');
+        } catch(e) {
+            loader.style.display = 'none';
+            container.innerHTML = '<p class="empty-state">⚠️ حدث خطأ في تحميل المواد</p>';
+        }
+    }
+
+    function renderExamInputs() {
+        const container = document.getElementById('examDatesList');
+        container.innerHTML = '';
+        for (const [courseId, date] of Object.entries(examDates)) {
+            const courseName = document.querySelector(`.course-checkbox[value="${courseId}"]`)?.parentElement?.innerText || courseId;
+            container.innerHTML += `<div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
+                <span style="color:white; background:#1e293b; padding:4px 12px; border-radius:20px;">${escapeHtml(courseName)}</span>
+                <input type="date" value="${date}" data-course="${courseId}" class="exam-date-input" style="flex:1;">
+                <button class="remove-exam" data-course="${courseId}" style="background:#ef4444; padding:5px 12px; border-radius:30px; color:white; border:none; cursor:pointer;">✕</button>
+            </div>`;
+        }
+        document.querySelectorAll('.exam-date-input').forEach(inp => {
+            inp.addEventListener('change', (e) => { examDates[e.target.dataset.course] = e.target.value; });
+        });
+        document.querySelectorAll('.remove-exam').forEach(btn => {
+            btn.addEventListener('click', (e) => { delete examDates[e.target.dataset.course]; renderExamInputs(); });
+        });
+    }
+
+    document.getElementById('addExamBtn').addEventListener('click', () => {
+        const selected = [...document.querySelectorAll('.course-checkbox:checked')].map(cb => cb.value);
+        if(selected.length === 0) { alert('⚠️ اختر مادة أولاً'); return; }
+        const courseId = selected[0];
+        examDates[courseId] = new Date().toISOString().split('T')[0];
+        renderExamInputs();
+    });
+
+    // ضبط التاريخ الافتراضي
+    const today = new Date().toISOString().split('T')[0];
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    const nextWeekStr = nextWeek.toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
+    document.getElementById('endDate').value = nextWeekStr;
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+        const courses_ids = [...document.querySelectorAll('.course-checkbox:checked')].map(cb => parseInt(cb.value));
+        if(courses_ids.length === 0) { alert('⚠️ اختر مادة واحدة على الأقل'); return; }
+        const daily_hours = parseFloat(document.getElementById('dailyHours').value);
+        const start_date = document.getElementById('startDate').value;
+        const end_date = document.getElementById('endDate').value;
+        if(new Date(start_date) > new Date(end_date)) { alert('❌ تاريخ البداية يجب أن يكون قبل النهاية'); return; }
+        
+        document.getElementById('genLoader').style.display = 'block';
+        document.getElementById('generateBtn').disabled = true;
+        
+        try {
+            const res = await fetch('/api/schedule/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ courses_ids, daily_hours, start_date, end_date, exam_dates: examDates })
+            });
+            const data = await res.json();
+            if(data.success) { loadSchedule(); }
+            else { alert('❌ خطأ في إنشاء الجدول'); }
+        } catch(e) { alert('❌ خطأ في الاتصال: ' + e.message); }
+        finally {
+            document.getElementById('genLoader').style.display = 'none';
+            document.getElementById('generateBtn').disabled = false;
+        }
+    });
+
+    async function loadSchedule() {
+        const res = await fetch('/api/schedule/current');
+        const data = await res.json();
+        const tasks = data.tasks;
+        const container = document.getElementById('tasksList');
+        const scheduleCard = document.getElementById('scheduleCard');
+        if(!tasks.length) { container.innerHTML = '<p class="empty-state">📭 لا توجد مهام حالياً. قم بإنشاء جدول جديد.</p>'; scheduleCard.style.display = 'block'; return; }
+        scheduleCard.style.display = 'block';
+        container.innerHTML = tasks.map(task => `
+            <div class="task-card ${task.is_completed ? 'completed' : ''}" data-id="${task.id}">
+                <div>
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    <div class="task-date">📅 ${task.date} | ⏱️ ${task.duration} دقيقة | ${task.priority === 2 ? '⭐ أولوية عالية (قرب الامتحان)' : '📘 أولوية عادية'}</div>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <span class="task-points"><i class="fas fa-star"></i> +5 نقاط</span>
+                    ${!task.is_completed ? `<button class="complete-btn" data-id="${task.id}">✔️ أنجزت</button>` : '<span style="color:#10b981;"><i class="fas fa-check-circle"></i> تم الإنجاز</span>'}
+                </div>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll('.complete-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const taskId = btn.dataset.id;
+                const res = await fetch(`/api/schedule/mark-done/${taskId}`, { method: 'POST' });
+                const data = await res.json();
+                if(data.success) {
+                    alert(`🎉 أحسنت! +${data.points_added} نقطة`);
+                    loadSchedule();
+                } else { alert('❌ حدث خطأ'); }
+            });
+        });
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
+    // تحميل المواد عند فتح الصفحة
+    loadCourses();
+    loadSchedule();
+</script>
+</body>
+</html>

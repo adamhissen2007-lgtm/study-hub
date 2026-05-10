@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>معمل التجارب - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
+        .flip-card { background-color: transparent; width: 300px; height: 200px; perspective: 1000px; cursor: pointer; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); }
+        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 1rem; padding: 1.5rem; }
+        .flip-card-front { background-color: #1e293b; color: #fbbf24; }
+        .flip-card-back { background-color: #4f46e5; color: white; transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; }
+    </style>
+</head>
+<body class="text-white p-8">
+    <div class="container mx-auto">
+        <h1 class="text-4xl font-bold text-center mb-4 text-amber-400">🧪 معمل التجارب (A/B Testing Lab)</h1>
+        <p class="text-center text-gray-300 mb-12">اكتشف أفضل طريقة للمذاكرة وتنظيم الوقت مخصصة لك أنت فقط!</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Study Technique Experiment -->
+            <div class="flip-card mx-auto">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front flex flex-col justify-center items-center">
+                        <i class="fas fa-brain text-5xl mb-4"></i>
+                        <h2 class="text-2xl font-bold">🧠 تقنيات المذاكرة</h2>
+                        <p class="text-gray-300 text-sm mt-2">اكتشف الطريقة المثالية لتركيزك</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <i class="fas fa-flask text-3xl mb-2"></i>
+                        <h3 class="text-xl font-bold mb-2">بومودورو أم تركيز عميق؟</h3>
+                        <p class="text-sm mb-4">سنخبرك أيهما يضاعف إنتاجيتك.</p>
+                        <button onclick="startExperiment('study_technique')" class="mt-2 bg-white text-purple-800 px-4 py-1 rounded-full text-sm font-bold hover:bg-gray-200">ابدأ التجربة</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Note Taking Experiment -->
+            <div class="flip-card mx-auto">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front flex flex-col justify-center items-center">
+                        <i class="fas fa-pen-fancy text-5xl mb-4"></i>
+                        <h2 class="text-2xl font-bold">📝 تنظيم الملاحظات</h2>
+                        <p class="text-gray-300 text-sm mt-2">طريقة تدوين متقدمة بذكاء اصطناعي</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <i class="fas fa-lightbulb text-3xl mb-2"></i>
+                        <h3 class="text-xl font-bold mb-2">Cornell vs Mind Maps</h3>
+                        <p class="text-sm mb-4">خلي ملاحظاتك تترتب تلقائياً.</p>
+                        <button onclick="startExperiment('note_taking')" class="mt-2 bg-white text-purple-800 px-4 py-1 rounded-full text-sm font-bold hover:bg-gray-200">ابدأ التجربة</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Productivity Framework -->
+            <div class="flip-card mx-auto">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front flex flex-col justify-center items-center">
+                        <i class="fas fa-chart-line text-5xl mb-4"></i>
+                        <h2 class="text-2xl font-bold">⚙️ أطر الإنتاجية</h2>
+                        <p class="text-gray-300 text-sm mt-2">نظم وقتك بذكاء فائق</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <i class="fas fa-chart-simple text-3xl mb-2"></i>
+                        <h3 class="text-xl font-bold mb-2">MIT vs Time Blocking</h3>
+                        <p class="text-sm mb-4">وصل لأهدافك بأقل مجهود.</p>
+                        <button onclick="startExperiment('productivity_framework')" class="mt-2 bg-white text-purple-800 px-4 py-1 rounded-full text-sm font-bold hover:bg-gray-200">ابدأ التجربة</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="result-area" class="mt-16 bg-gray-800 rounded-2xl p-8 border border-purple-500 text-center hidden">
+            <h2 class="text-2xl font-bold text-amber-400 mb-3">📊 نتائج تجربتك المخصصة</h2>
+            <div id="experiment-result" class="text-gray-200 text-lg leading-relaxed"></div>
+            <button id="apply-setting-btn" class="mt-6 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full transition duration-300 hidden">تطبيق الإعدادات 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        let currentExperimentId = null;
+
+        async function startExperiment(experimentId) {
+            currentExperimentId = experimentId;
+            const response = await fetch(`/api/ab-testing/start/${experimentId}`, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                alert(`✨ تم بدء تجربة: ${data.experiment.details.name}. سأتابع أدائك لمدة ${data.experiment.duration_days} أيام.`);
+            } else {
+                alert('حدث خطأ، حاول مرة أخرى.');
+            }
+        }
+
+        // WebSocket for real-time updates (placeholder for now)
+    </script>
+</body>
+</html>

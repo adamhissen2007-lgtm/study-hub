@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز التكامل - Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 25px 35px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid rgba(99,102,241,0.3);
+        }
+        .header h1 {
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+        }
+        .header h1 i { color: #fbbf24; }
+        .header a {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .header a:hover { background: #4f46e5; }
+        .stats-banner {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 28px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            border: 1px solid #4f46e5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stats-banner h3 { color: #fbbf24; font-size: 18px; }
+        .stats-banner p { color: #94a3b8; font-size: 14px; }
+        .integrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .integration-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 25px;
+            transition: all 0.3s;
+            border: 1px solid rgba(99,102,241,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .integration-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #fbbf24, #4f46e5);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+        .integration-card:hover::before { transform: translateX(0); }
+        .integration-card:hover { transform: translateY(-8px); border-color: #4f46e5; }
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(99,102,241,0.15);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin-bottom: 20px;
+        }
+        .card-icon.google { color: #ea4335; background: rgba(234,67,53,0.15); }
+        .card-icon.notion { color: #ffffff; background: rgba(255,255,255,0.1); }
+        .card-icon.slack { color: #e01e5a; background: rgba(224,30,90,0.15); }
+        .integration-card h3 { color: white; margin-bottom: 10px; font-size: 22px; }
+        .integration-card p { color: #94a3b8; font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .status-badge.connected { background: #10b981; color: white; }
+        .status-badge.disconnected { background: #334155; color: #94a3b8; }
+        .btn-connect {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-connect:hover { transform: scale(1.02); opacity: 0.9; }
+        .btn-disconnect {
+            background: #ef4444;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #1e293b;
+            border-radius: 32px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid #4f46e5;
+        }
+        .modal-content h3 { color: #fbbf24; margin-bottom: 20px; }
+        .modal-content input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            margin-bottom: 15px;
+        }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { flex: 1; padding: 10px; border-radius: 30px; border: none; cursor: pointer; font-weight: 700; }
+        .modal-save { background: #10b981; color: white; }
+        .modal-cancel { background: #334155; color: white; }
+        .features-list { margin-top: 15px; list-style: none; }
+        .features-list li { color: #94a3b8; font-size: 12px; padding: 5px 0; display: flex; align-items: center; gap: 8px; }
+        .features-list li i { color: #fbbf24; font-size: 10px; }
+        @media (max-width: 700px) { .integrations-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-plug"></i> مركز التكامل العالمي</h1>
+        <a href="/dashboard"><i class="fas fa-arrow-right"></i> العودة للوحة</a>
+    </div>
+
+    <div class="stats-banner">
+        <div>
+            <h3><i class="fas fa-chart-line"></i> إحصائيات التكامل</h3>
+            <p>اربط حساباتك الخارجية لتجربة تعليمية متكاملة</p>
+        </div>
+        <div id="statsInfo" style="color: #a78bfa;">✅ جاري التحميل...</div>
+    </div>
+
+    <div class="integrations-grid">
+        <!-- Google Classroom Card -->
+        <div class="integration-card">
+            <div class="card-icon google"><i class="fab fa-google"></i></div>
+            <h3>Google Classroom</h3>
+            <p>مزامنة الواجبات والمواد الدراسية تلقائياً من Google Classroom إلى جدولك الذكي</p>
+            <div id="googleStatus" class="status-badge disconnected">غير متصل</div>
+            <button class="btn-connect" onclick="openGoogleModal()"><i class="fab fa-google"></i> ربط حساب Google</button>
+            <ul class="features-list">
+                <li><i class="fas fa-check"></i> مزامنة فورية للواجبات</li>
+                <li><i class="fas fa-check"></i> تحديث تلقائي للجدول الذكي</li>
+                <li><i class="fas fa-check"></i> استيراد المحتوى التعليمي</li>
+            </ul>
+        </div>
+
+        <!-- Notion Card -->
+        <div class="integration-card">
+            <div class="card-icon notion"><i class="fab fa-notion"></i></div>
+            <h3>Notion</h3>
+            <p>مزامنة خططك الدراسية وملاحظاتك بين Study Hub وNotion Database</p>
+            <div id="notionStatus" class="status-badge disconnected">غير متصل</div>
+            <button class="btn-connect" onclick="openNotionModal()"><i class="fab fa-notion"></i> ربط Notion</button>
+            <ul class="features-list">
+                <li><i class="fas fa-check"></i> تصدير الخطط إلى Notion</li>
+                <li><i class="fas fa-check"></i> استيراد الملاحظات</li>
+                <li><i class="fas fa-check"></i> تحديث ثنائي الاتجاه</li>
+            </ul>
+        </div>
+
+        <!-- Slack Card -->
+        <div class="integration-card">
+            <div class="card-icon slack"><i class="fab fa-slack"></i></div>
+            <h3>Slack</h3>
+            <p>استقبل إشعارات المذاكرة والتذكيرات مباشرة في قنوات Slack الخاصة بك</p>
+            <div id="slackStatus" class="status-badge disconnected">غير متصل</div>
+            <button class="btn-connect" onclick="openSlackModal()"><i class="fab fa-slack"></i> ربط Slack</button>
+            <ul class="features-list">
+                <li><i class="fas fa-check"></i> إشعارات فورية</li>
+                <li><i class="fas fa-check"></i> تذكيرات المهام</li>
+                <li><i class="fas fa-check"></i> تقارير أسبوعية</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Google Modal -->
+<div id="googleModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fab fa-google"></i> ربط Google Classroom</h3>
+        <p style="color:#94a3b8; margin-bottom:15px;">سيتم توجيهك إلى Google لتسجيل الدخول والموافقة على الصلاحيات</p>
+        <div class="modal-buttons">
+            <button class="modal-save" onclick="connectGoogle()">متابعة إلى Google</button>
+            <button class="modal-cancel" onclick="closeModal('googleModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- Notion Modal -->
+<div id="notionModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fab fa-notion"></i> ربط Notion</h3>
+        <input type="text" id="notionApiKey" placeholder="API Key (يبدأ بـ ntn_)">
+        <input type="text" id="notionDatabaseId" placeholder="Database ID">
+        <div class="modal-buttons">
+            <button class="modal-save" onclick="connectNotion()">حفظ</button>
+            <button class="modal-cancel" onclick="closeModal('notionModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- Slack Modal -->
+<div id="slackModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fab fa-slack"></i> ربط Slack</h3>
+        <input type="text" id="slackToken" placeholder="Bot Token (يبدأ بـ xoxb-)">
+        <input type="text" id="slackChannelId" placeholder="Channel ID (يبدأ بـ C)">
+        <div class="modal-buttons">
+            <button class="modal-save" onclick="connectSlack()">حفظ</button>
+            <button class="modal-cancel" onclick="closeModal('slackModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openGoogleModal() { document.getElementById('googleModal').style.display = 'flex'; }
+    function openNotionModal() { document.getElementById('notionModal').style.display = 'flex'; }
+    function openSlackModal() { document.getElementById('slackModal').style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    async function connectGoogle() {
+        window.location.href = '/api/integrations/google/auth';
+    }
+
+    async function connectNotion() {
+        const apiKey = document.getElementById('notionApiKey').value.trim();
+        const databaseId = document.getElementById('notionDatabaseId').value.trim();
+        if(!apiKey || !databaseId) { alert('الرجاء إدخال API Key و Database ID'); return; }
+        const res = await fetch('/api/integrations/notion/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: apiKey, database_id: databaseId })
+        });
+        const data = await res.json();
+        if(data.success) {
+            localStorage.setItem('notion_connected', 'true');
+            document.getElementById('notionStatus').className = 'status-badge connected';
+            document.getElementById('notionStatus').innerText = 'متصل';
+            closeModal('notionModal');
+            alert('✅ تم ربط Notion بنجاح!');
+        } else { alert('❌ فشل الربط: ' + data.error); }
+    }
+
+    async function connectSlack() {
+        const botToken = document.getElementById('slackToken').value.trim();
+        const channelId = document.getElementById('slackChannelId').value.trim();
+        if(!botToken || !channelId) { alert('الرجاء إدخال Bot Token و Channel ID'); return; }
+        const res = await fetch('/api/integrations/slack/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bot_token: botToken, channel_id: channelId })
+        });
+        const data = await res.json();
+        if(data.success) {
+            localStorage.setItem('slack_connected', 'true');
+            document.getElementById('slackStatus').className = 'status-badge connected';
+            document.getElementById('slackStatus').innerText = 'متصل';
+            closeModal('slackModal');
+            alert('✅ تم ربط Slack بنجاح!');
+        } else { alert('❌ فشل الربط: ' + data.error); }
+    }
+
+    async function loadStatuses() {
+        try {
+            const res = await fetch('/api/integrations/status');
+            const data = await res.json();
+            if(data.google_classroom) {
+                document.getElementById('googleStatus').className = 'status-badge connected';
+                document.getElementById('googleStatus').innerText = 'متصل';
+            }
+            if(data.notion) {
+                document.getElementById('notionStatus').className = 'status-badge connected';
+                document.getElementById('notionStatus').innerText = 'متصل';
+            }
+            if(data.slack) {
+                document.getElementById('slackStatus').className = 'status-badge connected';
+                document.getElementById('slackStatus').innerText = 'متصل';
+            }
+            const connectedCount = [data.google_classroom, data.notion, data.slack].filter(Boolean).length;
+            document.getElementById('statsInfo').innerHTML = `🔗 ${connectedCount}/3 خدمات متصلة`;
+        } catch(e) { console.log(e); }
+    }
+    loadStatuses();
+</script>
+</body>
+</html>

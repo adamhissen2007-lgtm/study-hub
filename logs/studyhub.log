@@ -1,9 +1,25 @@
-2026-04-27 22:46:26,344 INFO: Study Hub Startup - Ultimate Edition
-2026-04-27 22:46:41,176 INFO: Study Hub Startup - Ultimate Edition
-2026-04-27 23:10:14,896 INFO: Study Hub Startup - Ultimate Edition
-2026-04-27 23:10:21,351 INFO: Study Hub Startup - Ultimate Edition
-2026-04-27 23:17:47,100 INFO: Study Hub Startup - Ultimate Edition
-2026-04-27 23:17:53,987 INFO: Study Hub Startup - Ultimate Edition
-2026-04-27 23:36:05,550 INFO: Study Hub Startup - Ultimate AI Edition
-2026-04-28 18:09:55,975 INFO: Database initialized with sample courses
-2026-04-28 18:26:14,205 INFO: Database initialized with sample courses
+2026-04-29 22:04:59,543 INFO: Study Hub Startup - Ultimate Email Security Edition
+2026-04-29 22:05:09,164 INFO: Study Hub Startup - Ultimate Email Security Edition
+2026-04-29 22:07:17,371 ERROR: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 22:07:17,913 ERROR: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-29 22:07:17,981 WARNING: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-29 22:20:04,483 WARNING: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-29 22:20:08,782 WARNING: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-30 13:17:31,209 INFO: Study Hub Startup - Ultimate AI Security Edition
+2026-04-30 13:33:58,929 INFO: Study Hub Startup - Ultimate AI Security Edition
+2026-04-30 13:34:09,085 INFO: Study Hub Startup - Ultimate AI Security Edition
+2026-04-30 17:44:31,498 ERROR: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 17:44:33,825 ERROR: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 17:44:33,845 WARNING: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-30 17:46:45,140 WARNING: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-30 17:47:02,433 ERROR: Failed to send email to 255378@eru.edu.eg: emails/magic_login.html
+2026-04-30 17:47:58,987 WARNING: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1
+2026-04-30 17:51:35,072 WARNING: SECURITY: LOGOUT - User logged out
+2026-04-30 17:51:56,629 WARNING: SECURITY: LOGIN_SUCCESS - 2FA Login from IP 127.0.0.1
+2026-04-30 18:36:44,482 INFO: Study Hub Startup - Ultimate AI Security Edition
+2026-04-30 18:36:50,369 INFO: Study Hub Startup - Ultimate AI Security Edition
+2026-04-30 18:38:52,977 ERROR: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 18:38:53,780 ERROR: Failed to send email to 255378@eru.edu.eg: The message does not specify a sender and a default sender has not been configured
+2026-04-30 18:38:53,795 WARNING: SECURITY: REGISTER - New user registered with email 255378@eru.edu.eg
+2026-04-30 18:42:18,681 WARNING: SECURITY: EMAIL_VERIFIED - Email verified successfully
+2026-04-30 18:42:23,623 WARNING: SECURITY: LOGIN_SUCCESS - Login from IP 127.0.0.1

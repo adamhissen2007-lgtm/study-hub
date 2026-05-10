@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>العقل الذكي - ألعاب التفكير | Study Hub AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #111827;
+            --border: #1f2937;
+            --accent: #6366f1;
+            --gold: #fbbf24;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --pink: #ec4899;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body {
+            background: radial-gradient(circle at 10% 20%, var(--bg-dark), #030712);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .user-info h1 { font-size: 28px; color: white; display: flex; align-items: center; gap: 10px; }
+        .badge {
+            background: linear-gradient(95deg, #4f46e5, #7c3aed);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+        }
+        .back-btn {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+        .back-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        
+        /* Energy Hearts */
+        .energy-bar {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 60px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .hearts {
+            display: flex;
+            gap: 8px;
+        }
+        .heart {
+            font-size: 28px;
+            color: #ef4444;
+        }
+        .heart.empty { color: #374151; }
+        .buy-energy {
+            background: var(--gold);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .game-card {
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+        .game-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .game-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .game-card h3 { color: white; margin-bottom: 10px; }
+        .game-card p { color: var(--text-dim); font-size: 14px; margin-bottom: 15px; }
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .play-btn {
+            background: linear-gradient(135deg, var(--success), #059669);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+        .play-btn.disabled { background: #374151; cursor: not-allowed; }
+        
+        /* Stats */
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .stat-badge {
+            background: var(--bg-card);
+            border-radius: 60px;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .stat-value { font-size: 24px; font-weight: bold; color: var(--gold); }
+        
+        @media (max-width: 700px) {
+            .games-grid { grid-template-columns: 1fr; }
+            .energy-bar { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <h1><i class="fas fa-brain" style="color: var(--gold);"></i> العقل الذكي</h1>
+            <span class="badge"><i class="fas fa-user-graduate"></i> {{ session.user_name }}</span>
+        </div>
+        <a href="/dashboard" class="back-btn"><i class="fas fa-arrow-right"></i> العودة</a>
+    </div>
+
+    <!-- Energy System -->
+    <div class="energy-bar">
+        <div>
+            <div style="color: var(--text-dim); font-size: 12px;">طاقة اللعب اليومية</div>
+            <div class="hearts" id="heartsContainer">
+                ❤️ ❤️ ❤️
+            </div>
+        </div>
+        <div>
+            <div style="color: var(--text-dim); font-size: 12px;">نقاط الخبرة</div>
+            <div style="font-size: 24px; font-weight: bold; color: var(--gold);" id="userPoints">{{ session.get('user_points', 0) }}</div>
+        </div>
+        <div>
+            <div style="color: var(--text-dim); font-size: 12px;">أعلى نتيجة اليوم</div>
+            <div style="font-size: 24px; font-weight: bold; color: var(--success);" id="highScore">0</div>
+        </div>
+        <button class="buy-energy" onclick="buyEnergy()">💎 شراء طاقة (100 نقطة)</button>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-badge"><div class="stat-value" id="gamesPlayed">0</div><div>ألعاب اليوم</div></div>
+        <div class="stat-badge"><div class="stat-value" id="totalXP">0</div><div>نقاط من الألعاب</div></div>
+        <div class="stat-badge"><div class="stat-value" id="winStreak">0</div><div>فوز متتالي</div></div>
+    </div>
+
+    <h2 style="color: white; margin: 20px 0;"><i class="fas fa-gamepad"></i> 🎮 ألعاب التفكير والمنطق</h2>
+    
+    <div class="games-grid" id="gamesGrid">
+        <div class="game-card" data-game="memory" data-energy="1" data-xp="15">
+            <div class="game-icon"><i class="fas fa-brain"></i></div>
+            <h3>🧠 MatchPairs - الذاكرة البصرية</h3>
+            <p>طابق البطاقات المتشابهة في أسرع وقت. تنمي الذاكرة والتركيز.</p>
+            <div class="game-stats"><span>⭐ 15 نقطة</span><span>⚡ يستهلك 1 طاقة</span><span>⏱️ 1-3 دقائق</span></div>
+            <button class="play-btn" onclick="playGame('memory')">🎮 العب الآن</button>
+        </div>
+        
+        <div class="game-card" data-game="math" data-energy="1" data-xp="10">
+            <div class="game-icon"><i class="fas fa-calculator"></i></div>
+            <h3>➕ Math Challenge - الحساب السريع</h3>
+            <p>حل أكبر عدد من المسائل الحسابية تحت الضغط. تنمي السرعة الحسابية.</p>
+            <div class="game-stats"><span>⭐ 10 نقطة</span><span>⚡ يستهلك 1 طاقة</span><span>⏱️ 1 دقيقة</span></div>
+            <button class="play-btn" onclick="playGame('math')">🎮 العب الآن</button>
+        </div>
+        
+        <div class="game-card" data-game="sequence" data-energy="1" data-xp="20">
+            <div class="game-icon"><i class="fas fa-chart-line"></i></div>
+            <h3>🔢 Number Sequence - التسلسل المنطقي</h3>
+            <p>اكتشف النمط وأكمل المتسلسلة. تنمي التفكير المنطقي والاستنتاج.</p>
+            <div class="game-stats"><span>⭐ 20 نقطة</span><span>⚡ يستهلك 1 طاقة</span><span>⏱️ 1-2 دقائق</span></div>
+            <button class="play-btn" onclick="playGame('sequence')">🎮 العب الآن</button>
+        </div>
+        
+        <div class="game-card" data-game="sudoku" data-energy="2" data-xp="30">
+            <div class="game-icon"><i class="fas fa-table"></i></div>
+            <h3>🗓️ Sudoku Junior - سودوكو</h3>
+            <p>املأ الشبكة بالأرقام دون تكرار. تنمي المنطق والتفكير الاستراتيجي.</p>
+            <div class="game-stats"><span>⭐ 30 نقطة</span><span>⚡ يستهلك 2 طاقة</span><span>⏱️ 3-5 دقائق</span></div>
+            <button class="play-btn" onclick="playGame('sudoku')">🎮 العب الآن</button>
+        </div>
+        
+        <div class="game-card" data-game="pattern" data-energy="1" data-xp="15">
+            <div class="game-icon"><i class="fas fa-puzzle-piece"></i></div>
+            <h3>🧩 Pattern Puzzle - الأنماط البصرية</h3>
+            <p>اختر الشكل الذي يكمل النمط. تنمي الإدراك البصري والتركيز.</p>
+            <div class="game-stats"><span>⭐ 15 نقطة</span><span>⚡ يستهلك 1 طاقة</span><span>⏱️ 1-2 دقائق</span></div>
+            <button class="play-btn" onclick="playGame('pattern')">🎮 العب الآن</button>
+        </div>
+        
+        <div class="game-card" data-game="aim" data-energy="1" data-xp="10">
+            <div class="game-icon"><i class="fas fa-crosshairs"></i></div>
+            <h3>🎯 Aim Trainer - التركيز البصري</h3>
+            <p>اضغط على الأهداف بسرعة ودقة. تنمي سرعة رد الفعل والتركيز.</p>
+            <div class="game-stats"><span>⭐ 10 نقطة</span><span>⚡ يستهلك 1 طاقة</span><span>⏱️ 1 دقيقة</span></div>
+            <button class="play-btn" onclick="playGame('aim')">🎮 العب الآن</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let energy = 3;
+    let gamesPlayedToday = 0;
+    let totalXPEarned = 0;
+    let winStreak = 0;
+    let highScore = 0;
+    
+    function loadGameStats() {
+        energy = parseInt(localStorage.getItem('gameEnergy')) || 3;
+        gamesPlayedToday = parseInt(localStorage.getItem('gamesPlayedToday')) || 0;
+        totalXPEarned = parseInt(localStorage.getItem('totalXPEarned')) || 0;
+        winStreak = parseInt(localStorage.getItem('winStreak')) || 0;
+        highScore = parseInt(localStorage.getItem('highScore')) || 0;
+        
+        updateUI();
+    }
+    
+    function updateUI() {
+        const heartsContainer = document.getElementById('heartsContainer');
+        heartsContainer.innerHTML = '';
+        for(let i=0; i<energy; i++) heartsContainer.innerHTML += '<i class="fas fa-heart heart"></i> ';
+        for(let i=energy; i<3; i++) heartsContainer.innerHTML += '<i class="far fa-heart heart empty"></i> ';
+        
+        document.getElementById('gamesPlayed').innerText = gamesPlayedToday;
+        document.getElementById('totalXP').innerText = totalXPEarned;
+        document.getElementById('winStreak').innerText = winStreak;
+        document.getElementById('highScore').innerText = highScore;
+        
+        // Disable games if no energy
+        const cards = document.querySelectorAll('.game-card');
+        cards.forEach(card => {
+            const btn = card.querySelector('.play-btn');
+            if(energy <= 0) {
+                btn.disabled = true;
+                btn.classList.add('disabled');
+                card.style.opacity = '0.5';
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+                card.style.opacity = '1';
+            }
+        });
+    }
+    
+    function buyEnergy() {
+        let userPoints = parseInt(document.getElementById('userPoints').innerText) || 0;
+        if(userPoints >= 100 && energy < 3) {
+            userPoints -= 100;
+            energy = 3;
+            localStorage.setItem('gameEnergy', energy);
+            updateUI();
+            alert('✅ تم شراء طاقة اللعب! لديك 3 قلوب الآن.');
+            location.reload();
+        } else if(energy >= 3) {
+            alert('⚠️ طاقتك ممتلئة بالفعل!');
+        } else {
+            alert('❌ لا تملك نقاط كافية! (100 نقطة مطلوبة)');
+        }
+    }
+    
+    function addGamePoints(xp) {
+        totalXPEarned += xp;
+        gamesPlayedToday++;
+        winStreak++;
+        if(xp > highScore) highScore = xp;
+        
+        // Save to server
+        fetch('/api/academic/complete-course', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ points: xp, course_name: 'لعبة عقلية' })
+        });
+        
+        localStorage.setItem('gamesPlayedToday', gamesPlayedToday);
+        localStorage.setItem('totalXPEarned', totalXPEarned);
+        localStorage.setItem('winStreak', winStreak);
+        localStorage.setItem('highScore', highScore);
+        updateUI();
+    }
+    
+    function consumeEnergy() {
+        if(energy > 0) {
+            energy--;
+            localStorage.setItem('gameEnergy', energy);
+            updateUI();
+            return true;
+        }
+        return false;
+    }
+    
+    function playGame(gameName) {
+        if(!consumeEnergy()) {
+            alert('⚠️ ليس لديك طاقة كافية! انتظر الغد أو اشتر طاقة.');
+            return;
+        }
+        
+        // Redirect to game page
+        window.location.href = `/game/${gameName}`;
+    }
+    
+    // Reset energy daily
+    function resetDaily() {
+        const lastReset = localStorage.getItem('lastReset');
+        const today = new Date().toDateString();
+        if(lastReset !== today) {
+            energy = 3;
+            gamesPlayedToday = 0;
+            winStreak = 0;
+            localStorage.setItem('gameEnergy', energy);
+            localStorage.setItem('gamesPlayedToday', gamesPlayedToday);
+            localStorage.setItem('winStreak', winStreak);
+            localStorage.setItem('lastReset', today);
+            updateUI();
+        }
+    }
+    
+    loadGameStats();
+    resetDaily();
+</script>
+</body>
+</html>
